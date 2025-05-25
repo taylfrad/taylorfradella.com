@@ -75,7 +75,6 @@ export default function Hero({ onNav }) {
     if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
       vantaEffectInstance = window.VANTA.WAVES({
         el: vantaRef.current,
-        THREE: THREE, // Pass imported THREE to Vanta
         mouseControls: true,
         touchControls: true,
         gyroControls: false,

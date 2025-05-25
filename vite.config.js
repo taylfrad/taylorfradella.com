@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     outDir: "dist", // Explicitly set output directory
     rollupOptions: {
-      // Removed external: ["vanta/dist/vanta.waves.min"],
+      external: ["vanta/dist/vanta.waves.min"],
     },
   },
   base: "/", // Ensure proper base path for GitHub Page

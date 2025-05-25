@@ -1209,23 +1209,24 @@ export default function Projects() {
           sx={{
             width: "40px",
             height: "40px",
-            background: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+            background: "#111",
             borderRadius: "50%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 4px 10px rgba(33, 150, 243, 0.3)",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
           }}
         >
-          <Typography
+          <Box
+            component="img"
+            src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/grok.png"
+            alt="Grok AI Logo"
             sx={{
-              fontSize: "20px",
-              color: "white",
-              fontWeight: "bold",
+              width: "70%",
+              height: "70%",
+              objectFit: "contain",
             }}
-          >
-            G
-          </Typography>
+          />
         </Box>
       </Box>
     </Box>
@@ -1265,7 +1266,7 @@ export default function Projects() {
       title: "Blood Sugar Monitor with AI",
       tags: ["Python", "Raspberry Pi", "Dexcom API", "AI"],
       description:
-        "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API.",
+        "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API alongside Grok AI.",
       status: "GITHUB ONLY",
       github: "https://github.com/taylfrad/blood-sugar-monitor",
       animation: bloodSugarMonitorAnimation,
@@ -1394,17 +1395,18 @@ export default function Projects() {
                   component={motion.div}
                   variants={imageVariants(isImageLeft)}
                   sx={{
-                    width: { xs: "100%", md: 460 },
-                    height: { xs: 260, md: 360 },
+                    maxWidth: "100%",
+                    width: { md: 460 },
+                    height: { xs: "auto", md: 360 },
                     flexShrink: 0,
                     mb: { xs: 2, md: 0 },
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRadius: 6, // More rounded corners
-                    overflow: "hidden", // Ensures child animation is clipped
-                    boxShadow: "0 6px 32px 0 rgba(31, 38, 135, 0.13)", // Soft shadow
-                    background: "none", // No background, let animation show
+                    borderRadius: 6,
+                    overflow: "hidden",
+                    boxShadow: "0 6px 32px 0 rgba(31, 38, 135, 0.13)",
+                    background: "none",
                   }}
                 >
                   {project.animation}

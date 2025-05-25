@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import React, { useRef, useEffect } from "react";
-import WAVES from "vanta/dist/vanta.waves.min";
-import * as THREE from "three";
+import "vanta/dist/vanta.waves.min.js";
 
 export default function MiniHero() {
   const vantaRef = useRef(null);
@@ -13,12 +12,11 @@ export default function MiniHero() {
     if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
       vantaEffectInstance = window.VANTA.WAVES({
         el: vantaRef.current,
-        THREE: THREE, // Pass imported THREE to Vanta
         mouseControls: false,
         touchControls: false,
         gyroControls: false,
-        minHeight: 0.0,
-        minWidth: 0.0,
+        minHeight: 200.0,
+        minWidth: 200.0,
         scale: 1.0,
         scaleMobile: 1.0,
         color: 0x223366,
@@ -60,6 +58,22 @@ export default function MiniHero() {
           width: "100%",
           height: "100%",
           zIndex: 0,
+          minHeight: 200,
+          minWidth: 200,
+        }}
+      />
+      {/* Overlay for readability */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(20,24,38,0.7)",
+          zIndex: 1,
+          pointerEvents: "none",
         }}
       />
       {/* Mini Navbar */}
@@ -143,7 +157,6 @@ export default function MiniHero() {
             textFillColor: "transparent",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            width: "100%",
             textAlign: "center",
             borderBottom: "none",
             paddingBottom: 0,
