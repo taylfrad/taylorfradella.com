@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, CssBaseline, ThemeProvider } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import theme from "./styles/Theme";
 import Hero from "./components/Hero";
 import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import AboutContact from "./components/AboutContact";
+import Footer from "./components/Footer";
 import "./styles/floatingBackground.css";
 import "./App.css"; // Make sure to import your App.css file
 
 function App() {
   const [activeSection, setActiveSection] = useState("hero");
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Create refs for each section
   const heroRef = useRef(null);
@@ -25,6 +26,7 @@ function App() {
     const handleScroll = () => {
       const currentScrollPosition = window.scrollY;
       setScrollPosition(currentScrollPosition);
+      setShowScrollTop(currentScrollPosition > 200);
 
       // Use direct DOM manipulation for the scroll button
       const scrollBtn = scrollTopBtnRef.current;
@@ -100,7 +102,7 @@ function App() {
     else if (sectionId === "about") element = aboutRef.current;
 
     if (element) {
-      const yOffset = -80; // Navbar height offset
+      const yOffset = -80; // Adjust this value as needed for your header height
       const y =
         element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
@@ -109,13 +111,48 @@ function App() {
 
   // Scroll to top handler
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    console.log(
+      "Attempting to scroll main content container to top from App.jsx..."
+    );
+    // Target the main content container
+    const mainContent = document.querySelector("main");
+
+    if (mainContent) {
+      console.log("Found main content container in App.jsx:", mainContent);
+      // Use scrollTo with behavior for smooth scroll
+      mainContent.scrollTo({ top: 0, behavior: "smooth" });
+      console.log("Scrolled main content container to top from App.jsx.");
+    } else {
+      // Fallback if the main element is not found
+      console.log(
+        "Main content container not found in App.jsx, attempting window scroll fallback."
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+  // Smooth scroll for all anchor links with hashes
+  useEffect(() => {
+    const handleSmoothScroll = (e) => {
+      // Only handle anchor links with hashes
+      const anchor = e.target.closest('a[href^="#"]');
+      if (anchor && anchor.hash && document.querySelector(anchor.hash)) {
+        const target = document.querySelector(anchor.hash);
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth" });
+        // Optionally update the URL hash:
+        window.history.pushState(null, "", anchor.hash);
+      }
+    };
 
+    document.addEventListener("click", handleSmoothScroll);
+    return () => {
+      document.removeEventListener("click", handleSmoothScroll);
+    };
+  }, []);
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Metaball Liquid Background */}
       <div className="flowing-bg">
         <div className="metaball-container">
@@ -128,32 +165,43 @@ function App() {
 
       <Box
         component="main"
-        sx={{ flexGrow: 1, position: "relative", zIndex: 1 }}
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          zIndex: 1,
+          overflowX: "hidden", // Prevent horizontal scroll
+          bgcolor: "#fff",
+        }}
       >
         <Box
           ref={heroRef}
           id="hero"
           sx={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
             zIndex: 1,
+            px: { xs: 2, sm: 3, md: 4 }, // Responsive padding
           }}
         >
-          <Hero onScrollToSkills={() => scrollToSection("skills")} />
+          <Hero onNav={scrollToSection} />
         </Box>
 
         <Box
           ref={skillsRef}
           id="skills"
           sx={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             bgcolor: "#ffffff",
+            py: { xs: 4, sm: 6, md: 8 }, // Responsive vertical padding
+            px: { xs: 2, sm: 3, md: 4 }, // Responsive horizontal padding
           }}
         >
           <Skills />
@@ -163,11 +211,14 @@ function App() {
           ref={projectsRef}
           id="projects"
           sx={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "#ffffff",
+            bgcolor: "#fff",
+            py: { xs: 4, sm: 6, md: 8 },
+            px: { xs: 2, sm: 3, md: 4 },
+            mb: 8,
           }}
         >
           <Projects />
@@ -177,26 +228,51 @@ function App() {
           ref={aboutRef}
           id="about"
           sx={{
-            minHeight: "100vh",
+            minHeight: "auto",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
             bgcolor: "#ffffff",
+            py: 0,
+            px: { xs: 2, sm: 3, md: 4 },
           }}
         >
           <AboutContact />
         </Box>
       </Box>
 
-      {/* Scroll to top button */}
-      <div
-        ref={scrollTopBtnRef}
-        className="scroll-top-button"
-        onClick={scrollToTop}
-      >
-        <KeyboardArrowUpIcon />
-      </div>
-    </ThemeProvider>
+      <Footer />
+
+      {/* Scroll-to-top arrow (fixed, centered, visible when scrolled down) */}
+      {showScrollTop && (
+        <IconButton
+          ref={scrollTopBtnRef}
+          onClick={scrollToTop}
+          sx={{
+            position: "fixed",
+            bottom: 32,
+            left: "50%",
+            transform: "translateX(-50%)",
+            bgcolor: "#fff",
+            color: "#222",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+            borderRadius: "50%",
+            transition: "all 0.2s",
+            width: 56,
+            height: 56,
+            zIndex: 3000,
+            "&:hover": {
+              bgcolor: "#f1f5f9",
+              color: "#1976d2",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+            },
+          }}
+          aria-label="Scroll to top"
+        >
+          <KeyboardArrowUpIcon fontSize="large" />
+        </IconButton>
+      )}
+    </Box>
   );
 }
 

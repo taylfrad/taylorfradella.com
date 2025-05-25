@@ -1,5 +1,4 @@
 // src/components/Skills.jsx
-import { useRef } from "react";
 import {
   Container,
   Typography,
@@ -9,17 +8,45 @@ import {
   Chip,
   useTheme,
   Link,
+  Divider,
 } from "@mui/material";
 import CodeIcon from "@mui/icons-material/Code";
 import StorageIcon from "@mui/icons-material/Storage";
 import BuildIcon from "@mui/icons-material/Build";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
+import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import SectionHeader from "./SectionHeader";
 
 export default function Skills() {
   const theme = useTheme();
   const [containerRef, isVisible] = useIntersectionObserver({
     threshold: 0.2,
   });
+  const controls = useAnimation();
+  const sectionRef = useRef();
+  const stickyRef = useRef();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+  const left = useTransform(scrollYProgress, [0, 1], ["50%", "24px"]);
+  const translateX = useTransform(scrollYProgress, [0, 1], ["-50%", "0%"]);
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.15 },
+    },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: "easeOut" },
+    },
+  };
 
   // Function to get appropriate URL for each skill
   const getSkillUrl = (skillName) => {
@@ -38,7 +65,8 @@ export default function Skills() {
       Mantine: "https://mantine.dev/",
       "Material UI": "https://mui.com/",
       "Node.js": "https://nodejs.org/",
-      "React.js": "https://reactjs.org/",
+      React: "https://reactjs.org/",
+      "Framer Motion": "https://motion.dev/",
 
       // Tools & Platforms
       "Git & GitHub": "https://github.com/",
@@ -87,7 +115,7 @@ export default function Skills() {
         },
         {
           name: "SQL",
-          iconClass: "devicon-microsoftsqlserver-plain colored", // Using MySQL as representative
+          iconClass: "devicon-microsoftsqlserver-plain-wordmark colored",
         },
         {
           name: "HTML/CSS",
@@ -101,8 +129,7 @@ export default function Skills() {
       skills: [
         {
           name: "Mantine",
-          // Mantine doesn't have a specific Devicon, we could use a generic icon or keep text only
-          iconClass: "devicon-react-plain colored", // Generic alternative
+          iconClass: "devicon-react-plain colored",
         },
         {
           name: "Material UI",
@@ -113,8 +140,12 @@ export default function Skills() {
           iconClass: "devicon-nodejs-plain colored",
         },
         {
-          name: "React.js",
+          name: "React",
           iconClass: "devicon-react-plain colored",
+        },
+        {
+          name: "Framer Motion",
+          iconClass: "devicon-framermotion-original colored",
         },
       ],
     },
@@ -172,209 +203,101 @@ export default function Skills() {
     />
   );
 
+  const [cardMinHeight, setCardMinHeight] = useState(220);
+  const cardRefs = useRef([]);
+  const [cardMinWidth, setCardMinWidth] = useState(340);
+
+  useEffect(() => {
+    // After mount, measure all card heights and set the max as minHeight
+    if (cardRefs.current.length) {
+      const heights = cardRefs.current.map((ref) =>
+        ref ? ref.offsetHeight : 0
+      );
+      const maxHeight = Math.max(...heights);
+      if (maxHeight && maxHeight !== cardMinHeight) {
+        setCardMinHeight(maxHeight);
+      }
+      const widths = cardRefs.current.map((ref) => (ref ? ref.offsetWidth : 0));
+      const maxWidth = Math.max(...widths);
+      if (maxWidth && maxWidth !== cardMinWidth) {
+        setCardMinWidth(maxWidth);
+      }
+    }
+  }, [cardRefs.current.length]);
+
   return (
     <Box
       id="skills"
+      ref={sectionRef}
       sx={{
         minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        py: 10,
         position: "relative",
-        bgcolor: "#ffffff", // White background for Skills section
+        bgcolor: "#ffffff",
         color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        pt: { xs: 2, md: 3 },
+        pb: { xs: 4, md: 6 },
       }}
     >
-      <Container maxWidth="lg" sx={{ textAlign: "center" }}>
-        <Box
-          ref={containerRef}
+      <SectionHeader
+        title="Skills"
+        sectionRef={sectionRef}
+        accentColor={theme.palette.primary.main}
+      />
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+          mb: 1,
+        }}
+      >
+        <Paper
+          elevation={0}
           sx={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(40px)",
-            transition: "opacity 0.7s ease, transform 0.7s ease",
+            background: "linear-gradient(135deg, #fafdff 0%, #e8eef6 100%)",
+            borderRadius: "32px",
+            p: { xs: 4, sm: 8, md: 10 },
+            boxShadow: "0 12px 48px 0 rgba(31, 38, 135, 0.16)",
+            maxWidth: 1000,
+            width: "100%",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            gap: 0,
+            mb: 0,
           }}
         >
-          <Box sx={{ mb: 8 }}>
-            <Typography
-              variant="h2"
-              component="h2"
-              sx={{
-                fontWeight: 700,
-                position: "relative",
-                display: "inline-block",
-                mb: 2,
-                color: "#0f172a", // Dark text for white background
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  width: "60px",
-                  height: "4px",
-                  backgroundColor: theme.palette.primary.main,
-                  bottom: "-12px",
-                  left: "calc(50% - 30px)",
-                  borderRadius: "2px",
-                },
-              }}
-            >
-              Skills
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: "#334155", // Darker text for white background
-                maxWidth: "650px",
-                mx: "auto",
-                mt: 4,
-                fontSize: "1.1rem",
-              }}
-            >
-              My technical toolkit includes a range of programming languages,
-              frameworks, and tools that I've used to build various projects.
-            </Typography>
-          </Box>
-
-          <Grid container spacing={4} justifyContent="center">
-            {skillCategories.map((category, index) => (
-              <Grid item xs={12} md={4} key={category.title}>
-                <Paper
-                  elevation={2}
-                  sx={{
-                    height: "100%",
-                    bgcolor: "#ffffff",
-                    borderRadius: "16px",
-                    p: 4,
-                    transition: "all 0.5s ease",
-                    position: "relative",
-                    overflow: "hidden",
-                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      boxShadow: "0 15px 35px rgba(0, 0, 0, 0.15)",
-                    },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: 4,
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        color: theme.palette.primary.main,
-                        mr: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "50px",
-                        height: "50px",
-                        borderRadius: "12px",
-                        bgcolor: "rgba(56, 189, 248, 0.1)",
-                        border: "1px solid rgba(56, 189, 248, 0.2)",
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      {category.icon}
-                    </Box>
-                    <Typography
-                      variant="h5"
-                      component="h3"
-                      sx={{
-                        fontWeight: 600,
-                        color: "#0f172a", // Dark text for white background
-                      }}
-                    >
-                      {category.title}
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 1,
-                      justifyContent: "center",
-                    }}
-                  >
-                    {category.skills.map((skill, skillIndex) => (
-                      <Chip
-                        key={skillIndex}
-                        label={skill.name}
-                        icon={<DeviconWrapper iconClass={skill.iconClass} />}
-                        component={Link}
-                        href={getSkillUrl(skill.name)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        clickable
-                        sx={{
-                          bgcolor: "rgba(56, 189, 248, 0.1)",
-                          color: "#334155", // Dark text for white background
-                          borderRadius: "8px",
-                          mb: 1,
-                          height: "36px",
-                          "& .MuiChip-label": {
-                            paddingLeft: "6px",
-                          },
-                          "& .MuiChip-icon": {
-                            marginLeft: "8px",
-                            color: "inherit",
-                          },
-                          "&:hover": {
-                            bgcolor: "rgba(56, 189, 248, 0.2)",
-                            transform: "translateY(-2px)",
-                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                          },
-                          transition: "all 0.3s ease",
-                          animation: "fadeIn 0.5s forwards",
-                          animationDelay: `${0.1 * skillIndex + 0.2 * index}s`,
-                          opacity: 0,
-                          "@keyframes fadeIn": {
-                            from: {
-                              opacity: 0,
-                              transform: "translateY(10px)",
-                            },
-                            to: {
-                              opacity: 1,
-                              transform: "translateY(0)",
-                            },
-                          },
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-
-          <Box
-            sx={{
-              width: "100%",
-              textAlign: "center",
-              mt: 8,
-              borderRadius: "16px",
-              bgcolor: "rgba(56, 189, 248, 0.05)",
-              p: 4,
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
-              border: "1px solid rgba(56, 189, 248, 0.1)",
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2, color: "#0f172a" }}>
-              Currently Learning
-            </Typography>
+          {/* LANGUAGES SECTION */}
+          <Box sx={{ width: "100%", mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <CodeIcon sx={{ color: theme.palette.primary.main, mr: 1 }} />
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: theme.palette.primary.main }}
+              >
+                Languages
+              </Typography>
+            </Box>
             <Box
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
+                gap: 2,
                 justifyContent: "center",
-                gap: 1,
               }}
             >
-              {learningSkills.map((skill, index) => (
+              {skillCategories[0].skills.map((skill, skillIndex) => (
                 <Chip
-                  key={index}
+                  key={skillIndex}
                   label={skill.name}
                   icon={<DeviconWrapper iconClass={skill.iconClass} />}
                   component={Link}
@@ -383,26 +306,233 @@ export default function Skills() {
                   rel="noopener noreferrer"
                   clickable
                   sx={{
-                    bgcolor: "rgba(56, 189, 248, 0.1)",
-                    color: "#334155",
-                    m: 0.5,
-                    height: "36px",
-                    "& .MuiChip-label": {
-                      paddingLeft: "6px",
-                    },
+                    background:
+                      "linear-gradient(90deg, #fafdff 0%, #e8eef6 100%)",
+                    color: "#222",
+                    borderRadius: "999px",
+                    height: "44px",
+                    fontWeight: 500,
+                    fontSize: "1.08rem",
+                    px: 2.5,
+                    boxShadow: "0 2px 12px rgba(31,38,135,0.08)",
+                    border: "none",
+                    "& .MuiChip-label": { paddingLeft: "8px" },
+                    "& .MuiChip-icon": { marginLeft: "10px", color: "inherit" },
                     "&:hover": {
-                      bgcolor: "rgba(56, 189, 248, 0.2)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                      background:
+                        "linear-gradient(90deg, #e8eef6 0%, #fafdff 100%)",
+                      transform: "translateY(-4px) scale(1.06)",
+                      boxShadow: "0 8px 24px rgba(31,38,135,0.13)",
                     },
-                    transition: "all 0.3s ease",
+                    transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
                   }}
                 />
               ))}
             </Box>
           </Box>
-        </Box>
-      </Container>
+          <Divider sx={{ my: 1, width: "90%", mx: "auto" }} />
+          {/* FRAMEWORKS & LIBRARIES SECTION */}
+          <Box sx={{ width: "100%", mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <StorageIcon sx={{ color: theme.palette.primary.main, mr: 1 }} />
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: theme.palette.primary.main }}
+              >
+                Frameworks & Libraries
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                justifyContent: "center",
+              }}
+            >
+              {skillCategories[1].skills.map((skill, skillIndex) => (
+                <Chip
+                  key={skillIndex}
+                  label={skill.name}
+                  icon={
+                    skill.name === "Framer Motion" ? (
+                      <svg
+                        viewBox="0 0 128 128"
+                        style={{
+                          width: 18,
+                          height: 18,
+                          display: "block",
+                          objectFit: "contain",
+                          marginTop: 1,
+                        }}
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M22.684 0h84.253v42.667H64.81L22.684 0Zm0 42.667H64.81l42.127 42.666H64.81V128L22.684 85.333V42.667Z"
+                          fill="#0055FF"
+                        />
+                      </svg>
+                    ) : (
+                      <DeviconWrapper iconClass={skill.iconClass} />
+                    )
+                  }
+                  component={Link}
+                  href={getSkillUrl(skill.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  clickable
+                  sx={{
+                    background:
+                      "linear-gradient(90deg, #fafdff 0%, #e8eef6 100%)",
+                    color: "#222",
+                    borderRadius: "999px",
+                    height: "44px",
+                    fontWeight: 500,
+                    fontSize: "1.08rem",
+                    px: 2.5,
+                    boxShadow: "0 2px 12px rgba(31,38,135,0.08)",
+                    border: "none",
+                    "& .MuiChip-label": { paddingLeft: "8px" },
+                    "& .MuiChip-icon": { marginLeft: "10px", color: "inherit" },
+                    "&:hover": {
+                      background:
+                        "linear-gradient(90deg, #e8eef6 0%, #fafdff 100%)",
+                      transform: "translateY(-4px) scale(1.06)",
+                      boxShadow: "0 8px 24px rgba(31,38,135,0.13)",
+                    },
+                    transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+          <Divider sx={{ my: 1, width: "90%", mx: "auto" }} />
+          {/* TOOLS & PLATFORMS SECTION */}
+          <Box sx={{ width: "100%", mb: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <BuildIcon sx={{ color: theme.palette.primary.main, mr: 1 }} />
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, color: theme.palette.primary.main }}
+              >
+                Tools & Platforms
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                justifyContent: "center",
+              }}
+            >
+              {skillCategories[2].skills.map((skill, skillIndex) => (
+                <Chip
+                  key={skillIndex}
+                  label={skill.name}
+                  icon={<DeviconWrapper iconClass={skill.iconClass} />}
+                  component={Link}
+                  href={getSkillUrl(skill.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  clickable
+                  sx={{
+                    background:
+                      "linear-gradient(90deg, #fafdff 0%, #e8eef6 100%)",
+                    color: "#222",
+                    borderRadius: "999px",
+                    height: "44px",
+                    fontWeight: 500,
+                    fontSize: "1.08rem",
+                    px: 2.5,
+                    boxShadow: "0 2px 12px rgba(31,38,135,0.08)",
+                    border: "none",
+                    "& .MuiChip-label": { paddingLeft: "8px" },
+                    "& .MuiChip-icon": { marginLeft: "10px", color: "inherit" },
+                    "&:hover": {
+                      background:
+                        "linear-gradient(90deg, #e8eef6 0%, #fafdff 100%)",
+                      transform: "translateY(-4px) scale(1.06)",
+                      boxShadow: "0 8px 24px rgba(31,38,135,0.13)",
+                    },
+                    transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        </Paper>
+      </Box>
+      {/* Currently Learning Card */}
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <Paper
+          elevation={0}
+          sx={{
+            background: "linear-gradient(135deg, #fafdff 0%, #e8eef6 100%)",
+            borderRadius: "24px",
+            p: { xs: 3, sm: 5 },
+            boxShadow: "0 6px 24px 0 rgba(31, 38, 135, 0.10)",
+            maxWidth: 700,
+            width: "100%",
+            mt: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: theme.palette.primary.main,
+              mb: 2,
+              letterSpacing: 0.5,
+            }}
+          >
+            Currently Learning
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              justifyContent: "center",
+            }}
+          >
+            {learningSkills.map((skill, skillIndex) => (
+              <Chip
+                key={skillIndex}
+                label={skill.name}
+                icon={<DeviconWrapper iconClass={skill.iconClass} />}
+                component={Link}
+                href={getSkillUrl(skill.name)}
+                target="_blank"
+                rel="noopener noreferrer"
+                clickable
+                sx={{
+                  background: "rgba(56, 189, 248, 0.1)",
+                  color: "#334155",
+                  borderRadius: "999px",
+                  height: "38px",
+                  fontWeight: 500,
+                  fontSize: "1.05rem",
+                  px: 2.5,
+                  boxShadow: "0 2px 8px rgba(31,38,135,0.06)",
+                  border: "none",
+                  "& .MuiChip-label": { paddingLeft: "8px" },
+                  "& .MuiChip-icon": { marginLeft: "10px", color: "inherit" },
+                  "&:hover": {
+                    background: "rgba(56, 189, 248, 0.18)",
+                    transform: "translateY(-2px) scale(1.04)",
+                    boxShadow: "0 6px 16px rgba(31,38,135,0.10)",
+                  },
+                  transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                }}
+              />
+            ))}
+          </Box>
+        </Paper>
+      </Box>
     </Box>
   );
 }

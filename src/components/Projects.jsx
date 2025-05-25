@@ -1,5 +1,5 @@
 // src/components/Projects.jsx
-import { useRef, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Typography,
@@ -9,19 +9,86 @@ import {
   Grid,
   Chip,
   Container,
-  useTheme,
   CardMedia,
   CardActions,
   Link,
+  Paper,
 } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
+import { useRef, useEffect, useState } from "react";
+import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import SectionHeader from "./SectionHeader";
+import Hero from "./Hero";
+import MiniHero from "./MiniHero";
+
+// Move this to the very top of the file, before any imports or usage
+const moviePosters = {
+  Interstellar:
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/bzONet3OeCTz5q9WOkGjVpOHMSR.jpg",
+  "The Godfather":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/3Tf8vXykYhzHdT0BtsYTp570JGQ.jpg",
+  "The Lion King":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/sKCr78MXSLixwmZ8DyJLrpMsd15.jpg",
+  "Star Wars":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/fai0rspsNeJCS69wHNjOdWxcI7P.jpg",
+  "A Minecraft Movie":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/tldIoZNsAkEkppQwXGuw3aWVWyL.jpg",
+  "The Dark Knight":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/xQPgyZOBhaz1GdCQIPf5A5VeFzO.jpg",
+  "Forrest Gump":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+  "Jurassic Park":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/b1xCNnyrPebIc7EWNZIa6jhb1Ww.jpg",
+  Titanic:
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+  "Dumbo (1941)":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/hKDdllslMtsU9JixAv5HR9biXlp.jpg",
+  "Hurry Up Tomorrow":
+    "https://posters.movieposterdb.com/25_03/2025/26927452/l_hurry-up-tomorrow-movie-poster_3351643e.jpg",
+  "The Idol":
+    "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gO9k7t9jSdkkWVG0deMZDpELZGw.jpg",
+};
 
 export default function Projects() {
   const theme = useTheme();
   const [containerRef, isVisible] = useIntersectionObserver({
     threshold: 0.1,
+    rootMargin: "-100px",
   });
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if (isVisible) {
+      controls.start("visible");
+    } else {
+      controls.start("hidden");
+    }
+  }, [isVisible, controls]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        when: "beforeChildren",
+      },
+    },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: [0.23, 1, 0.32, 1],
+      },
+    },
+  };
 
   // Function to get URLs for technology links
   const getTechUrl = (techName) => {
@@ -84,40 +151,40 @@ export default function Projects() {
   const portfolioAnimation = (
     <Box
       sx={{
-        height: "100%", // Change this
-        width: "100%", // Add this
+        height: "100%",
+        width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #0f172a 0%, #334155 100%)",
+        background: "linear-gradient(135deg, #101522 0%, #223366 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: "250px", // Add explicit minimum height
+        minHeight: "250px",
       }}
     >
-      {/* Animated "browser window" */}
+      {/* Browser window frame */}
       <Box
         sx={{
-          position: "absolute",
-          width: "80%",
-          height: "80%",
-          border: "3px solid rgba(56, 189, 248, 0.6)",
-          borderRadius: "12px",
-          background: "rgba(15, 23, 42, 0.7)",
-          display: "flex",
-          flexDirection: "column",
+          position: "relative",
+          width: { xs: "90%", md: 420 },
+          height: { xs: 320, md: 340 },
+          border: `3px solid ${theme.palette.primary.light}`,
+          borderRadius: "14px",
+          background: theme.palette.primary.dark,
           overflow: "hidden",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
       >
         {/* Browser header */}
         <Box
           sx={{
-            height: "30px",
+            height: "32px",
             width: "100%",
-            background: "rgba(30, 41, 59, 0.8)",
+            background: theme.palette.primary.main,
             display: "flex",
             alignItems: "center",
-            padding: "0 10px",
+            padding: "0 12px",
+            zIndex: 2,
           }}
         >
           {/* Browser controls */}
@@ -126,22 +193,117 @@ export default function Projects() {
               <Box
                 key={i}
                 sx={{
-                  width: "10px",
-                  height: "10px",
+                  width: "11px",
+                  height: "11px",
                   borderRadius: "50%",
                   background: color,
                 }}
               />
             ))}
           </Box>
-
           {/* URL bar */}
           <Box
             sx={{
               flex: 1,
-              height: "16px",
+              height: "18px",
+              margin: "0 12px",
+              background: theme.palette.primary.light,
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{ fontSize: "10px", color: theme.palette.text.secondary }}
+            >
+              taylorfradella.com
+            </Typography>
+          </Box>
+        </Box>
+        {/* Scaled down Hero component replaced with MiniHero */}
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: "calc(100% - 32px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+            background: theme.palette.primary.dark,
+          }}
+        >
+          <MiniHero />
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  // Lions Den Cinemas Animation
+  const lionsTheaterAnimation = (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+        minHeight: 250,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #1a0000 0%, #330000 100%)",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      {/* Website Preview (relative for overlap) */}
+      <Box
+        sx={{
+          position: "relative",
+          width: { xs: "60vw", md: "420px" },
+          maxWidth: "600px",
+          minWidth: "320px",
+          height: { xs: "60vw", md: "340px" },
+          maxHeight: "420px",
+          minHeight: "240px",
+          background: "#000",
+          borderRadius: "16px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+          overflow: "hidden",
+          border: "1.5px solid rgba(255,0,0,0.25)",
+          display: "flex",
+          flexDirection: "column",
+          zIndex: 1,
+        }}
+      >
+        {/* Browser Header */}
+        <Box
+          sx={{
+            height: "28px",
+            background: "#1a0000",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 10px",
+            gap: "6px",
+          }}
+        >
+          {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
+            <Box
+              key={i}
+              sx={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: color,
+              }}
+            />
+          ))}
+          <Box
+            sx={{
+              flex: 1,
+              height: "13px",
               margin: "0 10px",
-              background: "rgba(56, 189, 248, 0.2)",
+              background: "rgba(255,0,0,0.1)",
               borderRadius: "3px",
               display: "flex",
               alignItems: "center",
@@ -152,940 +314,681 @@ export default function Projects() {
               variant="caption"
               sx={{ fontSize: "8px", color: "rgba(255,255,255,0.6)" }}
             >
-              https://taylor-fradella.com
+              lionsdencinemas.com
             </Typography>
           </Box>
         </Box>
 
-        {/* Website content */}
+        {/* Website Content with animated scroll */}
         <Box
           sx={{
-            flex: 1,
-            padding: "15px",
+            height: "calc(100% - 28px)",
+            padding: "12px 10px 10px 10px",
+            background: "#000",
             display: "flex",
             flexDirection: "column",
+            gap: "10px",
+            overflowY: "auto",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
           }}
         >
           {/* Navigation */}
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
-              gap: "15px",
-              marginBottom: "20px",
+              gap: "12px",
+              padding: "4px 0 8px 0",
+              borderBottom: "1px solid rgba(255,0,0,0.15)",
             }}
           >
-            {["Home", "Skills", "Projects", "About"].map((item, i) => (
-              <Box
+            {["Home", "Movies", "Showtimes", "About"].map((item, i) => (
+              <Typography
                 key={i}
                 sx={{
-                  padding: "5px 10px",
-                  borderRadius: "4px",
-                  background:
-                    i === 0 ? "rgba(56, 189, 248, 0.3)" : "transparent",
-                  color: "white",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  animation: `navPulse 3s infinite ${i * 0.5}s`,
-                  "@keyframes navPulse": {
-                    "0%, 100%": { opacity: 0.7 },
-                    "50%": { opacity: 1, transform: "translateY(-2px)" },
-                  },
+                  fontSize: "9px",
+                  color: i === 0 ? "#ff0000" : "rgba(255,255,255,0.7)",
+                  fontWeight: i === 0 ? "bold" : "normal",
+                  letterSpacing: 0.5,
                 }}
               >
                 {item}
-              </Box>
+              </Typography>
             ))}
           </Box>
 
-          {/* Hero section */}
+          {/* Featured Movie */}
           <Box
             sx={{
-              textAlign: "center",
-              marginBottom: "20px",
+              height: "38%",
+              background: "linear-gradient(45deg, #1a0000, #330000)",
+              borderRadius: "5px",
+              padding: "8px 10px",
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
             }}
           >
-            <Typography
-              sx={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "white",
-                marginBottom: "8px",
-                background: "linear-gradient(90deg, #f8fafc 0%, #7dd3fc 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                animation: "shimmer 2s infinite linear",
-                "@keyframes shimmer": {
-                  "0%": { backgroundPosition: "-200px 0" },
-                  "100%": { backgroundPosition: "200px 0" },
-                },
-                backgroundSize: "200% 100%",
-              }}
-            >
-              TAYLOR FRADELLA
-            </Typography>
             <Box
+              component="img"
+              src={moviePosters["Dumbo (1941)"]}
+              alt="Dumbo (1941) poster"
               sx={{
-                height: "6px",
-                width: "70%",
-                margin: "0 auto",
-                background: "rgba(255,255,255,0.2)",
-                borderRadius: "3px",
+                width: 44,
+                height: 62,
+                objectFit: "cover",
+                borderRadius: "4px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+                background: "rgba(255,0,0,0.1)",
+                mr: 2,
               }}
             />
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: "11px",
+                  color: "#fff",
+                  fontWeight: "bold",
+                  marginBottom: "2px",
+                }}
+              >
+                Dumbo (1941)
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "8px",
+                  color: "rgba(255,255,255,0.7)",
+                }}
+              >
+                Now Showing - Disney Classic
+              </Typography>
+            </Box>
           </Box>
 
-          {/* Content sections */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {[...Array(3)].map((_, i) => (
+          {/* Animated Scrollable Movie List */}
+          <Box
+            sx={{
+              flex: 1,
+              overflow: "hidden",
+              position: "relative",
+              mt: 1,
+              overflowY: "auto",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "7px",
+                position: "relative",
+                width: "100%",
+              }}
+            >
+              {/* Duplicate the movie list for seamless looping */}
+              {[
+                { title: "Interstellar", time: "7:00 PM | 9:30 PM" },
+                { title: "The Godfather", time: "6:45 PM | 9:15 PM" },
+                { title: "The Lion King", time: "7:30 PM | 10:00 PM" },
+                { title: "Star Wars", time: "8:00 PM | 10:30 PM" },
+                { title: "A Minecraft Movie", time: "9:00 PM | 11:30 PM" },
+                { title: "The Dark Knight", time: "6:00 PM | 8:45 PM" },
+                { title: "Forrest Gump", time: "7:15 PM | 9:45 PM" },
+                { title: "Jurassic Park", time: "5:30 PM | 8:00 PM" },
+                { title: "Titanic", time: "6:30 PM | 9:44 PM" },
+                { title: "Dumbo (1941)", time: "4:00 PM | 6:00 PM" },
+                { title: "Hurry Up Tomorrow", time: "10:00 PM | 12:00 AM" },
+                { title: "The Idol", time: "11:00 PM | 1:00 AM" },
+              ].map((movie, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    minHeight: "28px",
+                    background: "rgba(255,0,0,0.05)",
+                    borderRadius: "3px",
+                    padding: "4px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={
+                      moviePosters[movie.title] ||
+                      "https://placehold.co/32x44/222/fff?text=No+Image"
+                    }
+                    alt={movie.title + " poster"}
+                    sx={{
+                      width: 28,
+                      height: 38,
+                      objectFit: "cover",
+                      borderRadius: "2.5px",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
+                      background: "rgba(255,0,0,0.1)",
+                      mr: 1,
+                    }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "8px",
+                        color: "#fff",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {movie.title}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "7px",
+                        color: "rgba(255,255,255,0.7)",
+                      }}
+                    >
+                      {movie.time}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+              {/* Repeat for seamless scroll */}
+              {[
+                { title: "Interstellar", time: "7:00 PM | 9:30 PM" },
+                { title: "The Godfather", time: "6:45 PM | 9:15 PM" },
+                { title: "The Lion King", time: "7:30 PM | 10:00 PM" },
+                { title: "Star Wars", time: "8:00 PM | 10:30 PM" },
+                { title: "A Minecraft Movie", time: "9:00 PM | 11:30 PM" },
+                { title: "The Dark Knight", time: "6:00 PM | 8:45 PM" },
+                { title: "Forrest Gump", time: "7:15 PM | 9:45 PM" },
+                { title: "Jurassic Park", time: "5:30 PM | 8:00 PM" },
+                { title: "Titanic", time: "6:30 PM | 9:44 PM" },
+                { title: "Dumbo (1941)", time: "4:00 PM | 6:00 PM" },
+                { title: "Hurry Up Tomorrow", time: "10:00 PM | 12:00 AM" },
+                { title: "The Idol", time: "11:00 PM | 1:00 AM" },
+              ].map((movie, i) => (
+                <Box
+                  key={"repeat-" + i}
+                  sx={{
+                    minHeight: "28px",
+                    background: "rgba(255,0,0,0.05)",
+                    borderRadius: "3px",
+                    padding: "4px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={
+                      moviePosters[movie.title] ||
+                      "https://placehold.co/32x44/222/fff?text=No+Image"
+                    }
+                    alt={movie.title + " poster"}
+                    sx={{
+                      width: 28,
+                      height: 38,
+                      objectFit: "cover",
+                      borderRadius: "2.5px",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
+                      background: "rgba(255,0,0,0.1)",
+                      mr: 1,
+                    }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "8px",
+                        color: "#fff",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {movie.title}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "7px",
+                        color: "rgba(255,255,255,0.7)",
+                      }}
+                    >
+                      {movie.time}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Mobile App Preview (overlapping right side) */}
+      <Box
+        sx={{
+          position: "absolute",
+          right: { xs: "8vw", md: "calc(18% - 30px)" },
+          top: { xs: "50%", md: "50%" },
+          transform: "translateY(-50%)",
+          width: { xs: "28vw", md: "160px" },
+          maxWidth: "220px",
+          minWidth: "110px",
+          height: { xs: "60vw", md: "340px" },
+          maxHeight: "420px",
+          minHeight: "240px",
+          background: "#111",
+          borderRadius: "38px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
+          overflow: "hidden",
+          border: "3.5px solid #222",
+          display: "flex",
+          flexDirection: "column",
+          zIndex: 2,
+          pb: "6px",
+        }}
+      >
+        {/* App Header */}
+        <Box
+          sx={{
+            height: "38px",
+            background: "linear-gradient(90deg, #1a0000, #330000)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pt: "6px",
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: "11px",
+              color: "#fff",
+              fontWeight: "bold",
+              letterSpacing: 1,
+              lineHeight: 1.1,
+            }}
+            noWrap
+          >
+            LIONS DEN CINEMAS
+          </Typography>
+        </Box>
+        {/* App Content - scrollable if needed */}
+        <Box
+          sx={{
+            height: "calc(100% - 38px - 6px)", // header, home indicator
+            pt: "6px",
+            px: "7px",
+            background: "#000",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Auto-scrolling Movie List for iPhone */}
+          <Box
+            className="auto-scroll-movie-list"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "7px",
+              position: "absolute",
+              width: "100%",
+              animation: "autoScrollIphone 6s linear infinite",
+              "@keyframes autoScrollIphone": {
+                "0%": { top: "0%" },
+                "50%": { top: "-50%" },
+                "100%": { top: "0%" },
+              },
+            }}
+          >
+            {[
+              { title: "Interstellar", genre: "Sci-Fi • 2h 49m" },
+              { title: "The Godfather", genre: "Crime • 2h 55m" },
+              { title: "The Lion King", genre: "Animation • 1h 28m" },
+              { title: "Star Wars", genre: "Sci-Fi • 2h 1m" },
+              { title: "A Minecraft Movie", genre: "Adventure • 1h 40m" },
+              { title: "The Dark Knight", genre: "Action • 2h 32m" },
+              { title: "Forrest Gump", genre: "Drama • 2h 22m" },
+              { title: "Jurassic Park", genre: "Adventure • 2h 7m" },
+              { title: "Titanic", genre: "Romance • 3h 14m" },
+              { title: "Dumbo (1941)", genre: "Animation • 1h 4m" },
+              { title: "Hurry Up Tomorrow", genre: "Music • 1h 30m" },
+              { title: "The Idol", genre: "Drama • 1h 50m" },
+            ].map((movie, i) => (
               <Box
                 key={i}
                 sx={{
+                  minHeight: "38px",
+                  background: "rgba(255,0,0,0.07)",
+                  borderRadius: "7px",
+                  padding: "6px 7px 5px 7px",
                   display: "flex",
+                  flexDirection: "row",
                   alignItems: "center",
-                  gap: "10px",
-                  animation: `slideInRight 0.5s ease both ${0.3 + i * 0.2}s`,
-                  "@keyframes slideInRight": {
-                    "0%": { opacity: 0, transform: "translateX(30px)" },
-                    "100%": { opacity: 1, transform: "translateX(0)" },
-                  },
+                  justifyContent: "flex-start",
+                  boxShadow:
+                    i === 0 ? "0 1px 4px rgba(255,0,0,0.04)" : undefined,
+                  gap: "7px",
                 }}
               >
                 <Box
+                  component="img"
+                  src={
+                    moviePosters[movie.title] ||
+                    "https://placehold.co/32x44/222/fff?text=No+Image"
+                  }
+                  alt={movie.title + " poster"}
                   sx={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "8px",
-                    background: `rgba(56, 189, 248, ${0.2 + i * 0.1})`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    width: 26,
+                    height: 36,
+                    objectFit: "cover",
+                    borderRadius: "2.5px",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
+                    background: "rgba(255,0,0,0.1)",
                   }}
-                >
-                  <Box
-                    sx={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "4px",
-                      background: "rgba(255,255,255,0.3)",
-                    }}
-                  />
-                </Box>
+                />
                 <Box sx={{ flex: 1 }}>
-                  <Box
+                  <Typography
                     sx={{
-                      height: "8px",
-                      width: "60%",
-                      background: "rgba(255,255,255,0.3)",
-                      borderRadius: "4px",
-                      marginBottom: "6px",
+                      fontSize: "8.5px",
+                      color: "#fff",
+                      fontWeight: "bold",
+                      lineHeight: 1.1,
                     }}
-                  />
-                  <Box
+                    noWrap
+                  >
+                    {movie.title}
+                  </Typography>
+                  <Typography
                     sx={{
-                      height: "6px",
-                      width: "80%",
-                      background: "rgba(255,255,255,0.2)",
-                      borderRadius: "3px",
+                      fontSize: "6.5px",
+                      color: "rgba(255,255,255,0.7)",
+                      lineHeight: 1.1,
                     }}
-                  />
+                    noWrap
+                  >
+                    {movie.genre}
+                  </Typography>
                 </Box>
               </Box>
             ))}
           </Box>
-
-          {/* Animated cursor */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              background: "white",
-              opacity: 0.7,
-              boxShadow: "0 0 10px rgba(255,255,255,0.5)",
-              animation: "moveCursor 8s infinite",
-              "@keyframes moveCursor": {
-                "0%": { top: "30%", left: "50%" },
-                "20%": { top: "50%", left: "30%" },
-                "40%": { top: "60%", left: "60%" },
-                "60%": { top: "40%", left: "70%" },
-                "80%": { top: "70%", left: "40%" },
-                "100%": { top: "30%", left: "50%" },
-              },
-            }}
-          />
         </Box>
-      </Box>
-
-      {/* Floating code elements */}
-      {[...Array(6)].map((_, i) => (
+        {/* iPhone Home Indicator */}
         <Box
-          key={i}
           sx={{
             position: "absolute",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            background: `rgba(${20 + i * 10}, ${30 + i * 20}, ${
-              50 + i * 30
-            }, 0.4)`,
-            color: "rgba(255,255,255,0.7)",
-            fontSize: "8px",
-            fontFamily: "monospace",
-            boxShadow: "0 0 15px rgba(0,0,0,0.2)",
-            whiteSpace: "nowrap",
-            transform: `rotate(${-10 + i * 5}deg)`,
-            top: `${15 + i * 12}%`,
-            left: i % 2 === 0 ? "5%" : "75%",
-            animation: `float ${3 + i * 0.5}s infinite ease-in-out ${i * 0.5}s`,
-            "@keyframes float": {
-              "0%, 100%": {
-                transform: `rotate(${-10 + i * 5}deg) translateY(0px)`,
-              },
-              "50%": {
-                transform: `rotate(${-10 + i * 5}deg) translateY(-10px)`,
-              },
-            },
+            bottom: "8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "16%",
+            height: "2px",
+            background: "#222",
+            borderRadius: "3px",
+            opacity: 0.7,
             zIndex: 10,
           }}
-        >
-          {
-            [
-              "<div className='component'>",
-              "const [state, setState] = useState();",
-              "import { useEffect } from 'react';",
-              "return <Box sx={{ display: 'flex' }}>",
-              "<Typography variant='h1'>",
-              "const theme = createTheme();",
-            ][i]
-          }
-        </Box>
-      ))}
-    </Box>
-  );
-
-  // Lions Den Theaters Animation
-  const lionsTheaterAnimation = (
-    <Box
-      sx={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%)", // Red theme
-        overflow: "hidden",
-        position: "relative",
-      }}
-    >
-      {/* Golden decorative elements */}
-      {[...Array(5)].map((_, i) => (
-        <Box
-          key={i}
-          sx={{
-            position: "absolute",
-            width: `${10 + i * 5}px`,
-            height: `${10 + i * 5}px`,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(234, 179, 8, 0.8) 0%, rgba(234, 179, 8, 0.1) 70%)",
-            top: `${15 + i * 15}%`,
-            left: `${10 + i * 18}%`,
-            filter: "blur(2px)",
-            animation: `goldPulse 4s infinite ease-in-out ${i * 0.7}s`,
-            "@keyframes goldPulse": {
-              "0%, 100%": { opacity: 0.4, transform: "scale(1)" },
-              "50%": { opacity: 0.7, transform: "scale(1.3)" },
-            },
-          }}
         />
-      ))}
+      </Box>
 
-      {/* Mobile device outline */}
+      {/* Tech Stack Icons */}
       <Box
         sx={{
-          position: "relative",
-          width: "45%",
-          height: "75%",
-          border: "10px solid #222",
-          borderRadius: "30px",
-          boxShadow: "0 0 20px rgba(0,0,0,0.3)",
-          overflow: "hidden",
-          animation: "float 4s infinite ease-in-out",
-          zIndex: 2,
+          position: "absolute",
+          bottom: "8%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "15px",
         }}
       >
-        {/* Screen content */}
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            background: "#111",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* Header with Lion logo */}
+        {[
+          { icon: "devicon-react-plain", color: "#61DAFB" },
+          { icon: "devicon-nodejs-plain", color: "#339933" },
+          { icon: "devicon-microsoftsqlserver-plain", color: "#CC2927" },
+        ].map((tech, i) => (
           <Box
+            key={i}
             sx={{
-              height: "15%",
-              background: "linear-gradient(90deg, #b91c1c 0%, #991b1b 100%)",
+              width: "30px",
+              height: "30px",
+              background: "rgba(0,0,0,0.8)",
+              borderRadius: "6px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-              position: "relative",
-              overflow: "hidden",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+              animation: `float 3s infinite ease-in-out ${i * 0.2}s`,
+              "@keyframes float": {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-5px)" },
+              },
             }}
           >
-            {/* Lion silhouette */}
-            <Box />
-
-            <Typography
-              sx={{
-                color: "#fef3c7", // Light gold color
-                fontWeight: "bold",
-                fontSize: "15px",
-                textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                letterSpacing: "1px",
+            <i
+              className={tech.icon}
+              style={{
+                fontSize: "20px",
+                color: tech.color,
               }}
-            >
-              LIONS DEN
-            </Typography>
+            />
           </Box>
-
-          {/* Movie list */}
-          <Box sx={{ flex: 1, padding: "10px", overflow: "hidden" }}>
-            {[1, 2, 3, 4].map((item) => (
-              <Box
-                key={item}
-                sx={{
-                  height: "20%",
-                  background: "rgba(23, 23, 23, 0.9)",
-                  marginBottom: "8px",
-                  borderRadius: "8px",
-                  padding: "6px",
-                  display: "flex",
-                  border: "1px solid rgba(127, 29, 29, 0.3)",
-                  animation: `slideIn 1s ease-out ${item * 0.2}s both`,
-                  "@keyframes slideIn": {
-                    "0%": { transform: "translateX(-20px)", opacity: 0 },
-                    "100%": { transform: "translateX(0)", opacity: 1 },
-                  },
-                }}
-              >
-                {/* Movie poster */}
-                <Box
-                  sx={{
-                    width: "30%",
-                    height: "100%",
-                    background: `linear-gradient(45deg, rgba(${
-                      100 + item * 20
-                    }, ${20 + item * 5}, ${20 + item * 5}, 0.9), rgba(${
-                      120 + item * 10
-                    }, ${40}, ${30}, 0.8))`,
-                    borderRadius: "4px",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* Movie poster pattern */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      opacity: 0.4,
-                      backgroundImage:
-                        "linear-gradient(45deg, transparent 48%, rgba(234, 179, 8, 0.4) 49%, rgba(234, 179, 8, 0.4) 51%, transparent 52%)",
-                      backgroundSize: "8px 8px",
-                    }}
-                  />
-                </Box>
-
-                {/* Movie info */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    paddingLeft: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Box>
-                    <Box
-                      sx={{
-                        height: "7px",
-                        width: "70%",
-                        background: "#fcd34d",
-                        borderRadius: "3px",
-                        marginBottom: "4px",
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        height: "5px",
-                        width: "40%",
-                        background: "rgba(252, 211, 77, 0.5)",
-                        borderRadius: "2px",
-                      }}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      height: "20px",
-                      width: "80%",
-                      display: "flex",
-                      gap: "4px",
-                    }}
-                  >
-                    {[1, 2, 3].map((btn) => (
-                      <Box
-                        key={btn}
-                        sx={{
-                          flex: 1,
-                          background: `rgba(${127 + btn * 10}, ${
-                            29 + btn * 5
-                          }, ${29 + btn * 5}, 0.6)`,
-                          borderRadius: "3px",
-                          animation: `pulse 2s infinite ease-in-out ${
-                            btn * 0.3
-                          }s`,
-                          "@keyframes pulse": {
-                            "0%, 100%": { opacity: 0.7 },
-                            "50%": { opacity: 1, transform: "scale(1.05)" },
-                          },
-                          border: "1px solid rgba(220, 38, 38, 0.3)",
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        </Box>
+        ))}
       </Box>
-
-      {/* Database icon and connection */}
-      <Box
-        sx={{
-          position: "absolute",
-          right: "15%",
-          bottom: "18%",
-          width: "50px",
-          height: "50px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "10px",
-          background: "rgba(20, 20, 20, 0.8)",
-          boxShadow: "0 0 15px rgba(0,0,0,0.5)",
-          border: "1px solid rgba(127, 29, 29, 0.5)",
-          zIndex: 3,
-        }}
-      >
-        <i
-          className="devicon-microsoftsqlserver-plain colored"
-          style={{
-            fontSize: "28px",
-            color: "#f87171",
-            filter: "drop-shadow(0 0 5px rgba(248, 113, 113, 0.7))",
-          }}
-        />
-      </Box>
-
-      {/* React Native and Node.js icons */}
-      <Box
-        sx={{
-          position: "absolute",
-          left: "15%",
-          top: "18%",
-          width: "50px",
-          height: "50px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "10px",
-          background: "rgba(20, 20, 20, 0.8)",
-          boxShadow: "0 0 15px rgba(0,0,0,0.5)",
-          border: "1px solid rgba(127, 29, 29, 0.5)",
-          zIndex: 3,
-        }}
-      >
-        <i
-          className="devicon-react-plain"
-          style={{
-            fontSize: "28px",
-            color: "#38bdf8",
-            filter: "drop-shadow(0 0 5px rgba(56, 189, 248, 0.7))",
-          }}
-        />
-      </Box>
-
-      <Box
-        sx={{
-          position: "absolute",
-          left: "26%",
-          top: "34%",
-          width: "40px",
-          height: "40px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "8px",
-          background: "rgba(20, 20, 20, 0.8)",
-          boxShadow: "0 0 15px rgba(0,0,0,0.5)",
-          border: "1px solid rgba(127, 29, 29, 0.5)",
-          zIndex: 3,
-        }}
-      >
-        <i
-          className="devicon-nodejs-plain"
-          style={{
-            fontSize: "22px",
-            color: "#22c55e",
-            filter: "drop-shadow(0 0 5px rgba(34, 197, 94, 0.7))",
-          }}
-        />
-      </Box>
-
-      {/* Lion silhouette background */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          opacity: 0.06,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23fcd34d'%3E%3Cpath d='M157.1 121.9C99.2 127.2 54.7 148.9 26.2 190c-16.8 24.2-24.1 48.6-23.3 80 .9 29.2 1.7 32.3 27.5 52.5 13.3 10.4 12.8 12-14.5 27.4-40.3 23.7-43.4 52.5-9.3 78.5 19.9 15.9 63.8 32.6 101.1 40.2 3.7 6 43.9 22.3 68.5 28.8 28.7 7.6 85.3 8.9 124.9.2 20.7 3.1 27.9 6.3 42.5 10.8 24.3 7.9 53.5 9.2 63.3-2.1 7.1-8.2 6-20.5 3.3-28.9-3.1-9.9-1.6-10.8 6.6-8.9 9.9 2.3 37-5.7 50.8-18.1 14.5-12.9 21.4-39.8 16.5-68.4 5.3-8.1 14.1-36.3 16.1-52 5-21.7 4.1-60.9-1.8-81.1-7.9-27.1-23.9-54.6-41.5-72.3-16.7-15.3-18.3-19-26.8-19.4-3.8-.2-34.7 1.6-39.5 3.8-17.9 2.5-31.5 7.8-44.6 17.6-17.1 12.6-40.4 40.4-40.4 43.9 0 1.7-3.3 2.8-4-3.6 0-10.1 6.8-36.5 10.8-46.8 3.2-9 1.9-24.4-1.8-31.9-9.6-15.9-35.5-22.4-55-18.2-17.1 3.8-30.1 12.9-57.5 32.2-5.5 3.9-10.7 6.5-13 7.2.1-4.7 1.9-10.8 4.4-16.1 2.5-5.7 4.1-11.4 4.1-14.7 0-12.3-10.6-23.5-25.3-26.8-6.8-1.5-14.1-2.9-16.1-3.1-2.1-.2-8.7-.1-14.9.3z'/%3E%3C/svg%3E")`,
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "75%",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Connection lines */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: "20%",
-          height: "3px",
-          background: "rgba(234, 179, 8, 0.4)",
-          right: "30%",
-          bottom: "30%",
-          transform: "rotate(30deg)",
-          zIndex: 1,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "rgba(234, 179, 8, 0.8)",
-            top: "-3px",
-            right: 0,
-            animation: "pulse 2s infinite",
-          },
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "rgba(234, 179, 8, 0.8)",
-            top: "-3px",
-            left: 0,
-            animation: "pulse 2s infinite 0.5s",
-          },
-        }}
-      />
-
-      <Box
-        sx={{
-          position: "absolute",
-          width: "15%",
-          height: "3px",
-          background: "rgba(234, 179, 8, 0.4)",
-          left: "28%",
-          top: "40%",
-          transform: "rotate(-45deg)",
-          zIndex: 1,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "rgba(234, 179, 8, 0.8)",
-            top: "-3px",
-            right: 0,
-            animation: "pulse 2s infinite 0.3s",
-          },
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "rgba(234, 179, 8, 0.8)",
-            top: "-3px",
-            left: 0,
-            animation: "pulse 2s infinite 0.8s",
-          },
-        }}
-      />
     </Box>
   );
 
   // Blood Sugar Monitor Animation
-  const bloodSugarAnimation = (
+  const bloodSugarMonitorAnimation = (
     <Box
       sx={{
-        height: "100%", // Change this
-        width: "100%", // Add this
+        height: "100%",
+        width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e40af 100%)",
+        background: "linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: "250px", // Add explicit minimum height
+        minHeight: "250px",
       }}
     >
-      {/* Animated background pattern - circuit-like */}
+      {/* Main Device Display */}
       <Box
         sx={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0.06,
-          background: `
-          linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px),
-          linear-gradient(0deg, rgba(255,255,255,.1) 1px, transparent 1px)
-        `,
-          backgroundSize: "20px 20px",
-        }}
-      />
-
-      {/* Raspberry Pi board outline */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: "35%",
-          height: "55%",
-          bottom: "8%",
-          right: "10%",
-          background: "#3e8e41",
-          borderRadius: "8px",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+          width: "70%",
+          height: "80%",
+          background: "#2c3e50",
+          borderRadius: "15px",
           display: "flex",
           flexDirection: "column",
-          padding: "10px",
-          gap: "5px",
-          zIndex: 2,
-          transform: "perspective(500px) rotateY(-15deg) rotateX(5deg)",
-        }}
-      >
-        {/* PCB details */}
-        {[...Array(8)].map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              height: "6px",
-              width: "40%",
-              background: "#2b632d",
-              borderRadius: "3px",
-              marginLeft: i % 2 === 0 ? "5%" : "55%",
-              opacity: 0.8,
-            }}
-          />
-        ))}
-
-        {/* Pi CPU */}
-        <Box
-          sx={{
-            position: "absolute",
-            width: "40%",
-            height: "25%",
-            top: "30%",
-            left: "30%",
-            background: "#333",
-            borderRadius: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
-          }}
-        >
-          <i
-            className="devicon-raspberrypi-plain"
-            style={{
-              color: "#c51a4a", // Raspberry Pi logo color
-              fontSize: "25px",
-              filter: "drop-shadow(0 0 3px rgba(0,0,0,0.3))",
-            }}
-          />
-        </Box>
-
-        {/* GPIO pins */}
-        <Box
-          sx={{
-            position: "absolute",
-            width: "80%",
-            height: "15%",
-            top: "10%",
-            left: "10%",
-            display: "flex",
-            gap: "2px",
-          }}
-        >
-          {[...Array(12)].map((_, i) => (
-            <Box
-              key={i}
-              sx={{
-                flex: 1,
-                background: "#aaa",
-                borderRadius: "1px",
-                animation: `blink 5s infinite ${i * 0.3}s`,
-                "@keyframes blink": {
-                  "0%, 100%": { opacity: 0.5 },
-                  "50%": { opacity: 0.9 },
-                },
-              }}
-            />
-          ))}
-        </Box>
-
-        {/* USB ports */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "15%",
-            left: "10%",
-            width: "80%",
-            height: "10%",
-            display: "flex",
-            gap: "10px",
-          }}
-        >
-          <Box
-            sx={{
-              flex: 1,
-              background: "#222",
-              borderRadius: "3px",
-            }}
-          />
-          <Box
-            sx={{
-              flex: 1,
-              background: "#222",
-              borderRadius: "3px",
-            }}
-          />
-        </Box>
-
-        {/* Activity LEDs */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: "70%",
-            right: "20%",
-            display: "flex",
-            gap: "8px",
-          }}
-        >
-          {["#ff5f57", "#28c840"].map((color, i) => (
-            <Box
-              key={i}
-              sx={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: color,
-                boxShadow: `0 0 5px ${color}`,
-                animation: `ledBlink ${1 + i * 2}s infinite alternate ${
-                  i * 0.5
-                }s`,
-                "@keyframes ledBlink": {
-                  "0%": { opacity: 0.4 },
-                  "100%": { opacity: 1 },
-                },
-              }}
-            />
-          ))}
-        </Box>
-      </Box>
-
-      {/* Blood sugar monitor display */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: "60%",
-          height: "65%",
-          top: "8%",
-          left: "5%",
-          background: "rgba(255, 255, 255, 0.95)",
-          borderRadius: "12px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-          overflow: "hidden",
           padding: "15px",
-          zIndex: 3,
-          display: "flex",
-          flexDirection: "column",
-          transform: "perspective(500px) rotateY(5deg) rotateX(3deg)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Header with logo */}
+        {/* Header */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderBottom: "1px solid #e0e0e0",
-            paddingBottom: "10px",
-            marginBottom: "15px",
+            marginBottom: "10px",
           }}
         >
           <Typography
             sx={{
-              fontSize: "16px",
+              fontSize: "14px",
+              color: "white",
               fontWeight: "bold",
-              color: "#333",
             }}
           >
-            Glucose Monitor
+            Dexcom G6 + Grok AI
           </Typography>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <i
-              className="devicon-python-plain"
-              style={{
-                color: "#3776AB",
-                fontSize: "18px",
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <Box
+              sx={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#4caf50",
+                animation: "pulse 2s infinite",
+                "@keyframes pulse": {
+                  "0%": { opacity: 0.5 },
+                  "50%": { opacity: 1 },
+                  "100%": { opacity: 0.5 },
+                },
               }}
             />
             <Typography
               sx={{
-                fontSize: "12px",
-                color: "#666",
+                fontSize: "10px",
+                color: "white",
               }}
             >
-              v2.1
+              Connected
             </Typography>
           </Box>
         </Box>
 
-        {/* Current glucose reading */}
+        {/* Current Reading with AI Processing */}
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: "15px",
+            alignItems: "baseline",
+            marginBottom: "10px",
+            position: "relative",
           }}
         >
           <Typography
             sx={{
-              fontSize: "28px",
+              fontSize: "32px",
+              color: "white",
               fontWeight: "bold",
-              color: "#2563eb",
-              textShadow: "0 0 5px rgba(37, 99, 235, 0.2)",
-              animation: "pulse 3s infinite",
+              animation: "fadeInOut 3s infinite",
+              "@keyframes fadeInOut": {
+                "0%, 100%": { opacity: 0.7 },
+                "50%": { opacity: 1 },
+              },
             }}
           >
             124
           </Typography>
           <Typography
             sx={{
-              fontSize: "12px",
-              color: "#666",
+              fontSize: "14px",
+              color: "white",
               marginLeft: "5px",
-              marginTop: "8px",
             }}
           >
             mg/dL
           </Typography>
-        </Box>
 
-        {/* Blood sugar graph - now with animated drawing effect */}
-        <Box
-          sx={{
-            flex: 1,
-            position: "relative",
-            borderBottom: "1px solid #ccc",
-            borderLeft: "1px solid #ccc",
-            marginBottom: "10px",
-          }}
-        >
-          {/* Y-axis labels */}
-          {[0, 1, 2, 3].map((i) => (
-            <Box
-              key={i}
-              sx={{
-                position: "absolute",
-                left: 0,
-                bottom: `${i * 25}%`,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "9px",
-                  color: "#666",
-                  transform: "translateX(-5px)",
-                }}
-              >
-                {220 - i * 50}
-              </Typography>
-              <Box
-                sx={{
-                  height: "1px",
-                  width: "100%",
-                  position: "absolute",
-                  left: 0,
-                  background: "rgba(0,0,0,0.05)",
-                }}
-              />
-            </Box>
-          ))}
-
-          {/* X-axis labels */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <Typography
-              key={i}
-              sx={{
-                position: "absolute",
-                bottom: "-16px",
-                left: `${20 * i}%`,
-                fontSize: "9px",
-                color: "#666",
-              }}
-            >
-              {i * 3}h
-            </Typography>
-          ))}
-
-          {/* Target range area */}
+          {/* AI Processing Indicator */}
           <Box
             sx={{
               position: "absolute",
-              width: "100%",
-              height: "30%",
-              bottom: "35%",
-              background: "rgba(34, 197, 94, 0.1)",
-              border: "1px dashed rgba(34, 197, 94, 0.4)",
+              right: 0,
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
-          />
+          >
+            <Box
+              sx={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "#2196f3",
+                animation: "aiPulse 1.5s infinite",
+                "@keyframes aiPulse": {
+                  "0%": { transform: "scale(0.8)", opacity: 0.5 },
+                  "50%": { transform: "scale(1.2)", opacity: 1 },
+                  "100%": { transform: "scale(0.8)", opacity: 0.5 },
+                },
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: "10px",
+                color: "#2196f3",
+                fontWeight: "bold",
+              }}
+            >
+              AI Processing
+            </Typography>
+          </Box>
+        </Box>
 
-          {/* Animated path drawing effect */}
+        {/* Graph Container */}
+        <Box
+          sx={{
+            flex: 1,
+            background: "rgba(255, 255, 255, 0.1)",
+            borderRadius: "10px",
+            padding: "10px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Graph Background Grid */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              padding: "10px",
+            }}
+          >
+            {[...Array(5)].map((_, i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: "100%",
+                  height: "1px",
+                  background: "rgba(255, 255, 255, 0.1)",
+                }}
+              />
+            ))}
+          </Box>
+
+          {/* Y-axis Labels */}
+          <Box
+            sx={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              padding: "10px 0",
+            }}
+          >
+            {[400, 300, 200, 100, 0].map((value) => (
+              <Typography
+                key={value}
+                sx={{
+                  fontSize: "8px",
+                  color: "rgba(255, 255, 255, 0.5)",
+                  transform: "translateX(-20px)",
+                }}
+              >
+                {value}
+              </Typography>
+            ))}
+          </Box>
+
+          {/* Animated Glucose Line */}
           <svg
             width="100%"
             height="100%"
@@ -1097,402 +1000,234 @@ export default function Projects() {
               left: 0,
             }}
           >
-            {/* Define the blood sugar line path */}
+            {/* Target Range Area */}
             <path
-              d="M0,40 C10,50 15,30 25,35 C35,40 40,20 50,30 C60,40 65,60 75,50 C85,40 90,45 100,30"
+              d="M0,40 L100,40 L100,60 L0,60 Z"
+              fill="rgba(76, 175, 80, 0.1)"
+              stroke="rgba(76, 175, 80, 0.3)"
+              strokeWidth="0.5"
+            />
+
+            {/* Glucose Line */}
+            <path
+              d="M0,50 C10,45 20,55 30,40 C40,35 50,45 60,30 C70,35 80,25 90,40 C95,45 100,40 100,40"
               fill="none"
-              stroke="#3b82f6"
-              strokeWidth="2"
+              stroke="#2196f3"
+              strokeWidth="1.5"
               strokeDasharray="200"
               strokeDashoffset="200"
               style={{
-                animation: "drawPath 5s linear forwards",
+                animation: "drawLine 3s linear forwards",
               }}
             />
 
-            {/* Data points along the path */}
-            {[0, 25, 50, 75, 100].map((x, i) => {
-              // Calculate y points that match the path
-              const yPoints = [40, 35, 30, 50, 30];
+            {/* Data Points */}
+            {[0, 20, 40, 60, 80, 100].map((x, i) => {
+              const yPoints = [50, 45, 40, 30, 35, 40];
               return (
                 <circle
                   key={i}
                   cx={`${x}%`}
                   cy={`${yPoints[i]}%`}
-                  r="2"
-                  fill="#3b82f6"
+                  r="1.5"
+                  fill="#2196f3"
                   opacity="0"
                   style={{
-                    animation: `fadeIn 0.3s ease forwards ${1 + i * 0.8}s`,
+                    animation: `fadeIn 0.3s ease forwards ${1 + i * 0.3}s`,
                   }}
                 />
               );
             })}
 
-            {/* Moving point that follows the path */}
+            {/* Moving Point */}
             <circle
               cx="0%"
-              cy="40%"
-              r="3"
-              fill="#2563eb"
+              cy="50%"
+              r="2"
+              fill="#2196f3"
               style={{
-                filter: "drop-shadow(0 0 3px #3b82f6)",
-                animation: "moveDot 5s linear forwards",
+                filter: "drop-shadow(0 0 3px #2196f3)",
+                animation: "moveDot 3s linear forwards",
               }}
             />
 
             <style>
               {`
-              @keyframes drawPath {
-                to {
-                  stroke-dashoffset: 0;
+                @keyframes drawLine {
+                  to {
+                    stroke-dashoffset: 0;
+                  }
                 }
-              }
-              @keyframes fadeIn {
-                to {
-                  opacity: 1;
+                @keyframes fadeIn {
+                  to {
+                    opacity: 1;
+                  }
                 }
-              }
-              @keyframes moveDot {
-                0% { cx: 0%; cy: 40%; }
-                25% { cx: 25%; cy: 35%; }
-                50% { cx: 50%; cy: 30%; }
-                75% { cx: 75%; cy: 50%; }
-                100% { cx: 100%; cy: 30%; }
-              }
-            `}
+                @keyframes moveDot {
+                  0% { cx: 0%; cy: 50%; }
+                  20% { cx: 20%; cy: 45%; }
+                  40% { cx: 40%; cy: 40%; }
+                  60% { cx: 60%; cy: 30%; }
+                  80% { cx: 80%; cy: 35%; }
+                  100% { cx: 100%; cy: 40%; }
+                }
+              `}
             </style>
           </svg>
         </Box>
 
-        {/* AI assistant interaction section */}
+        {/* AI Insights Panel with Code-like Elements */}
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-            }}
-          >
-            <Box
-              sx={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              G
-            </Box>
-            <Box
-              sx={{
-                background: "rgba(59, 130, 246, 0.1)",
-                borderRadius: "12px 12px 12px 0",
-                padding: "8px 12px",
-                maxWidth: "80%",
-              }}
-            >
-              <Typography sx={{ fontSize: "11px", color: "#333" }}>
-                Your glucose is stable. Consider a protein snack before exercise
-                today.
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              alignSelf: "flex-end",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-            }}
-          >
-            <Box
-              sx={{
-                background: "rgba(59, 130, 246, 0.05)",
-                borderRadius: "12px 12px 0 12px",
-                padding: "8px 12px",
-                maxWidth: "80%",
-                border: "1px solid rgba(59, 130, 246, 0.1)",
-              }}
-            >
-              <Typography sx={{ fontSize: "11px", color: "#666" }}>
-                What's my average for today?
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                background: "#e5e7eb",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#374151",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              U
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "8px",
-              animation: "slideUp 0.5s forwards 2s",
-              opacity: 0,
-              transform: "translateY(20px)",
-              "@keyframes slideUp": {
-                to: {
-                  opacity: 1,
-                  transform: "translateY(0)",
-                },
-              },
-            }}
-          >
-            <Box
-              sx={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              G
-            </Box>
-            <Box
-              sx={{
-                background: "rgba(59, 130, 246, 0.1)",
-                borderRadius: "12px 12px 12px 0",
-                padding: "8px 12px",
-                maxWidth: "80%",
-              }}
-            >
-              <Typography sx={{ fontSize: "11px", color: "#333" }}>
-                Your average glucose today is 137 mg/dL with a standard
-                deviation of 18.
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Data flow animations between Raspberry Pi and monitor */}
-      <Box
-        sx={{
-          position: "absolute",
-          height: "3px",
-          width: "20%",
-          top: "40%",
-          left: "40%",
-          background: "rgba(37, 99, 235, 0.2)",
-          zIndex: 1,
-        }}
-      >
-        {[...Array(4)].map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              position: "absolute",
-              width: "6px",
-              height: "6px",
-              borderRadius: "50%",
-              background: "#3b82f6",
-              top: "-3px",
-              boxShadow: "0 0 8px rgba(59, 130, 246, 0.8)",
-              animation: `flowData 3s infinite linear ${i * 0.7}s`,
-              "@keyframes flowData": {
-                "0%": { left: "0%", opacity: 0 },
-                "10%": { opacity: 1 },
-                "90%": { opacity: 1 },
-                "100%": { left: "100%", opacity: 0 },
-              },
-            }}
-          />
-        ))}
-      </Box>
-
-      {/* Dexcom and AI graphics */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "12%",
-          left: "40%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          zIndex: 4,
-        }}
-      >
-        <Box
-          sx={{
-            padding: "8px 12px",
+            marginTop: "10px",
+            background: "rgba(255, 255, 255, 0.1)",
             borderRadius: "8px",
-            background: "rgba(255, 255, 255, 0.95)",
-            display: "flex",
-            alignItems: "center",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-            marginBottom: "15px",
+            padding: "8px",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           <Typography
             sx={{
-              fontSize: "12px",
+              fontSize: "10px",
+              color: "white",
               fontWeight: "bold",
-              color: "#0ea5e9",
-            }}
-          >
-            DEXCOM API
-          </Typography>
-          <Box
-            sx={{
-              width: "8px",
-              height: "8px",
-              borderRadius: "50%",
-              background: "#22c55e",
-              marginLeft: "6px",
-              animation: "pulse 2s infinite",
-            }}
-          />
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: "10px",
-          }}
-        >
-          <Box
-            sx={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              background: "rgba(30, 64, 175, 0.9)",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+              marginBottom: "4px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              animation: "pulse 3s infinite 1s",
-              position: "relative",
+              gap: "4px",
             }}
           >
-            <Typography
+            <Box
               sx={{
-                fontSize: "20px",
-                fontWeight: "bold",
-                color: "white",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#2196f3",
+                animation: "aiPulse 1.5s infinite",
               }}
-            >
-              G
-            </Typography>
-            <Typography
-              sx={{
-                position: "absolute",
-                bottom: "-14px",
-                fontSize: "8px",
-                color: "white",
-                opacity: 0.9,
-                textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-              }}
-            >
-              GROK
-            </Typography>
+            />
+            Grok AI Analysis
+          </Typography>
+
+          {/* Code-like Elements */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              opacity: 0.1,
+              fontSize: "8px",
+              fontFamily: "monospace",
+              color: "white",
+              padding: "4px",
+              animation: "scrollCode 10s linear infinite",
+              "@keyframes scrollCode": {
+                "0%": { transform: "translateY(0)" },
+                "100%": { transform: "translateY(-100%)" },
+              },
+            }}
+          >
+            {[
+              "def analyze_glucose(data):",
+              "    trend = detect_trend(data)",
+              "    if trend == 'stable':",
+              "        return 'Glucose stable'",
+              "    elif trend == 'rising':",
+              "        return 'Consider insulin'",
+              "    return 'Monitor closely'",
+              "",
+              "def predict_next_reading():",
+              "    model = load_grok_model()",
+              "    prediction = model.predict()",
+              "    return prediction",
+            ].map((line, i) => (
+              <Box key={i} sx={{ whiteSpace: "pre" }}>
+                {line}
+              </Box>
+            ))}
           </Box>
 
           <Box
             sx={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              background: "rgba(20, 184, 166, 0.9)",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: "pulse 3s infinite 2s",
+              animation: "fadeInOut 3s infinite",
               position: "relative",
+              zIndex: 1,
             }}
           >
-            <i
-              className="devicon-python-plain"
-              style={{
-                color: "white",
-                fontSize: "22px",
-              }}
-            />
             <Typography
               sx={{
-                position: "absolute",
-                bottom: "-14px",
                 fontSize: "8px",
-                color: "white",
-                opacity: 0.9,
-                textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+                color: "rgba(255, 255, 255, 0.8)",
+                fontFamily: "monospace",
               }}
             >
-              PYTHON
+              {">"} Glucose trending stable
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "8px",
+                color: "rgba(255, 255, 255, 0.8)",
+                fontFamily: "monospace",
+              }}
+            >
+              {">"} Consider light exercise
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "8px",
+                color: "rgba(255, 255, 255, 0.8)",
+                fontFamily: "monospace",
+                animation: "typewriter 2s steps(40) infinite",
+                "@keyframes typewriter": {
+                  "0%": { opacity: 0 },
+                  "50%": { opacity: 1 },
+                  "100%": { opacity: 0 },
+                },
+              }}
+            >
+              {">"} Next reading predicted: 118 mg/dL
             </Typography>
           </Box>
         </Box>
       </Box>
 
-      {/* Technical floating elements */}
-      {[...Array(5)].map((_, i) => (
+      {/* Floating Grok Icon */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "10%",
+          right: "10%",
+          animation: "float 3s infinite ease-in-out",
+          "@keyframes float": {
+            "0%, 100%": { transform: "translateY(0)" },
+            "50%": { transform: "translateY(-10px)" },
+          },
+        }}
+      >
         <Box
-          key={i}
           sx={{
-            position: "absolute",
-            padding: "5px 8px",
-            borderRadius: "4px",
-            background: `rgba(${10 + i * 10}, ${20 + i * 10}, ${
-              50 + i * 20
-            }, 0.8)`,
-            color: "rgba(255,255,255,0.9)",
-            fontSize: "8px",
-            fontFamily: "monospace",
-            boxShadow: "0 0 10px rgba(0,0,0,0.2)",
-            whiteSpace: "nowrap",
-            transform: `rotate(${-5 + i * 3}deg)`,
-            top: `${10 + i * 16}%`,
-            left: i % 2 === 0 ? "5%" : "70%",
-            animation: `float ${2 + i * 0.3}s infinite ease-in-out ${i * 0.4}s`,
-            opacity: 0.7,
-            zIndex: 0,
+            width: "40px",
+            height: "40px",
+            background: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 10px rgba(33, 150, 243, 0.3)",
           }}
         >
-          {
-            [
-              "response = dexcom_api.get_readings()",
-              "ml_model.predict(glucose_data)",
-              "import tensorflow as tf",
-              "grok.generate_response(query)",
-              "plt.plot(time, glucose_values)",
-            ][i]
-          }
+          <Typography
+            sx={{
+              fontSize: "20px",
+              color: "white",
+              fontWeight: "bold",
+            }}
+          >
+            G
+          </Typography>
         </Box>
-      ))}
+      </Box>
     </Box>
   );
 
@@ -1500,306 +1235,361 @@ export default function Projects() {
   const projects = [
     {
       id: 1,
-      title: "Personal Portfolio",
+      image: "/images/portfolio.png",
+      role: "PERSONAL PROJECT",
+      title: "Personal Portfolio Website",
+      tags: ["React", "Material UI", "Framer Motion"],
       description:
-        "A modern, responsive personal portfolio website built with React and Material UI. Features animated backgrounds, smooth scrolling, and interactive elements to showcase my skills and projects.",
-      technologies: ["React", "Material UI", "CSS", "Responsive Design"],
+        "A hand-crafted, interactive portfolio built with React and Framer Motion. Showcases my work, skills, and story through custom animations, live project previews, and a modern, accessible design. Every detail—from the animated hero to the project cards—was designed to be both beautiful and highly usable on any device.",
+      status: "LIVE",
       github: "https://github.com/taylfrad/taylorfradella.com",
       animation: portfolioAnimation,
     },
     {
       id: 2,
-      title: "Lions Den Theaters",
+      image: "/images/lionsden.png",
+      role: "TEAM PROJECT",
+      title: "Lions Den Cinemas Website and Mobile App",
+      tags: ["React Native", "Node.js", "SQL"],
       description:
-        "A comprehensive theater management application built with React Native and Expo. Features include ticket booking, seat selection, movie information, and admin dashboard. Backend powered by Node.js with SQL database integration for data management.",
-      technologies: ["SQL", "React Native", "Expo", "Node.js"],
+        "My team and I brought Lions Den Cinemas to life online by creating both a website and a mobile app where anyone can browse showtimes, buy tickets and snacks—either as a guest or by signing up. We also built an easy-to-use admin panel so cinema staff can quickly update movie listings, manage ticket availability, and tweak concession options on the fly. This project highlights our ability to design and deliver a seamless, end-to-end experience for both customers and administrators.",
+      status: "COMPLETED",
       github:
         "https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g06",
       animation: lionsTheaterAnimation,
     },
     {
       id: 3,
+      image: "/images/bloodsugar.png",
+      role: "HARDWARE + AI",
       title: "Blood Sugar Monitor with AI",
+      tags: ["Python", "Raspberry Pi", "Dexcom API", "AI"],
       description:
-        "A Raspberry Pi-powered blood sugar monitoring system that integrates with the Dexcom API to track and display glucose levels. Utilizes Python for backend processing and data visualization. Features AI-driven suggestions for meals and provides glucose level information through natural language queries using Grok.",
-      technologies: ["Python", "Raspberry Pi", "Dexcom API", "Grok"],
+        "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API.",
+      status: "GITHUB ONLY",
       github: "https://github.com/taylfrad/blood-sugar-monitor",
-      animation: bloodSugarAnimation,
+      animation: bloodSugarMonitorAnimation,
     },
   ];
 
-  // Create separate refs for each project to observe individually
-  const projectRefs = useRef(projects.map(() => useRef(null)));
-  const projectVisibility = projects.map((_, index) => {
-    const [ref, isVisible] = useIntersectionObserver({
-      threshold: 0.2,
-      rootMargin: "0px 0px -100px 0px", // Trigger earlier for better animation
-    });
-    projectRefs.current[index] = ref;
-    return isVisible;
+  const sectionRef = useRef();
+  const stickyRef = useRef();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end end"],
+  });
+
+  // Animation for the "View More Projects on GitHub" button
+  const buttonOpacity = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]); // Fade out from 70% to 90% scrolled
+  const buttonY = useTransform(scrollYProgress, [0.7, 0.9], [0, 50]); // Slide down from 70% to 90% scrolled
+
+  // Animation variants for image and text
+  const imageVariants = (isImageLeft) => ({
+    hidden: { opacity: 0, x: isImageLeft ? -80 : 80 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.23, 1, 0.32, 1],
+      },
+    },
+  });
+
+  const textVariants = (isImageLeft) => ({
+    hidden: { opacity: 0, x: isImageLeft ? 80 : -80 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.23, 1, 0.32, 1],
+        delay: 0.18,
+      },
+    },
   });
 
   return (
     <Box
       id="projects"
+      ref={sectionRef}
       sx={{
         minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        py: 10,
         position: "relative",
+        bgcolor: "#ffffff",
         width: "100%",
-        bgcolor: "#ffffff", // White background
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      <Container maxWidth="lg" sx={{ textAlign: "center" }}>
-        <Box
-          ref={containerRef}
-          sx={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(40px)",
-            transition: "opacity 0.8s ease, transform 0.8s ease",
-            width: "100%",
-          }}
-        >
-          <Box sx={{ mb: 8 }}>
-            <Typography
-              variant="h2"
-              component="h2"
-              sx={{
-                fontWeight: 700,
-                position: "relative",
-                display: "inline-block",
-                mb: 2,
-                color: "#0f172a", // Dark text for white background
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  width: "60px",
-                  height: "4px",
-                  backgroundColor: theme.palette.primary.main,
-                  bottom: "-12px",
-                  left: "calc(50% - 30px)",
-                  borderRadius: "2px",
-                },
-              }}
-            >
-              Projects
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: "#334155", // Darker text for white background
-                maxWidth: "650px",
-                mx: "auto", // Center the paragraph
-                mt: 4,
-                fontSize: "1.1rem",
-              }}
-            >
-              Here are some of my recent projects that showcase my technical
-              skills and problem-solving abilities.
-            </Typography>
-          </Box>
+      <SectionHeader
+        title="Projects"
+        sectionRef={sectionRef}
+        accentColor={theme.palette.primary.main}
+      />
+      <Typography
+        variant="subtitle1"
+        sx={{
+          color: "#6b7280",
+          maxWidth: 700,
+          mx: "auto",
+          mt: { xs: 2, md: 3 },
+          mb: { xs: 4, md: 6 },
+          fontSize: { xs: "1.15rem", md: "1.22rem" },
+          fontWeight: 400,
+          lineHeight: 1.7,
+          textAlign: "center",
+          letterSpacing: "-0.01em",
+        }}
+      >
+        Here are some of my recent projects that showcase my technical skills
+        and problem-solving abilities.
+      </Typography>
+      <motion.div
+        ref={containerRef}
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.18,
+            },
+          },
+          hidden: {},
+        }}
+        initial="hidden"
+        animate="visible"
+        style={{ width: "100%" }}
+      >
+        <Box sx={{ width: "100%", maxWidth: 1400, mx: "auto" }}>
+          {projects.map((project, idx) => {
+            const isImageLeft = idx % 2 === 0;
+            const [ref, inView] = useInView({
+              threshold: 0.35,
+              triggerOnce: false,
+            });
 
-          {/* Stacked project cards that slide in from alternating sides */}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              width: "100%",
-              gap: 6,
-            }}
-          >
-            {projects.map((project, index) => (
+            return (
               <Box
                 key={project.id}
-                ref={projectRefs.current[index]}
+                ref={ref}
+                component={motion.div}
+                initial="hidden"
+                animate={inView ? "visible" : "hidden"}
                 sx={{
-                  opacity: projectVisibility[index] ? 1 : 0,
-                  transform: projectVisibility[index]
-                    ? "translateX(0)"
-                    : index % 2 === 0
-                    ? "translateX(-100px)"
-                    : "translateX(100px)",
-                  transition: "all 0.8s ease",
-                  maxWidth: "900px",
+                  display: "flex",
+                  flexDirection: {
+                    xs: "column",
+                    md: isImageLeft ? "row" : "row-reverse",
+                  },
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: { xs: 4, md: 8 },
+                  my: { xs: 6, md: 10 },
                   width: "100%",
                 }}
               >
-                <Card
+                {/* Animated Project Image */}
+                <Box
+                  component={motion.div}
+                  variants={imageVariants(isImageLeft)}
                   sx={{
+                    width: { xs: "100%", md: 460 },
+                    height: { xs: 260, md: 360 },
+                    flexShrink: 0,
+                    mb: { xs: 2, md: 0 },
                     display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    borderRadius: "16px",
-                    bgcolor: "#ffffff",
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
-                    transition: "all 0.4s ease",
-                    overflow: "hidden",
-                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
-                    minHeight: { md: "350px" }, // Ensure sufficient height on medium screens and up
-                    "&:hover": {
-                      transform: "translateY(-12px)",
-                      boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
-                      "& .project-animation": {
-                        filter: "brightness(1.1)",
-                      },
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 6, // More rounded corners
+                    overflow: "hidden", // Ensures child animation is clipped
+                    boxShadow: "0 6px 32px 0 rgba(31, 38, 135, 0.13)", // Soft shadow
+                    background: "none", // No background, let animation show
+                  }}
+                >
+                  {project.animation}
+                </Box>
+                {/* Animated Project Details */}
+                <Box
+                  component={motion.div}
+                  variants={textVariants(isImageLeft)}
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: {
+                      xs: "center",
+                      md: isImageLeft ? "flex-start" : "flex-end",
+                    },
+                    justifyContent: "center",
+                    textAlign: {
+                      xs: "center",
+                      md: isImageLeft ? "left" : "right",
                     },
                   }}
                 >
-                  {/* Project animation */}
-                  <Box
+                  <Typography
+                    variant="overline"
                     sx={{
-                      width: { xs: "100%", md: "40%" },
-                      position: "relative",
-                      // Reverse the order for odd-indexed projects on desktop
-                      order: { xs: 0, md: index % 2 === 0 ? 0 : 1 },
-                      height: { xs: "220px", md: "100%" },
+                      color: "#b0b0b0",
+                      fontWeight: 700,
+                      letterSpacing: 2,
                     }}
-                    className="project-animation"
                   >
-                    {project.animation}
-                  </Box>
-
-                  {/* Project content */}
+                    {project.role}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                      mt: 1,
+                      mb: 2,
+                      color: "#222",
+                      fontSize: { xs: "1.6rem", md: "2.2rem" },
+                    }}
+                  >
+                    {project.title}
+                  </Typography>
                   <Box
                     sx={{
-                      width: { xs: "100%", md: "60%" },
                       display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      // Reverse the order for odd-indexed projects on desktop
-                      order: { xs: 1, md: index % 2 === 0 ? 1 : 0 },
-                      textAlign: "left", // Align text to the left
+                      gap: 1,
+                      mb: 2,
+                      flexWrap: "wrap",
+                      justifyContent: {
+                        xs: "center",
+                        md: isImageLeft ? "flex-start" : "flex-end",
+                      },
                     }}
                   >
-                    <CardContent sx={{ p: 4 }}>
-                      <Typography
-                        variant="h4"
-                        component="h3"
-                        gutterBottom
+                    {project.tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
                         sx={{
+                          bgcolor: "#e3f0fd",
+                          color: "#3b82f6",
                           fontWeight: 600,
-                          mb: 2,
-                          color: "#0f172a", // Dark text for white background
+                          fontSize: "0.85rem",
+                          borderRadius: 2,
+                          px: 1.5,
+                          py: 0.5,
+                          letterSpacing: 1,
                         }}
-                      >
-                        {project.title}
-                      </Typography>
-
+                      />
+                    ))}
+                  </Box>
+                  <Typography
+                    variant="body1"
+                    component="div"
+                    sx={{ color: "#555", fontSize: "1.1rem", mb: 2 }}
+                  >
+                    {project.description}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mt: 2,
+                      justifyContent: {
+                        xs: "center",
+                        md: isImageLeft ? "flex-start" : "flex-end",
+                      },
+                    }}
+                  >
+                    {project.status === "LIVE" && (
                       <Typography
-                        variant="body1"
+                        variant="overline"
                         sx={{
-                          mb: 3,
-                          fontSize: "1rem",
-                          lineHeight: 1.6,
-                          color: "#334155", // Darker text for white background
+                          color: "#b0b0b0",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          fontSize: "0.92rem",
+                          letterSpacing: 1.5,
+                          lineHeight: 1,
+                          mr: 1,
                         }}
                       >
-                        {project.description}
+                        {project.status}
                       </Typography>
-
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 1,
-                          mt: 3,
-                        }}
-                      >
-                        {project.technologies.map((tech, techIndex) => (
-                          <Chip
-                            key={techIndex}
-                            label={tech}
-                            icon={
-                              <DeviconWrapper
-                                iconClass={getTechIconClass(tech)}
-                              />
-                            }
-                            component={Link}
-                            href={getTechUrl(tech)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            clickable
-                            sx={{
-                              bgcolor: "rgba(56, 189, 248, 0.1)",
-                              color: "#334155", // Dark text for white background
-                              borderRadius: "6px",
-                              mb: 1,
-                              height: "32px",
-                              "& .MuiChip-label": {
-                                paddingLeft: "6px",
-                              },
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                bgcolor: "rgba(56, 189, 248, 0.2)",
-                                transform: "translateY(-2px)",
-                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                              },
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    </CardContent>
-
-                    <CardActions sx={{ p: 3, pt: 0 }}>
-                      <Button
-                        component={Link}
+                    )}
+                    {project.github && (
+                      <motion.a
                         href={project.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<GitHubIcon />}
-                        sx={{
-                          borderRadius: "8px",
-                          textTransform: "none",
-                          "&:hover": {
-                            boxShadow: "0 0 10px rgba(56, 189, 248, 0.3)",
-                            transform: "translateY(-2px)",
+                        style={{
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          fontSize: "0.92rem",
+                          color: "#b0b0b0",
+                          letterSpacing: 1.5,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          textDecoration: "none",
+                          lineHeight: 1,
+                          marginLeft: 8,
+                          transition: "color 0.2s",
+                        }}
+                        whileHover={{
+                          x: 8,
+                          color: "#3b82f6",
+                          transition: {
+                            type: "tween",
+                            duration: 0.25,
+                            ease: "easeOut",
                           },
                         }}
                       >
-                        View Code
-                      </Button>
-                    </CardActions>
+                        View Project{" "}
+                        <ArrowForwardIcon
+                          style={{ fontSize: 16, marginLeft: 4 }}
+                        />
+                      </motion.a>
+                    )}
                   </Box>
-                </Card>
+                </Box>
               </Box>
-            ))}
-          </Box>
-
-          {/* GitHub projects link button */}
-          <Box sx={{ textAlign: "center", mt: 6 }}>
-            <Button
-              component={Link}
-              href="https://github.com/taylfrad"
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="outlined"
-              color="primary"
-              size="large"
-              startIcon={<GitHubIcon />}
-              sx={{
-                borderRadius: "10px",
-                px: 4,
-                py: 1.5,
-                borderWidth: "2px",
-                textTransform: "none",
-                fontSize: "1rem",
-                boxShadow: "0 0 10px rgba(56, 189, 248, 0.1)",
-                "&:hover": {
-                  borderWidth: "2px",
-                  boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
-                  transform: "translateY(-3px)",
-                },
-              }}
-            >
-              View More Projects on GitHub
-            </Button>
-          </Box>
+            );
+          })}
         </Box>
-      </Container>
+      </motion.div>
+
+      {/* GitHub projects link button */}
+      <Box
+        component={motion.div}
+        style={{ opacity: buttonOpacity, y: buttonY }}
+        sx={{ textAlign: "center", mt: 6, mb: { xs: 8, md: 12 } }}
+      >
+        <Button
+          component={Link}
+          href="https://github.com/taylfrad"
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="outlined"
+          color="primary"
+          size="large"
+          startIcon={<GitHubIcon />}
+          sx={{
+            borderRadius: "10px",
+            px: 4,
+            py: 1.5,
+            borderWidth: "2px",
+            textTransform: "none",
+            fontSize: "1rem",
+            boxShadow: "0 0 10px rgba(56, 189, 248, 0.1)",
+            "&:hover": {
+              borderWidth: "2px",
+              boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
+              transform: "translateY(-3px)",
+            },
+          }}
+        >
+          View More Projects on GitHub
+        </Button>
+      </Box>
     </Box>
   );
 }
