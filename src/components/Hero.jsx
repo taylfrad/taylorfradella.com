@@ -14,7 +14,7 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import WAVES from "vanta/dist/vanta.waves.min";
+import "vanta/dist/vanta.waves.min.js";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 
@@ -51,7 +51,7 @@ export default function Hero({ onNav }) {
 
   // Navigation click handler
   const handleNavClick = (sectionId) => {
-    console.log("handleNavClick fired with sectionId:", sectionId);
+    const section = document.getElementById(sectionId);
     if (onNav) onNav(sectionId);
   };
 
@@ -91,10 +91,6 @@ export default function Hero({ onNav }) {
           waveSpeed: 0.6, // Slightly faster
           backgroundColor: 0x101522, // Even deeper navy background
         });
-        console.log(
-          "Vanta Waves initialized (CDN workaround)",
-          vantaEffect.current
-        );
       }
     }
     initVanta();

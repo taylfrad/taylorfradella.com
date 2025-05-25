@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: "dist", // Explicitly set output directory
+    rollupOptions: {
+      external: ["vanta/dist/vanta.waves.min"],
+    },
   },
-  base: "/", // Ensure proper base path for GitHub Pages
+  base: "/", // Ensure proper base path for GitHub Page
 });

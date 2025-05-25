@@ -5,6 +5,8 @@ import "./index.css";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "/src/styles/Theme.js";
+import * as VANTA from "vanta";
+import "vanta/dist/vanta.waves.min.js";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

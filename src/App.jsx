@@ -111,22 +111,13 @@ function App() {
 
   // Scroll to top handler
   const scrollToTop = () => {
-    console.log(
-      "Attempting to scroll main content container to top from App.jsx..."
-    );
     // Target the main content container
     const mainContent = document.querySelector("main");
 
     if (mainContent) {
-      console.log("Found main content container in App.jsx:", mainContent);
-      // Use scrollTo with behavior for smooth scroll
       mainContent.scrollTo({ top: 0, behavior: "smooth" });
-      console.log("Scrolled main content container to top from App.jsx.");
     } else {
       // Fallback if the main element is not found
-      console.log(
-        "Main content container not found in App.jsx, attempting window scroll fallback."
-      );
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };

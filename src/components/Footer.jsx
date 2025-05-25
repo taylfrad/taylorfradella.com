@@ -24,13 +24,10 @@ const Footer = () => {
   const theme = useTheme();
 
   const scrollToTop = () => {
-    console.log("Attempting to find scrollable parent and scroll to hero...");
-
     const heroSection = document.getElementById("hero");
     const fixedHeaderHeight = 80; // Approximate height of your fixed header/navbar
 
     if (!heroSection) {
-      console.log("Hero section not found.");
       // Fallback to window scroll if hero section is not found
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -56,7 +53,6 @@ const Footer = () => {
     const scrollableParent = findScrollableParent(heroSection);
 
     if (scrollableParent) {
-      console.log("Found scrollable parent:", scrollableParent);
       // Calculate the position of the hero section relative to the scrollable parent
       const targetScrollTop = heroSection.offsetTop - fixedHeaderHeight; // offsetTop is relative to offsetParent
 
@@ -64,14 +60,7 @@ const Footer = () => {
       const scrollToPosition = Math.max(0, targetScrollTop);
 
       scrollableParent.scrollTo({ top: scrollToPosition, behavior: "smooth" });
-      console.log(
-        "Scrolled scrollable parent to hero section position:",
-        scrollToPosition
-      );
     } else {
-      console.log(
-        "No scrollable parent found, attempting window scroll fallback."
-      );
       // Fallback to window scroll if no specific scrollable parent is found
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
