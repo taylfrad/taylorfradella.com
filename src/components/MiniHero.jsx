@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import React, { useRef, useEffect } from "react";
 import WAVES from "vanta/dist/vanta.waves.min";
-import THREE from "three";
+import * as THREE from "three";
 
 export default function MiniHero() {
   const vantaRef = useRef(null);
