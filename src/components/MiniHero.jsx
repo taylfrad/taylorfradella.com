@@ -1,19 +1,19 @@
 import { Box, Typography } from "@mui/material";
 import React, { useRef, useEffect } from "react";
 import WAVES from "vanta/dist/vanta.waves.min";
+import THREE from "three";
 
 export default function MiniHero() {
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
 
   useEffect(() => {
-    if (vantaEffect.current) {
-      vantaEffect.current.destroy();
-      vantaEffect.current = null;
-    }
-    if (vantaRef.current) {
-      vantaEffect.current = WAVES({
+    let vantaEffectInstance;
+    // Check if VANTA and WAVES are available globally
+    if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
+      vantaEffectInstance = window.VANTA.WAVES({
         el: vantaRef.current,
+        THREE: THREE, // Pass imported THREE to Vanta
         mouseControls: false,
         touchControls: false,
         gyroControls: false,
@@ -29,9 +29,8 @@ export default function MiniHero() {
       });
     }
     return () => {
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
+      if (vantaEffectInstance) {
+        vantaEffectInstance.destroy();
       }
     };
   }, []);

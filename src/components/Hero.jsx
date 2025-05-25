@@ -68,38 +68,31 @@ export default function Hero({ onNav }) {
     }, 100); // Delay to allow menu to close before scrolling
   };
 
-  // Vanta.js Waves effect (using global THREE from CDN)
+  // Vanta.js Waves effect setup
   useEffect(() => {
-    function initVanta() {
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
-      }
-      if (vantaRef.current) {
-        vantaEffect.current = WAVES({
-          el: vantaRef.current,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          scale: 1.0,
-          scaleMobile: 1.0,
-          color: 0x223366, // Darker blue
-          shininess: 80.0, // More metallic
-          waveHeight: 25.0, // Taller waves
-          waveSpeed: 0.6, // Slightly faster
-          backgroundColor: 0x101522, // Even deeper navy background
-        });
-      }
+    let vantaEffectInstance;
+    // Check if VANTA and WAVES are available globally
+    if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
+      vantaEffectInstance = window.VANTA.WAVES({
+        el: vantaRef.current,
+        THREE: THREE, // Pass imported THREE to Vanta
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.0,
+        minWidth: 200.0,
+        scale: 1.0,
+        scaleMobile: 1.0,
+        color: 0x223366, // Darker blue
+        shininess: 80.0, // More metallic
+        waveHeight: 25.0, // Taller waves
+        waveSpeed: 0.6, // Slightly faster
+        backgroundColor: 0x101522, // Even deeper navy background
+      });
     }
-    initVanta();
-    window.addEventListener("resize", initVanta);
     return () => {
-      window.removeEventListener("resize", initVanta);
-      if (vantaEffect.current) {
-        vantaEffect.current.destroy();
-        vantaEffect.current = null;
+      if (vantaEffectInstance) {
+        vantaEffectInstance.destroy();
       }
     };
   }, []);
