@@ -792,9 +792,9 @@ export default function Projects() {
       {/* Main Device Display */}
       <Box
         sx={{
-          position: "absolute",
-          width: "70%",
-          height: "80%",
+          position: "relative",
+          width: { xs: "90%", md: "70%" },
+          height: { xs: "auto", md: "80%" },
           background: "#2c3e50",
           borderRadius: "15px",
           display: "flex",

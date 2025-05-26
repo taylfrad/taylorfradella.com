@@ -103,16 +103,15 @@ const Footer = () => {
             cursor: "pointer",
             boxShadow: "none",
             transition: "transform 0.2s ease-in-out",
+            animation: `${bounceAnimation} 1.5s infinite ease-in-out`,
             "&:hover": {
               color: "#444",
               backgroundColor: "transparent",
               boxShadow: "none",
-              animation: `${bounceAnimation} 0.6s ease-in-out`,
             },
             "&:active": {
               backgroundColor: "transparent",
               boxShadow: "none",
-              animation: `${bounceAnimation} 0.6s ease-in-out`,
             },
           }}
           aria-label="Scroll to top"
