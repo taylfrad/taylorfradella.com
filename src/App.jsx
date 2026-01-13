@@ -17,10 +17,11 @@ function App() {
   const heroRef = useRef(null);
   const skillsRef = useRef(null);
   const projectsRef = useRef(null);
+  const mainScrollRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollContainer = document.querySelector("main");
+      const scrollContainer = mainScrollRef.current || document.querySelector("main");
       let currentScrollPosition = 0;
       
       if (scrollContainer) {
@@ -32,7 +33,7 @@ function App() {
       setShowScrollTop(currentScrollPosition > 200);
     };
 
-    const scrollContainer = document.querySelector("main");
+    const scrollContainer = mainScrollRef.current || document.querySelector("main");
     
     window.addEventListener("scroll", handleScroll, { passive: true });
     if (scrollContainer) {
@@ -51,7 +52,7 @@ function App() {
 
   useEffect(() => {
     const path = location.pathname;
-    const scrollContainer = document.querySelector("main");
+    const scrollContainer = mainScrollRef.current || document.querySelector("main");
     let element = null;
 
     if (path === "/" || path === "/hero") {
@@ -64,40 +65,27 @@ function App() {
       const footerElement = document.getElementById("footer");
       if (footerElement) {
         setTimeout(() => {
-          if (scrollContainer) {
-            let offsetTop = 0;
-            let currentElement = footerElement;
-            while (currentElement && currentElement !== scrollContainer) {
-              offsetTop += currentElement.offsetTop;
-              currentElement = currentElement.offsetParent;
-            }
-            scrollContainer.scrollTo({ top: Math.max(0, offsetTop - 80), behavior: "smooth" });
-          } else {
-            const yOffset = -80;
-            const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: "smooth" });
-          }
-        }, 100);
+          // Footer is outside main container, scroll window to it
+          footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
         return;
       }
     }
 
     if (element) {
-      setTimeout(() => {
-        if (scrollContainer) {
-          let offsetTop = 0;
-          let currentElement = element;
-          while (currentElement && currentElement !== scrollContainer) {
-            offsetTop += currentElement.offsetTop;
-            currentElement = currentElement.offsetParent;
+      // Wait for DOM to be ready, then scroll window to element
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (element) {
+            // Use scrollIntoView which works with window scrolling
+            element.scrollIntoView({ 
+              behavior: "smooth", 
+              block: "start",
+              inline: "nearest"
+            });
           }
-          scrollContainer.scrollTo({ top: Math.max(0, offsetTop - 80), behavior: "smooth" });
-        } else {
-          const yOffset = -80;
-          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
-      }, 100);
+        }, 100);
+      });
     }
   }, [location]);
 
@@ -127,6 +115,7 @@ function App() {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <Box
           component="main"
+          ref={mainScrollRef}
           sx={{
             flex: 1,
             display: "flex",
