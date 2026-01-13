@@ -156,88 +156,130 @@ export default function Projects() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #101522 0%, #223366 100%)",
+        background: "#ffffff",
         overflow: "hidden",
         position: "relative",
         minHeight: "250px",
       }}
     >
-      {/* Browser window frame */}
+      {/* Hero Section Content - Direct, no browser frame */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "90%", md: 420 },
-          height: { xs: 320, md: 340 },
-          border: `3px solid ${theme.palette.primary.light}`,
-          borderRadius: "14px",
-          background: theme.palette.primary.dark,
+          width: { xs: "90%", md: "85%" },
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           overflow: "hidden",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          background: "#ffffff",
+          p: 2,
         }}
       >
-        {/* Browser header */}
-        <Box
-          sx={{
-            height: "32px",
-            width: "100%",
-            background: theme.palette.primary.main,
-            display: "flex",
-            alignItems: "center",
-            padding: "0 12px",
-            zIndex: 2,
-          }}
-        >
-          {/* Browser controls */}
-          <Box sx={{ display: "flex", gap: "6px" }}>
-            {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
-              <Box
-                key={i}
+          {/* Navigation - Absolute positioned at top */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "12px",
+              left: "16px",
+              display: "flex",
+              gap: 1.5,
+              zIndex: 10,
+            }}
+          >
+            {["About", "Projects", "Contact"].map((item) => (
+              <Typography
+                key={item}
                 sx={{
-                  width: "11px",
-                  height: "11px",
-                  borderRadius: "50%",
-                  background: color,
+                  color: "#1d1d1f",
+                  fontSize: "9px",
+                  fontWeight: 400,
+                  letterSpacing: "-0.01em",
                 }}
-              />
+              >
+                {item}
+              </Typography>
             ))}
           </Box>
-          {/* URL bar */}
+
+          {/* Left Side - Text Content */}
           <Box
             sx={{
               flex: 1,
-              height: "18px",
-              margin: "0 12px",
-              background: theme.palette.primary.light,
-              borderRadius: "4px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              pr: 1.5,
+              mt: 3,
+            }}
+          >
+            {/* Heading */}
+            <Typography
+              sx={{
+                fontWeight: 600,
+                fontSize: "18px",
+                lineHeight: 1.05,
+                letterSpacing: "-0.02em",
+                mb: 1,
+                color: "#1d1d1f",
+              }}
+            >
+              Hi, I'm Taylor Fradella.
+            </Typography>
+
+            {/* Subtitle */}
+            <Typography
+              sx={{
+                color: "#86868b",
+                fontWeight: 400,
+                fontSize: "10px",
+                mb: 2,
+                lineHeight: 1.4,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              A computer science student passionate about building elegant & efficient software.
+            </Typography>
+
+            {/* Button */}
+            <Box
+              sx={{
+                bgcolor: "#e0e0e0",
+                color: "#222",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: "8px",
+                fontSize: "9px",
+                fontWeight: 500,
+              }}
+            >
+              Get in Touch
+            </Box>
+          </Box>
+
+          {/* Right Side - MacBook */}
+          <Box
+            sx={{
+              flex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ fontSize: "10px", color: theme.palette.text.secondary }}
-            >
-              taylorfradella.com
-            </Typography>
+            <Box
+              component="img"
+              src="/macbook-frame.png"
+              alt="MacBook"
+              sx={{
+                width: "100%",
+                maxWidth: "200px",
+                height: "auto",
+                objectFit: "contain",
+              }}
+            />
           </Box>
         </Box>
-        {/* Scaled down Hero component replaced with MiniHero */}
-        <Box
-          sx={{
-            position: "relative",
-            width: "100%",
-            height: "calc(100% - 32px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-            background: theme.palette.primary.dark,
-          }}
-        >
-          <MiniHero />
-        </Box>
-      </Box>
     </Box>
   );
 
@@ -1088,6 +1130,7 @@ export default function Projects() {
           }}
         >
           <Typography
+            component="div"
             sx={{
               fontSize: "10px",
               color: "white",
@@ -1232,6 +1275,300 @@ export default function Projects() {
     </Box>
   );
 
+  // Workly Animation - Job Tinder App
+  const worklyAnimation = (
+    <Box
+      sx={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)",
+        overflow: "hidden",
+        position: "relative",
+        minHeight: "250px",
+      }}
+    >
+      {/* Mobile Phone Frame */}
+      <Box
+        sx={{
+          position: "relative",
+          width: { xs: "135px", md: "170px" },
+          height: { xs: "270px", md: "340px" },
+          bgcolor: "#1a1a1a",
+          borderRadius: "28px",
+          padding: "8px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+          border: "2px solid #2a2a2a",
+        }}
+      >
+        {/* Screen - Gradient background with color */}
+        <Box
+          sx={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "22px",
+            borderTopLeftRadius: "22px",
+            borderTopRightRadius: "22px",
+            borderBottomLeftRadius: "22px",
+            borderBottomRightRadius: "22px",
+            overflow: "hidden",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #a855f7 100%)",
+          }}
+        >
+          {/* Status Bar - Different color to avoid double purple */}
+          <Box
+            sx={{
+              height: "20px",
+              bgcolor: "rgba(255,255,255,0.1)",
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 1.5,
+              pt: 0.5,
+              borderTopLeftRadius: "22px",
+              borderTopRightRadius: "22px",
+            }}
+          >
+            <Typography sx={{ fontSize: "9px", color: "#ffffff", fontWeight: 600, letterSpacing: "0.02em" }}>
+              9:41
+            </Typography>
+            <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: "16px",
+                  height: "9px",
+                  border: "1.5px solid #ffffff",
+                  borderRadius: "3px",
+                  position: "relative",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: "1.5px",
+                    top: "1.5px",
+                    width: "65%",
+                    height: "calc(100% - 3px)",
+                    bgcolor: "#ffffff",
+                    borderRadius: "2px",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* App Content */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              pt: 1.5,
+              pb: 2,
+              px: 2,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Swipeable Job Card */}
+            <motion.div
+              animate={{
+                x: [0, 12, -12, 0],
+                rotate: [0, 3, -3, 0],
+              }}
+              transition={{
+                duration: 3.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                position: "absolute",
+                width: "88%",
+                height: "70%",
+                top: "8%",
+              }}
+            >
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  bgcolor: "#ffffff",
+                  borderRadius: "16px",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
+                  p: 1.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Brown Briefcase Icon - Centered at top */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mb: 0.75,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      fontSize: "24px",
+                      filter: "hue-rotate(25deg) saturate(1.2)",
+                    }}
+                  >
+                    💼
+                  </Box>
+                </Box>
+
+                {/* Job Title */}
+                <Typography
+                  sx={{
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#1d1d1f",
+                    mb: 0.25,
+                    textAlign: "center",
+                    letterSpacing: "-0.01em",
+                    flexShrink: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Software Engineer
+                </Typography>
+
+                {/* Company Name */}
+                <Typography
+                  sx={{
+                    fontSize: "10px",
+                    color: "#86868b",
+                    mb: 1,
+                    textAlign: "center",
+                    fontWeight: 400,
+                    flexShrink: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Tech Company Inc.
+                </Typography>
+
+                {/* Job Details with colored icons */}
+                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, mb: 1, minHeight: 0, justifyContent: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center" }}>
+                    <Typography sx={{ fontSize: "10px", filter: "hue-rotate(320deg) saturate(1.3)" }}>📍</Typography>
+                    <Typography sx={{ fontSize: "9px", color: "#4a5568", fontWeight: 500, lineHeight: 1.2 }}>
+                      Remote
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center" }}>
+                    <Typography sx={{ fontSize: "10px", filter: "hue-rotate(25deg) saturate(1.2)" }}>💰</Typography>
+                    <Typography sx={{ fontSize: "9px", color: "#4a5568", fontWeight: 500, lineHeight: 1.2 }}>
+                      $80k-$120k
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center" }}>
+                    <Typography sx={{ fontSize: "10px", filter: "hue-rotate(0deg) saturate(1.4)" }}>⏰</Typography>
+                    <Typography sx={{ fontSize: "9px", color: "#4a5568", fontWeight: 500, lineHeight: 1.2 }}>
+                      Full-time
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Skills Tags - Different colors for each */}
+                <Box sx={{ display: "flex", gap: 0.4, flexWrap: "wrap", justifyContent: "center", mt: "auto", flexShrink: 0, pt: 0.5 }}>
+                  {[
+                    { name: "React", color: "#000000", bg: "#61dafb" },
+                    { name: "Node.js", color: "#ffffff", bg: "#339933" },
+                    { name: "TypeScript", color: "#ffffff", bg: "#3178c6" },
+                  ].map((tag, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        bgcolor: tag.bg,
+                        color: tag.color,
+                        px: 0.75,
+                        py: 0.3,
+                        borderRadius: "6px",
+                        fontSize: "8px",
+                        fontWeight: 600,
+                        letterSpacing: "0.01em",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {tag.name}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </motion.div>
+
+            {/* Action Buttons - Both Dislike and Like */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: "16px",
+                display: "flex",
+                gap: 3,
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+                width: "100%",
+              }}
+            >
+              {/* Dislike Button - Red X */}
+              <Box
+                sx={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  bgcolor: "#ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 6px 16px rgba(239,68,68,0.4)",
+                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <Typography sx={{ fontSize: "22px", color: "#fff", fontWeight: 700, lineHeight: 1 }}>✕</Typography>
+              </Box>
+
+              {/* Like Button - Green Heart */}
+              <Box
+                sx={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  bgcolor: "#22c55e",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 6px 16px rgba(34,197,94,0.4)",
+                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <Typography sx={{ fontSize: "22px", color: "#fff", fontWeight: 700, lineHeight: 1 }}>♥</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+
   // Projects array with animations
   const projects = [
     {
@@ -1241,7 +1578,7 @@ export default function Projects() {
       title: "Personal Portfolio Website",
       tags: ["React", "Material UI", "Framer Motion"],
       description:
-        "A hand-crafted, interactive portfolio built with React and Framer Motion. Showcases my work, skills, and story through custom animations, live project previews, and a modern, accessible design. Every detail—from the animated hero to the project cards—was designed to be both beautiful and highly usable on any device.",
+        "A minimalist portfolio website designed with Apple's design philosophy in mind. Crafted with React and Material-UI, it features fluid animations, fully responsive layouts, and an emphasis on clean typography and whitespace. Every interaction is thoughtfully designed to create a seamless, professional experience across all devices.",
       status: "LIVE",
       github: "https://github.com/taylfrad/taylorfradella.com",
       animation: portfolioAnimation,
@@ -1268,8 +1605,20 @@ export default function Projects() {
       description:
         "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API alongside Grok AI.",
       status: "GITHUB ONLY",
-      github: "https://github.com/taylfrad/blood-sugar-monitor",
+      github: "https://www.youtube.com/watch?v=64Pnq-MybS8&list=PLk22IJ-X9itqH1UIuWYtNs3cfTwHqOIvM&index=14",
       animation: bloodSugarMonitorAnimation,
+    },
+    {
+      id: 4,
+      image: "/images/workly.png",
+      role: "TEAM PROJECT",
+      title: "Workly - Job Tinder App",
+      tags: ["Flutter", "Dart", "Firebase", "Mobile"],
+      description:
+        "A mobile application that revolutionizes job searching with a Tinder-like swipe interface. Built with Flutter, Workly allows job seekers to quickly browse opportunities by swiping right on interesting positions or left to pass. The app features real-time job matching, user profiles, and seamless navigation across iOS, Android, and web platforms.",
+      status: "GITHUB ONLY",
+      github: "https://github.com/maheessh/workly",
+      animation: worklyAnimation,
     },
   ];
 
@@ -1315,7 +1664,7 @@ export default function Projects() {
       id="projects"
       ref={sectionRef}
       sx={{
-        minHeight: "100vh",
+        minHeight: "auto",
         position: "relative",
         bgcolor: "#ffffff",
         width: "100%",
@@ -1323,46 +1672,62 @@ export default function Projects() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        pt: 0,
+        pb: 0,
+        px: 0,
       }}
     >
-      <SectionHeader
-        title="Projects"
-        sectionRef={sectionRef}
-        accentColor={theme.palette.primary.main}
-      />
-      <Typography
-        variant="subtitle1"
-        sx={{
-          color: "#6b7280",
-          maxWidth: 700,
-          mx: "auto",
-          mt: { xs: 2, md: 3 },
-          mb: { xs: 4, md: 6 },
-          fontSize: { xs: "1.15rem", md: "1.22rem" },
-          fontWeight: 400,
-          lineHeight: 1.7,
-          textAlign: "center",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        Here are some of my recent projects that showcase my technical skills
-        and problem-solving abilities.
-      </Typography>
-      <motion.div
-        ref={containerRef}
-        variants={{
-          visible: {
-            transition: {
-              staggerChildren: 0.18,
-            },
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          width: "100%", 
+          px: { xs: 2, sm: 3, md: 4 },
+          "& .MuiContainer-root": {
+            maxWidth: "100% !important",
           },
-          hidden: {},
         }}
-        initial="hidden"
-        animate="visible"
-        style={{ width: "100%" }}
       >
-        <Box sx={{ width: "100%", maxWidth: 1400, mx: "auto" }}>
+        <Paper
+          elevation={0}
+          sx={{
+            bgcolor: "#f5f5f7",
+            borderRadius: "18px",
+            p: { xs: 3.5, md: 5 },
+            boxShadow: "none",
+            border: "none",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "2rem", md: "2.75rem" },
+              mb: { xs: 3.5, md: 4.5 },
+              color: "#1d1d1f",
+              textAlign: "left",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.05,
+            }}
+          >
+            Recent Projects
+          </Typography>
+          <motion.div
+            ref={containerRef}
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.18,
+                },
+              },
+              hidden: {},
+            }}
+            initial="hidden"
+            animate="visible"
+            style={{ width: "100%" }}
+          >
+            <Box sx={{ width: "100%", mx: "auto" }}>
           {projects.map((project, idx) => {
             const isImageLeft = idx % 2 === 0;
             const [ref, inView] = useInView({
@@ -1381,12 +1746,12 @@ export default function Projects() {
                   display: "flex",
                   flexDirection: {
                     xs: "column",
-                    md: isImageLeft ? "row" : "row-reverse",
+                    md: "row",
                   },
                   alignItems: "center",
-                  justifyContent: "center",
-                  gap: { xs: 4, md: 8 },
-                  my: { xs: 6, md: 10 },
+                  justifyContent: "flex-start",
+                  gap: { xs: 3, md: 5 },
+                  mb: { xs: 5, md: 6 },
                   width: "100%",
                 }}
               >
@@ -1403,168 +1768,97 @@ export default function Projects() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRadius: 6,
-                    overflow: "hidden",
-                    boxShadow: "0 6px 32px 0 rgba(31, 38, 135, 0.13)",
-                    background: "none",
-                  }}
-                >
-                  {project.animation}
-                </Box>
-                {/* Animated Project Details */}
-                <Box
-                  component={motion.div}
-                  variants={textVariants(isImageLeft)}
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  background: "none",
+                }}
+              >
+                {project.animation}
+              </Box>
+              {/* Animated Project Details */}
+              <Box
+                component={motion.div}
+                variants={textVariants(isImageLeft)}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  textAlign: "left",
+                }}
+              >
+                <Typography
+                  variant="h5"
                   sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: {
-                      xs: "center",
-                      md: isImageLeft ? "flex-start" : "flex-end",
-                    },
-                    justifyContent: "center",
-                    textAlign: {
-                      xs: "center",
-                      md: isImageLeft ? "left" : "right",
-                    },
+                    fontWeight: 600,
+                    mb: 1,
+                    color: "#222",
+                    fontSize: { xs: "1.25rem", md: "1.5rem" },
                   }}
                 >
-                  <Typography
-                    variant="overline"
+                  {project.title}
+                </Typography>
+                <Typography
+                  component="div"
+                  sx={{
+                    color: "#666",
+                    mb: 2,
+                    fontSize: { xs: "0.875rem", md: "0.9375rem" },
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {project.description}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <Button
+                    component="a"
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="contained"
                     sx={{
-                      color: "#b0b0b0",
-                      fontWeight: 700,
-                      letterSpacing: 2,
-                    }}
-                  >
-                    {project.role}
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      mt: 1,
-                      mb: 2,
+                      bgcolor: "#e0e0e0",
                       color: "#222",
-                      fontSize: { xs: "1.6rem", md: "2.2rem" },
-                    }}
-                  >
-                    {project.title}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      mb: 2,
-                      flexWrap: "wrap",
-                      justifyContent: {
-                        xs: "center",
-                        md: isImageLeft ? "flex-start" : "flex-end",
+                      textTransform: "none",
+                      fontSize: { xs: "0.9rem", md: "1rem" },
+                      fontWeight: 500,
+                      px: { xs: 2.5, md: 3.5 },
+                      py: { xs: 1.25, md: 1.75 },
+                      borderRadius: "8px",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                      border: "1px solid #d0d0d0",
+                      "&:hover": {
+                        bgcolor: "#d0d0d0",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
                       },
                     }}
                   >
-                    {project.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        sx={{
-                          bgcolor: "#e3f0fd",
-                          color: "#3b82f6",
-                          fontWeight: 600,
-                          fontSize: "0.85rem",
-                          borderRadius: 2,
-                          px: 1.5,
-                          py: 0.5,
-                          letterSpacing: 1,
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography
-                    variant="body1"
-                    component="div"
-                    sx={{ color: "#555", fontSize: "1.1rem", mb: 2 }}
-                  >
-                    {project.description}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      mt: 2,
-                      justifyContent: {
-                        xs: "center",
-                        md: isImageLeft ? "flex-start" : "flex-end",
-                      },
-                    }}
-                  >
-                    {project.status === "LIVE" && (
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          color: "#b0b0b0",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          fontSize: "0.92rem",
-                          letterSpacing: 1.5,
-                          lineHeight: 1,
-                          mr: 1,
-                        }}
-                      >
-                        {project.status}
-                      </Typography>
-                    )}
-                    {project.github && (
-                      <motion.a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          fontSize: "0.92rem",
-                          color: "#b0b0b0",
-                          letterSpacing: 1.5,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          textDecoration: "none",
-                          lineHeight: 1,
-                          marginLeft: 8,
-                          transition: "color 0.2s",
-                        }}
-                        whileHover={{
-                          x: 8,
-                          color: "#3b82f6",
-                          transition: {
-                            type: "tween",
-                            duration: 0.25,
-                            ease: "easeOut",
-                          },
-                        }}
-                      >
-                        View Project{" "}
-                        <ArrowForwardIcon
-                          style={{ fontSize: 16, marginLeft: 4 }}
-                        />
-                      </motion.a>
-                    )}
-                  </Box>
+                    View Project
+                  </Button>
                 </Box>
+              </Box>
               </Box>
             );
           })}
-        </Box>
-      </motion.div>
+            </Box>
+          </motion.div>
 
-      {/* GitHub projects link button */}
-      <Box
-        component={motion.div}
-        style={{ opacity: buttonOpacity, y: buttonY }}
-        sx={{ textAlign: "center", mt: 6, mb: { xs: 8, md: 12 } }}
-      >
+          {/* GitHub projects link button */}
+          <Box
+            component={motion.div}
+            style={{ opacity: buttonOpacity, y: buttonY }}
+            sx={{ textAlign: "center", mt: 6, mb: { xs: 2, md: 2 } }}
+          >
         <Button
           component={Link}
           href="https://github.com/taylfrad"
@@ -1591,7 +1885,9 @@ export default function Projects() {
         >
           View More Projects on GitHub
         </Button>
-      </Box>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 }

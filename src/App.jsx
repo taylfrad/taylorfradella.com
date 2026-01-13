@@ -4,7 +4,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Hero from "./components/Hero";
 import Skills from "./components/Skills";
 import Projects from "./components/Projects";
-import AboutContact from "./components/AboutContact";
+import StatementSection from "./components/StatementSection";
 import Footer from "./components/Footer";
 import "./styles/floatingBackground.css";
 import "./App.css"; // Make sure to import your App.css file
@@ -24,7 +24,16 @@ function App() {
   // Updated scroll handler
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollPosition = window.scrollY;
+      // Check both window scroll and main element scroll (for scroll-snap)
+      const scrollContainer = document.querySelector("main");
+      let currentScrollPosition = 0;
+      
+      if (scrollContainer) {
+        currentScrollPosition = scrollContainer.scrollTop;
+      } else {
+        currentScrollPosition = window.scrollY || window.pageYOffset;
+      }
+      
       setScrollPosition(currentScrollPosition);
       setShowScrollTop(currentScrollPosition > 200);
 
@@ -46,10 +55,13 @@ function App() {
       )
         return;
 
-      const heroTop = heroRef.current.offsetTop;
-      const skillsTop = skillsRef.current.offsetTop;
-      const projectsTop = projectsRef.current.offsetTop;
-      const aboutTop = aboutRef.current.offsetTop;
+      // Get bounding rects for more accurate detection with scroll-snap
+      const heroRect = heroRef.current.getBoundingClientRect();
+      const skillsRect = skillsRef.current.getBoundingClientRect();
+      const projectsRect = projectsRef.current.getBoundingClientRect();
+      const aboutRect = aboutRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
       const metaballs = document.querySelectorAll(".metaball");
 
       metaballs.forEach((metaball) => {
@@ -67,47 +79,69 @@ function App() {
         );
       });
 
-      const scrollPos = window.scrollY;
-      const offset = window.innerHeight * 0.2; // 20% of viewport height
-
-      // Determine which section we're in
+      // Determine which section is currently in view using getBoundingClientRect
+      // Hero section is visible when its top is near the top of viewport
       let currentSection = "hero";
-      if (scrollPos >= aboutTop - offset) {
-        currentSection = "about";
-      } else if (scrollPos >= projectsTop - offset) {
-        currentSection = "projects";
-      } else if (scrollPos >= skillsTop - offset) {
+      
+      if (heroRect.top >= 0 && heroRect.top < viewportHeight * 0.5) {
+        currentSection = "hero";
+      } else if (skillsRect.top >= 0 && skillsRect.top < viewportHeight * 0.5) {
         currentSection = "skills";
+      } else if (projectsRect.top >= 0 && projectsRect.top < viewportHeight * 0.5) {
+        currentSection = "projects";
+      } else if (aboutRect.top >= 0 && aboutRect.top < viewportHeight * 0.5) {
+        currentSection = "about";
       }
 
       // Update active section
       setActiveSection(currentSection);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    // Listen to both window and main element scroll
+    const scrollContainer = document.querySelector("main");
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    }
 
     // Initial check
     setTimeout(handleScroll, 100);
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
-  // Direct scroll method
-  const scrollToSection = (sectionId) => {
-    let element = null;
+      // Direct scroll method
+      const scrollToSection = (sectionId) => {
+        let element = null;
 
-    if (sectionId === "hero") element = heroRef.current;
-    else if (sectionId === "skills") element = skillsRef.current;
-    else if (sectionId === "projects") element = projectsRef.current;
-    else if (sectionId === "about") element = aboutRef.current;
+        if (sectionId === "hero") element = heroRef.current;
+        else if (sectionId === "skills") element = skillsRef.current;
+        else if (sectionId === "projects") element = projectsRef.current;
+        else if (sectionId === "about") element = aboutRef.current;
+        else if (sectionId === "contact" || sectionId === "footer") {
+          // Scroll to footer
+          const footerElement = document.getElementById("footer");
+          if (footerElement) {
+            const yOffset = -80;
+            const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: "smooth" });
+            return;
+          }
+        }
 
-    if (element) {
-      const yOffset = -80; // Adjust this value as needed for your header height
-      const y =
-        element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+        if (element) {
+          const yOffset = -80;
+          const y =
+            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      };
 
   // Scroll to top handler
   const scrollToTop = () => {
@@ -144,39 +178,36 @@ function App() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* Metaball Liquid Background */}
-      <div className="flowing-bg">
-        <div className="metaball-container">
-          {[1, 2].map((num) => (
-            <div key={num} className={`metaball metaball-${num}`}></div>
-          ))}
-        </div>
-        <div className="metaball-overlay"></div>
-      </div>
-
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          zIndex: 1,
-          overflowX: "hidden", // Prevent horizontal scroll
-          bgcolor: "#fff",
-        }}
-      >
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            zIndex: 1,
+            overflowX: "hidden",
+            bgcolor: "#ffffff",
+            scrollSnapType: "y mandatory",
+            overflowY: "auto",
+            height: "100vh",
+          }}
+        >
         <Box
           ref={heroRef}
           id="hero"
           sx={{
-            minHeight: "auto",
+            minHeight: "100vh",
+            height: "100vh",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
             zIndex: 1,
-            px: { xs: 2, sm: 3, md: 4 }, // Responsive padding
+            px: 0,
+            bgcolor: "#f5f5f7",
+            scrollSnapAlign: "start",
+            scrollSnapStop: "always",
           }}
         >
           <Hero onNav={scrollToSection} />
@@ -186,13 +217,15 @@ function App() {
           ref={skillsRef}
           id="skills"
           sx={{
-            minHeight: "auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             bgcolor: "#ffffff",
-            py: { xs: 4, sm: 6, md: 8 }, // Responsive vertical padding
-            px: { xs: 2, sm: 3, md: 4 }, // Responsive horizontal padding
+            pt: { xs: 2, sm: 3, md: 4 },
+            pb: { xs: 1, sm: 1.5, md: 2 },
+            px: 0,
+            scrollSnapAlign: "start",
+            scrollSnapStop: "always",
           }}
         >
           <Skills />
@@ -202,34 +235,21 @@ function App() {
           ref={projectsRef}
           id="projects"
           sx={{
-            minHeight: "auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "#fff",
-            py: { xs: 4, sm: 6, md: 8 },
-            px: { xs: 2, sm: 3, md: 4 },
-            mb: 8,
+            bgcolor: "#ffffff",
+            pt: { xs: 1, sm: 1.5, md: 2 },
+            pb: { xs: 2, sm: 3, md: 4 },
+            px: 0,
+            scrollSnapAlign: "start",
+            scrollSnapStop: "always",
           }}
         >
           <Projects />
         </Box>
 
-        <Box
-          ref={aboutRef}
-          id="about"
-          sx={{
-            minHeight: "auto",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            bgcolor: "#ffffff",
-            py: 0,
-            px: { xs: 2, sm: 3, md: 4 },
-          }}
-        >
-          <AboutContact />
-        </Box>
+        <StatementSection />
       </Box>
 
       <Footer />
@@ -241,21 +261,22 @@ function App() {
           onClick={scrollToTop}
           sx={{
             position: "fixed",
-            bottom: 32,
+            bottom: 40,
             left: "50%",
             transform: "translateX(-50%)",
-            bgcolor: "#fff",
-            color: "#222",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
+            bgcolor: "#ffffff",
+            color: "#1d1d1f",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
             borderRadius: "50%",
-            transition: "all 0.2s",
-            width: 56,
-            height: 56,
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            width: 48,
+            height: 48,
             zIndex: 3000,
             "&:hover": {
-              bgcolor: "#f1f5f9",
-              color: "#1976d2",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+              bgcolor: "#f5f5f7",
+              color: "#0071e3",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+              transform: "translateX(-50%) translateY(-2px)",
             },
           }}
           aria-label="Scroll to top"
