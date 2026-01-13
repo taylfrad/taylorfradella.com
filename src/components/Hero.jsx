@@ -1,26 +1,12 @@
 import { Box, Typography, Container, Button, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 export default function Hero({ onNav }) {
-  const navigate = useNavigate();
-
   // Navigation click handler
   const handleNavClick = (sectionId) => {
     if (onNav) {
       onNav(sectionId);
-    } else {
-      // Fallback: navigate directly
-      if (sectionId === "skills") {
-        navigate("/skills");
-      } else if (sectionId === "projects") {
-        navigate("/projects");
-      } else if (sectionId === "contact" || sectionId === "footer") {
-        navigate("/contact");
-      } else {
-        navigate("/");
-      }
     }
   };
 
@@ -47,11 +33,13 @@ export default function Hero({ onNav }) {
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: { xs: "center", md: "space-between" },
           gap: { xs: 3, sm: 4, md: 6 },
           width: "100%",
           px: { xs: 2, sm: 3, md: 4 },
-          py: { xs: 8, sm: 9, md: 8 },
+          py: { xs: 0, sm: 0, md: 0 },
+          pt: { xs: 16, sm: 14, md: 0 },
+          pb: { xs: 8, sm: 6, md: 0 },
         }}
       >
         {/* Left Side - Text Content */}
@@ -61,8 +49,10 @@ export default function Hero({ onNav }) {
             display: "flex",
             flexDirection: "column",
             alignItems: { xs: "center", md: "flex-start" },
+            justifyContent: { xs: "center", md: "flex-start" },
             textAlign: { xs: "center", md: "left" },
             maxWidth: { xs: "100%", md: "50%" },
+            width: "100%",
           }}
         >
           <motion.div
@@ -118,8 +108,6 @@ export default function Hero({ onNav }) {
                 e.preventDefault();
                 if (onNav) {
                   onNav("contact");
-                } else {
-                  navigate("/contact");
                 }
               }}
               sx={{
@@ -152,7 +140,7 @@ export default function Hero({ onNav }) {
             alignItems: "center",
             justifyContent: "center",
             maxWidth: { xs: "100%", md: "50%" },
-            mt: { xs: 3, sm: 4, md: 0 },
+            mt: { xs: 2, sm: 3, md: 0 },
             width: "100%",
           }}
         >
@@ -210,8 +198,6 @@ export default function Hero({ onNav }) {
         }}
       >
         <Button
-          component={Link}
-          to="/skills"
           onClick={(e) => {
             e.preventDefault();
             handleNavClick("skills");
@@ -235,8 +221,6 @@ export default function Hero({ onNav }) {
           About
         </Button>
         <Button
-          component={Link}
-          to="/projects"
           onClick={(e) => {
             e.preventDefault();
             handleNavClick("projects");
@@ -260,8 +244,6 @@ export default function Hero({ onNav }) {
           Projects
         </Button>
         <Button
-          component={Link}
-          to="/contact"
           onClick={(e) => {
             e.preventDefault();
             handleNavClick("contact");
@@ -309,7 +291,9 @@ export default function Hero({ onNav }) {
         >
           <IconButton
             onClick={() => {
-              navigate("/skills");
+              if (onNav) {
+                onNav("skills");
+              }
             }}
             sx={{
               color: "#1d1d1f",

@@ -1,6 +1,5 @@
 import { Box, Typography, Button, Container, Link, Paper } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { useNavigate } from "react-router-dom";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -34,11 +33,32 @@ const moviePosters = {
 };
 
 export default function Projects() {
-  const navigate = useNavigate();
   const [containerRef] = useIntersectionObserver({
     threshold: 0.1,
     rootMargin: "-100px",
   });
+
+  const scrollToSection = (sectionId) => {
+    let element = null;
+    
+    if (sectionId === "hero" || sectionId === "/") {
+      element = document.getElementById("hero");
+    } else if (sectionId === "skills") {
+      element = document.getElementById("skills");
+    } else if (sectionId === "projects") {
+      element = document.getElementById("projects");
+    } else if (sectionId === "contact" || sectionId === "footer") {
+      element = document.getElementById("footer");
+    }
+
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "start",
+        inline: "nearest"
+      });
+    }
+  };
 
   const portfolioAnimation = (
     <Box
@@ -86,7 +106,7 @@ export default function Projects() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate("/skills");
+              scrollToSection("skills");
             }}
             sx={{
               color: "#1d1d1f",
@@ -112,7 +132,7 @@ export default function Projects() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate("/projects");
+              scrollToSection("projects");
             }}
             sx={{
               color: "#1d1d1f",
@@ -138,7 +158,7 @@ export default function Projects() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate("/contact");
+              scrollToSection("contact");
             }}
             sx={{
               color: "#1d1d1f",
@@ -207,7 +227,7 @@ export default function Projects() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              navigate("/contact");
+              scrollToSection("contact");
             }}
             sx={{
               bgcolor: "#e0e0e0",

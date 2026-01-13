@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { Box, IconButton } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import Hero from "./components/Hero";
@@ -11,8 +10,6 @@ import "./App.css";
 
 function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const heroRef = useRef(null);
   const skillsRef = useRef(null);
@@ -50,54 +47,31 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const path = location.pathname;
-    const scrollContainer = mainScrollRef.current || document.querySelector("main");
-    let element = null;
+  // Removed location-based scroll effect to prevent animation on page refresh
 
-    if (path === "/" || path === "/hero") {
+  const scrollToSection = (sectionId) => {
+    let element = null;
+    
+    if (sectionId === "hero" || sectionId === "/") {
       element = heroRef.current;
-    } else if (path === "/skills") {
+    } else if (sectionId === "skills") {
       element = skillsRef.current;
-    } else if (path === "/projects") {
+    } else if (sectionId === "projects") {
       element = projectsRef.current;
-    } else if (path === "/contact" || path === "/footer") {
+    } else if (sectionId === "contact" || sectionId === "footer") {
       const footerElement = document.getElementById("footer");
       if (footerElement) {
-        setTimeout(() => {
-          // Footer is outside main container, scroll window to it
-          footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 200);
+        footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
     }
 
     if (element) {
-      // Wait for DOM to be ready, then scroll window to element
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if (element) {
-            // Use scrollIntoView which works with window scrolling
-            element.scrollIntoView({ 
-              behavior: "smooth", 
-              block: "start",
-              inline: "nearest"
-            });
-          }
-        }, 100);
+      element.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "start",
+        inline: "nearest"
       });
-    }
-  }, [location]);
-
-  const scrollToSection = (sectionId) => {
-    if (sectionId === "hero" || sectionId === "/") {
-      navigate("/");
-    } else if (sectionId === "skills") {
-      navigate("/skills");
-    } else if (sectionId === "projects") {
-      navigate("/projects");
-    } else if (sectionId === "contact" || sectionId === "footer") {
-      navigate("/contact");
     }
   };
 
