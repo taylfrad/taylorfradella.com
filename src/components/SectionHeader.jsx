@@ -37,14 +37,12 @@ export default function SectionHeader({
         variant="h2"
         component="h2"
         sx={{
-          fontWeight: 800,
-          color: "#0f172a",
-          fontSize: { xs: "2.6rem", sm: "3.2rem", md: "3.8rem" },
+          fontWeight: 600,
+          color: "#1d1d1f",
+          fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
           textAlign: "center",
           letterSpacing: "-0.02em",
-          lineHeight: 1.1,
-          textShadow: "0 2px 16px rgba(31,38,135,0.08)",
-          borderRadius: "16px",
+          lineHeight: 1.05,
           px: 2,
           borderBottom: "none",
           background: "#fff",
@@ -56,12 +54,13 @@ export default function SectionHeader({
       <Box
         sx={{
           width: lineWidth,
-          height: 5,
+          height: 2,
           background: accentColor,
-          borderRadius: 2,
+          borderRadius: 1,
           mt: 1.5,
           mb: 0,
           transition: "width 0.2s",
+          opacity: 0.3,
         }}
       />
     </Box>

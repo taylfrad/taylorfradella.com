@@ -3,36 +3,6 @@ import React, { useRef, useEffect } from "react";
 import "vanta/dist/vanta.waves.min.js";
 
 export default function MiniHero() {
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
-
-  useEffect(() => {
-    let vantaEffectInstance;
-    // Check if VANTA and WAVES are available globally
-    if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
-      vantaEffectInstance = window.VANTA.WAVES({
-        el: vantaRef.current,
-        mouseControls: false,
-        touchControls: false,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
-        scale: 1.0,
-        scaleMobile: 1.0,
-        color: 0x223366,
-        shininess: 80.0,
-        waveHeight: 25.0,
-        waveSpeed: 0.6,
-        backgroundColor: 0x101522,
-      });
-    }
-    return () => {
-      if (vantaEffectInstance) {
-        vantaEffectInstance.destroy();
-      }
-    };
-  }, []);
-
   return (
     <Box
       sx={{
@@ -46,36 +16,9 @@ export default function MiniHero() {
         overflow: "hidden",
         borderRadius: 0,
         boxShadow: "none",
+        background: "#ffffff",
       }}
     >
-      {/* Vanta.js Waves Background */}
-      <Box
-        ref={vantaRef}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
-          minHeight: 200,
-          minWidth: 200,
-        }}
-      />
-      {/* Overlay for readability */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          height: "100%",
-          background: "rgba(20,24,38,0.7)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
       {/* Mini Navbar */}
       <Box
         sx={{
@@ -92,41 +35,72 @@ export default function MiniHero() {
         }}
       >
         <Typography
+          component="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setTimeout(() => {
+              const section = document.getElementById("skills");
+              if (section) {
+                section.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 100);
+          }}
           sx={{
-            color: "#fff",
-            fontWeight: 900,
-            fontSize: "0.95rem",
-            letterSpacing: 1.2,
-            textTransform: "uppercase",
+            color: "#1d1d1f",
+            fontWeight: 400,
+            fontSize: "0.75rem",
+            letterSpacing: "-0.01em",
             lineHeight: 1,
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            transition: "opacity 0.2s",
+            "&:hover": {
+              opacity: 0.6,
+            },
           }}
         >
-          Taylor Fradella
+          About
         </Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          {["Skills", "Projects", "About"].map((item) => (
-            <Typography
-              key={item}
-              sx={{
-                color: "#fff",
-                fontWeight: 400,
-                fontSize: "0.85rem",
-                letterSpacing: 0.7,
-                textTransform: "capitalize",
-                cursor: "default",
-                px: 0.2,
-                lineHeight: 1,
-                transition: "background 0.2s, border-radius 0.2s",
-                "&:hover": {
-                  background: "rgba(56,189,248,0.13)",
-                  borderRadius: 2,
+        <Box sx={{ display: "flex", gap: 1.5 }}>
+          {["Projects", "Contact"].map((item) => {
+            const sectionId = item === "Contact" ? "footer" : item.toLowerCase();
+            return (
+              <Typography
+                key={item}
+                component="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTimeout(() => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                      section.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }, 100);
+                }}
+                sx={{
+                  color: "#1d1d1f",
+                  fontWeight: 400,
+                  fontSize: "0.75rem",
+                  letterSpacing: "-0.01em",
                   cursor: "pointer",
-                },
-              }}
-            >
-              {item}
-            </Typography>
-          ))}
+                  lineHeight: 1,
+                  border: "none",
+                  background: "transparent",
+                  fontFamily: "inherit",
+                  transition: "opacity 0.2s",
+                  "&:hover": {
+                    opacity: 0.6,
+                  },
+                }}
+              >
+                {item}
+              </Typography>
+            );
+          })}
         </Box>
       </Box>
       {/* Content */}
@@ -140,79 +114,76 @@ export default function MiniHero() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          pt: 0.5,
-          pb: 1,
+          px: 2,
+          py: 1,
         }}
       >
         {/* Name */}
         <Typography
           variant="h2"
           sx={{
-            fontWeight: 900,
-            fontSize: "1.25rem",
-            lineHeight: 1.1,
-            mb: 0.7,
-            background: "linear-gradient(90deg, #f8fafc 0%, #7dd3fc 100%)",
-            backgroundClip: "text",
-            textFillColor: "transparent",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            fontWeight: 600,
+            fontSize: "1rem",
+            lineHeight: 1.05,
+            mb: 0.5,
+            color: "#1d1d1f",
             textAlign: "center",
-            borderBottom: "none",
-            paddingBottom: 0,
-            letterSpacing: 0.7,
+            letterSpacing: "-0.02em",
           }}
         >
-          Taylor Fradella
+          Hi, I'm Taylor Fradella.
         </Typography>
         {/* Subtitle */}
         <Typography
-          variant="h6"
+          variant="body2"
           sx={{
-            color: "#fff",
+            color: "#86868b",
             fontWeight: 400,
-            fontSize: "0.85rem",
+            fontSize: "0.7rem",
             textAlign: "center",
-            mb: 0.2,
+            mb: 1,
+            lineHeight: 1.4,
+            letterSpacing: "-0.01em",
           }}
         >
-          Computer Science Student
+          A computer science student passionate about building elegant & efficient software.
         </Typography>
-        {/* University */}
-        <Typography
-          variant="h6"
+        {/* Button */}
+        <Box
+          component="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Scroll directly to footer
+            setTimeout(() => {
+              const footerElement = document.getElementById("footer");
+              if (footerElement) {
+                footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, 100);
+          }}
           sx={{
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: "0.85rem",
-            textAlign: "center",
-            mb: 0.7,
+            bgcolor: "#e0e0e0",
+            color: "#222",
+            px: 1.5,
+            py: 0.5,
+            borderRadius: "8px",
+            fontSize: "0.65rem",
+            fontWeight: 500,
+            mt: 0.5,
+            border: "none",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            "&:hover": {
+              bgcolor: "#d0d0d0",
+            },
+            "&:active": {
+              bgcolor: "#c0c0c0",
+            },
           }}
         >
-          Southeastern Louisiana University
-        </Typography>
-        {/* Long Description */}
-        <Typography
-          variant="caption"
-          sx={{
-            color: "#fff",
-            fontWeight: 400,
-            fontSize: "0.6rem",
-            lineHeight: 0.95,
-            maxWidth: 300,
-            textAlign: "center",
-            mx: "auto",
-            mb: 0,
-          }}
-        >
-          Aspiring software engineer and curious builder. I've created some
-          awesome projects in school, but now I'm ready to take what I've
-          learned and put it to the test in the real world. I'm passionate about
-          understanding how things work and finding ways to make them better —
-          through clean code, thoughtful design, and real problem-solving. I
-          love where creativity meets technology, and I'm always looking to grow
-          and create something meaningful.
-        </Typography>
+          Get in Touch
+        </Box>
       </Box>
     </Box>
   );
