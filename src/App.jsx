@@ -65,13 +65,14 @@ function App() {
       if (footerElement) {
         setTimeout(() => {
           if (scrollContainer) {
-            footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
+            const targetY = footerElement.offsetTop - 80;
+            scrollContainer.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
           } else {
             const yOffset = -80;
             const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({ top: y, behavior: "smooth" });
           }
-        }, 150);
+        }, 100);
         return;
       }
     }
@@ -79,13 +80,14 @@ function App() {
     if (element) {
       setTimeout(() => {
         if (scrollContainer) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
+          const targetY = element.offsetTop - 80;
+          scrollContainer.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
         } else {
           const yOffset = -80;
           const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: "smooth" });
         }
-      }, 150);
+      }, 100);
     }
   }, [location]);
 
