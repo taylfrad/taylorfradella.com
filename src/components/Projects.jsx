@@ -1858,7 +1858,6 @@ export default function Projects() {
                         width: { xs: "100%", sm: "90%", md: 460 },
                         height: { xs: "auto", sm: "280px", md: 360 },
                         minHeight: { xs: "200px", sm: "280px", md: 360 },
-                        maxWidth: "100%",
                         flexShrink: 0,
                         mb: { xs: 3, sm: 3, md: 0 },
                         display: "flex",
