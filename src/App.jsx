@@ -51,6 +51,7 @@ function App() {
 
   useEffect(() => {
     const path = location.pathname;
+    const scrollContainer = document.querySelector("main");
     let element = null;
 
     if (path === "/" || path === "/hero") {
@@ -63,9 +64,17 @@ function App() {
       const footerElement = document.getElementById("footer");
       if (footerElement) {
         setTimeout(() => {
-          const yOffset = -80;
-          const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({ top: y, behavior: "smooth" });
+          if (scrollContainer) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const footerRect = footerElement.getBoundingClientRect();
+            const scrollTop = scrollContainer.scrollTop;
+            const targetY = scrollTop + footerRect.top - containerRect.top - 80;
+            scrollContainer.scrollTo({ top: targetY, behavior: "smooth" });
+          } else {
+            const yOffset = -80;
+            const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: "smooth" });
+          }
         }, 100);
         return;
       }
@@ -73,9 +82,17 @@ function App() {
 
     if (element) {
       setTimeout(() => {
-        const yOffset = -80;
-        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
+        if (scrollContainer) {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const scrollTop = scrollContainer.scrollTop;
+          const targetY = scrollTop + elementRect.top - containerRect.top - 80;
+          scrollContainer.scrollTo({ top: targetY, behavior: "smooth" });
+        } else {
+          const yOffset = -80;
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
       }, 100);
     }
   }, [location]);
