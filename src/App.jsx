@@ -65,8 +65,13 @@ function App() {
       if (footerElement) {
         setTimeout(() => {
           if (scrollContainer) {
-            const targetY = footerElement.offsetTop - 80;
-            scrollContainer.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+            let offsetTop = 0;
+            let currentElement = footerElement;
+            while (currentElement && currentElement !== scrollContainer) {
+              offsetTop += currentElement.offsetTop;
+              currentElement = currentElement.offsetParent;
+            }
+            scrollContainer.scrollTo({ top: Math.max(0, offsetTop - 80), behavior: "smooth" });
           } else {
             const yOffset = -80;
             const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -80,8 +85,13 @@ function App() {
     if (element) {
       setTimeout(() => {
         if (scrollContainer) {
-          const targetY = element.offsetTop - 80;
-          scrollContainer.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+          let offsetTop = 0;
+          let currentElement = element;
+          while (currentElement && currentElement !== scrollContainer) {
+            offsetTop += currentElement.offsetTop;
+            currentElement = currentElement.offsetParent;
+          }
+          scrollContainer.scrollTo({ top: Math.max(0, offsetTop - 80), behavior: "smooth" });
         } else {
           const yOffset = -80;
           const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
