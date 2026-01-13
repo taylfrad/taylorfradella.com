@@ -1,508 +1,330 @@
-import { Box, Typography, Container, Link, Button } from "@mui/material";
+import { Box, Typography, Container, Button, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import MenuIcon from "@mui/icons-material/Menu";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
-import React, { useRef, useEffect, useState } from "react";
-import {
-  motion,
-  useAnimation,
-  useInView,
-  useScroll,
-  useTransform,
-} from "framer-motion";
-import "vanta/dist/vanta.waves.min.js";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function Hero({ onNav }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const vantaRef = useRef(null);
-  const vantaEffect = useRef(null);
-  const heroTextRef = useRef(null);
-  const isInView = useInView(heroTextRef, { once: true, margin: "-100px" });
-  const controls = useAnimation();
-  const { scrollY } = useScroll();
-  const scale = useTransform(scrollY, [0, 300], [1, 1.05]);
-  const y = useTransform(scrollY, [0, 300], [0, 40]);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  // Typing animation state for the name
-  const fullName = "Taylor Fradella";
-  const [typedName, setTypedName] = useState("");
-  const [typingDone, setTypingDone] = useState(false);
-
-  useEffect(() => {
-    let timeout;
-    if (!typingDone && typedName.length < fullName.length) {
-      timeout = setTimeout(() => {
-        setTypedName(fullName.slice(0, typedName.length + 1));
-      }, 90);
-    } else if (typedName.length === fullName.length) {
-      setTypingDone(true);
-    }
-    return () => clearTimeout(timeout);
-  }, [typedName, typingDone, fullName]);
+  const navigate = useNavigate();
 
   // Navigation click handler
   const handleNavClick = (sectionId) => {
-    const section = document.getElementById(sectionId);
-    if (onNav) onNav(sectionId);
-  };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-  const handleMenuNavClick = (sectionId) => {
-    handleMenuClose();
-    setTimeout(() => {
-      handleNavClick(sectionId);
-    }, 100); // Delay to allow menu to close before scrolling
-  };
-
-  // Vanta.js Waves effect setup
-  useEffect(() => {
-    let vantaEffectInstance;
-    // Check if VANTA and WAVES are available globally
-    if (vantaRef.current && window.VANTA && window.VANTA.WAVES) {
-      vantaEffectInstance = window.VANTA.WAVES({
-        el: vantaRef.current,
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
-        scale: 1.0,
-        scaleMobile: 1.0,
-        color: 0x223366, // Darker blue
-        shininess: 80.0, // More metallic
-        waveHeight: 25.0, // Taller waves
-        waveSpeed: 0.6, // Slightly faster
-        backgroundColor: 0x101522, // Even deeper navy background
-      });
-    }
-    return () => {
-      if (vantaEffectInstance) {
-        vantaEffectInstance.destroy();
+    if (onNav) {
+      onNav(sectionId);
+    } else {
+      // Fallback: navigate directly
+      if (sectionId === "skills") {
+        navigate("/skills");
+      } else if (sectionId === "projects") {
+        navigate("/projects");
+      } else if (sectionId === "contact" || sectionId === "footer") {
+        navigate("/contact");
+      } else {
+        navigate("/");
       }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
     }
-  }, [isInView, controls]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.18,
-      },
-    },
-  };
-  const itemVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.9, ease: "easeOut" },
-    },
   };
 
   return (
     <Box
       sx={{
+        width: "100%",
+        height: "100%",
         minHeight: "100vh",
-        width: "100vw",
         position: "relative",
-        overflow: "hidden",
-        marginLeft: "calc(50% - 50vw)",
-        marginRight: "calc(50% - 50vw)",
+        bgcolor: "#f5f5f7",
+        display: "flex",
+        flexDirection: "column",
+        px: 0,
+        py: 0,
+        overflow: "visible",
       }}
     >
-      {/* Vanta.js background (minimal container) */}
-      <div
-        id="vanta-waves-bg"
-        ref={vantaRef}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          height: "100vh",
-          minHeight: 400,
-          minWidth: 400,
-          zIndex: 0,
-          display: "block",
-        }}
-      >
-        <div style={{ display: "none" }} /> {/* Dummy child for Vanta Net */}
-      </div>
-      {/* Overlay for readability */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          width: "100%",
-          height: "100vh",
-          background: "rgba(20,24,38,0.7)",
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Foreground content */}
-      <Box
+      {/* Main Content - Two Column Layout */}
+      <Container
+        maxWidth="lg"
         sx={{
-          minHeight: "100vh",
+          flex: 1,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: { xs: "column", md: "row" },
           alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          zIndex: 2,
-          width: "100vw",
+          justifyContent: "space-between",
+          gap: { xs: 3, sm: 4, md: 6 },
+          width: "100%",
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 8, sm: 9, md: 8 },
         }}
       >
-        {/* Name positioned at far left (hide on mobile) */}
-        {!isMobile && (
-          <Typography
-            variant="h4"
-            sx={{
-              color: "white",
-              fontWeight: 700,
-              fontSize: "2rem",
-              position: "absolute",
-              top: 20,
-              left: 150,
-              zIndex: 10,
-            }}
-          >
-            TAYLOR FRADELLA
-          </Typography>
-        )}
-
-        {/* Navigation for desktop */}
-        {!isMobile && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 20,
-              right: 150,
-              display: "flex",
-              gap: 2,
-              zIndex: 10,
-            }}
-          >
-            <Button
-              component="a"
-              href="#skills"
-              sx={{ color: "white", textTransform: "none", fontSize: "1rem" }}
-            >
-              Skills
-            </Button>
-            <Button
-              component="a"
-              href="#projects"
-              sx={{ color: "white", textTransform: "none", fontSize: "1rem" }}
-            >
-              Projects
-            </Button>
-            <Button
-              component="a"
-              href="#about"
-              sx={{ color: "white", textTransform: "none", fontSize: "1rem" }}
-            >
-              About
-            </Button>
-          </Box>
-        )}
-
-        {/* Hamburger menu for mobile */}
-        {isMobile && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 20,
-              right: 20,
-              zIndex: 20,
-            }}
-          >
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMenuOpen}
-              sx={{ color: "white" }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <MenuItem component="a" href="#skills" onClick={handleMenuClose}>
-                Skills
-              </MenuItem>
-              <MenuItem
-                component="a"
-                href="#projects"
-                onClick={handleMenuClose}
-              >
-                Projects
-              </MenuItem>
-              <MenuItem component="a" href="#about" onClick={handleMenuClose}>
-                About
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
-
-        <Container
-          maxWidth="lg"
+        {/* Left Side - Text Content */}
+        <Box
           sx={{
+            flex: 1,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100vw",
-            textAlign: "center",
-          }}
-        >
-          <Box
-            ref={heroTextRef}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              width: "100%",
-              maxWidth: 800,
-              pt: { xs: 10, md: 0 },
-              position: "relative",
-            }}
-          >
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate={controls}
-              style={{ scale, y }}
-            >
-              <motion.div variants={itemVariants}>
-                <Typography
-                  variant="h2"
-                  component="h1"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "3.5rem", sm: "4.5rem", md: "5rem" },
-                    lineHeight: 1.2,
-                    mb: 2,
-                    background:
-                      "linear-gradient(90deg, #f8fafc 0%, #7dd3fc 100%)",
-                    backgroundClip: "text",
-                    textFillColor: "transparent",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    width: "100%",
-                    textAlign: "center",
-                    borderBottom: "none",
-                    paddingBottom: 0,
-                  }}
-                >
-                  {typedName}
-                  {!typingDone && typedName.length < fullName.length && (
-                    <motion.span
-                      initial={{ opacity: 1 }}
-                      animate={{ opacity: [1, 0, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.8 }}
-                      style={{
-                        display: "inline-block",
-                        width: "1ch",
-                        color: "#7dd3fc",
-                      }}
-                    >
-                      |
-                    </motion.span>
-                  )}
-                </Typography>
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <Typography
-                  variant="h4"
-                  component="h2"
-                  sx={{
-                    color: "rgba(255, 255, 255, 0.9)",
-                    fontWeight: 400,
-                    fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
-                    letterSpacing: "0.01em",
-                    textAlign: "center",
-                    width: "100%",
-                  }}
-                >
-                  Computer Science Student
-                </Typography>
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <Typography
-                  variant="h5"
-                  component="h3"
-                  sx={{
-                    mb: 3.5,
-                    color: "rgba(255, 255, 255, 0.85)",
-                    fontWeight: 400,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box
-                    component="span"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mt: 0.5,
-                      mb: 0.5,
-                    }}
-                  >
-                    <Link
-                      href="https://www.southeastern.edu/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      underline="none"
-                      sx={{
-                        color: "white",
-                        fontWeight: 600,
-                        fontSize: "1.15em",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        transition: "color 0.3s ease",
-                        "&:hover": {
-                          color: "primary.light",
-                        },
-                      }}
-                    >
-                      Southeastern Louisiana University
-                    </Link>
-                  </Box>
-                </Typography>
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <Typography
-                  variant="body1"
-                  component="div"
-                  sx={{
-                    mb: 4,
-                    color: "rgba(255,255,255,0.85)",
-                    fontWeight: 400,
-                    fontSize: { xs: "1.1rem", sm: "1.2rem" },
-                    lineHeight: 1.7,
-                    maxWidth: "650px",
-                    textAlign: "center",
-                    mx: "auto",
-                  }}
-                >
-                  Aspiring software engineer and curious builder. I've created
-                  some awesome projects in school, but now I'm ready to take
-                  what I've learned and put it to the test in the real world.
-                  I'm passionate about understanding how things work and finding
-                  ways to make them better — through clean code, thoughtful
-                  design, and real problem-solving. I love where creativity
-                  meets technology, and I'm always looking to grow and create
-                  something meaningful.
-                </Typography>
-              </motion.div>
-            </motion.div>
-          </Box>
-        </Container>
-        {/* Down arrow with framer motion bounce (moved outside inner Box/Container) */}
-        <a
-          href="#skills"
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            bottom: 40,
-            zIndex: 1000,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            alignItems: { xs: "center", md: "flex-start" },
+            textAlign: { xs: "center", md: "left" },
+            maxWidth: { xs: "100%", md: "50%" },
           }}
         >
           <motion.div
-            initial={{ y: 0 }}
-            animate={{ y: [0, -18, 0] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <KeyboardArrowDownIcon
+            <Typography
+              variant="h1"
+              component="h1"
               sx={{
-                color: "primary.light",
-                fontSize: "3.5rem",
+                fontWeight: 600,
+                fontSize: { xs: "2.25rem", sm: "3rem", md: "4rem", lg: "5rem" },
+                lineHeight: 1.05,
+                letterSpacing: "-0.03em",
+                mb: 2,
+                color: "#1d1d1f",
               }}
-            />
+            >
+              Hi, I'm Taylor Fradella.
+            </Typography>
           </motion.div>
-        </a>
-      </Box>
-      {showScrollTop && (
-        <IconButton
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{
+                color: "#86868b",
+                fontWeight: 400,
+                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "1.625rem" },
+                mb: 4,
+                lineHeight: 1.47059,
+                letterSpacing: "-0.016em",
+              }}
+            >
+              Designing and engineering thoughtful digital experiences.
+            </Typography>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <Button
+              variant="contained"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onNav) {
+                  onNav("contact");
+                } else {
+                  navigate("/contact");
+                }
+              }}
+              sx={{
+                bgcolor: "#e0e0e0",
+                color: "#222",
+                textTransform: "none",
+                fontSize: { xs: "0.9rem", md: "1rem" },
+                fontWeight: 500,
+                px: { xs: 2.5, md: 3.5 },
+                py: { xs: 1.25, md: 1.75 },
+                borderRadius: "8px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                border: "1px solid #d0d0d0",
+                "&:hover": {
+                  bgcolor: "#d0d0d0",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                },
+              }}
+            >
+              Get in Touch
+            </Button>
+          </motion.div>
+        </Box>
+
+        {/* Right Side - MacBook Mockup */}
+        <Box
           sx={{
-            position: "fixed",
-            bottom: 32,
-            right: 32,
-            bgcolor: "#fff",
-            color: "#222",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.12)",
-            borderRadius: "50%",
-            zIndex: 2000,
-            transition: "all 0.2s",
-            "&:hover": {
-              bgcolor: "#f1f5f9",
-              color: "#1976d2",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
-            },
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            maxWidth: { xs: "100%", md: "50%" },
+            mt: { xs: 3, sm: 4, md: 0 },
+            width: "100%",
           }}
-          aria-label="Scroll to top"
         >
-          <KeyboardArrowUpIcon fontSize="Large" />
-        </IconButton>
-      )}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ width: "100%", maxWidth: "1000px" }}
+          >
+            {/* Device Mockup - Screen Inside Frame */}
+            <Box
+              sx={{
+                position: "relative",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {/* Device Frame Image */}
+              <Box
+                component="img"
+                src="/macbook-frame.png"
+                alt="MacBook Pro"
+                sx={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: { xs: "350px", sm: "500px", md: "750px" },
+                  maxWidth: { xs: "100%", sm: "95%", md: "100%" },
+                  display: "block",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.06))",
+                  zIndex: 2,
+                  position: "relative",
+                }}
+              />
+
+            </Box>
+          </motion.div>
+        </Box>
+      </Container>
+
+      {/* Navigation - Top Left - Only visible on hero page */}
+      <Box
+        component="nav"
+        sx={{
+          position: "absolute",
+          top: { xs: "16px", sm: "20px", md: "24px" },
+          left: { xs: "16px", sm: "32px", md: "48px" },
+          display: "flex",
+          gap: { xs: 2, sm: 3, md: 4 },
+          zIndex: 1000,
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        <Button
+          component={Link}
+          to="/skills"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick("skills");
+          }}
+            sx={{
+              color: "#1d1d1f",
+              textTransform: "none",
+              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontWeight: 500,
+              letterSpacing: "-0.01em",
+              px: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1, md: 1.25 },
+              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              transition: "opacity 0.2s ease",
+              "&:hover": {
+                opacity: 0.6,
+                bgcolor: "transparent",
+              },
+            }}
+        >
+          About
+        </Button>
+        <Button
+          component={Link}
+          to="/projects"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick("projects");
+          }}
+            sx={{
+              color: "#1d1d1f",
+              textTransform: "none",
+              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontWeight: 500,
+              letterSpacing: "-0.01em",
+              px: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1, md: 1.25 },
+              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              transition: "opacity 0.2s ease",
+              "&:hover": {
+                opacity: 0.6,
+                bgcolor: "transparent",
+              },
+            }}
+        >
+          Projects
+        </Button>
+        <Button
+          component={Link}
+          to="/contact"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick("contact");
+          }}
+            sx={{
+              color: "#1d1d1f",
+              textTransform: "none",
+              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontWeight: 500,
+              letterSpacing: "-0.01em",
+              px: { xs: 1.5, sm: 2, md: 2.5 },
+              py: { xs: 0.75, sm: 1, md: 1.25 },
+              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              transition: "opacity 0.2s ease",
+              "&:hover": {
+                opacity: 0.6,
+                bgcolor: "transparent",
+              },
+            }}
+        >
+          Contact
+        </Button>
+      </Box>
+
+      {/* Bouncing Down Arrow - Only visible on hero page */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: { xs: 3, sm: 4, md: 5 },
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 1000,
+          margin: 0,
+        }}
+      >
+        <motion.div
+          animate={{
+            y: [0, 8, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <IconButton
+            onClick={() => {
+              navigate("/skills");
+            }}
+            sx={{
+              color: "#1d1d1f",
+              opacity: 0.6,
+              "&:hover": {
+                opacity: 1,
+                bgcolor: "rgba(0,0,0,0.05)",
+              },
+            }}
+            aria-label="Scroll down"
+          >
+            <KeyboardArrowDownIcon sx={{ fontSize: { xs: "36px", md: "40px" } }} />
+          </IconButton>
+        </motion.div>
+      </Box>
     </Box>
   );
 }

@@ -1,30 +1,11 @@
-// src/components/Projects.jsx
-import { useTheme } from "@mui/material/styles";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  Grid,
-  Chip,
-  Container,
-  CardMedia,
-  CardActions,
-  Link,
-  Paper,
-} from "@mui/material";
+import { Box, Typography, Button, Container, Link, Paper } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useNavigate } from "react-router-dom";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
-import { useRef, useEffect, useState } from "react";
-import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import SectionHeader from "./SectionHeader";
-import Hero from "./Hero";
-import MiniHero from "./MiniHero";
 
-// Move this to the very top of the file, before any imports or usage
 const moviePosters = {
   Interstellar:
     "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/bzONet3OeCTz5q9WOkGjVpOHMSR.jpg",
@@ -53,101 +34,12 @@ const moviePosters = {
 };
 
 export default function Projects() {
-  const theme = useTheme();
-  const [containerRef, isVisible] = useIntersectionObserver({
+  const navigate = useNavigate();
+  const [containerRef] = useIntersectionObserver({
     threshold: 0.1,
     rootMargin: "-100px",
   });
-  const controls = useAnimation();
 
-  useEffect(() => {
-    if (isVisible) {
-      controls.start("visible");
-    } else {
-      controls.start("hidden");
-    }
-  }, [isVisible, controls]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        when: "beforeChildren",
-      },
-    },
-  };
-  const itemVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.7,
-        ease: [0.23, 1, 0.32, 1],
-      },
-    },
-  };
-
-  // Function to get URLs for technology links
-  const getTechUrl = (techName) => {
-    const techUrls = {
-      React: "https://reactjs.org/",
-      "Material UI": "https://mui.com/",
-      CSS: "https://developer.mozilla.org/en-US/docs/Web/CSS",
-      "Responsive Design":
-        "https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design",
-      SQL: "https://azure.microsoft.com/en-us/products/azure-sql/database",
-      "React Native": "https://reactnative.dev/",
-      Expo: "https://expo.dev/",
-      "Node.js": "https://nodejs.org/",
-      Python: "https://www.python.org/",
-      "Raspberry Pi": "https://www.raspberrypi.org/",
-      "Dexcom API": "https://developer.dexcom.com/",
-      "AI Integration": "https://openai.com/blog/chatgpt",
-      Grok: "https://grok.x.ai/",
-    };
-
-    return techUrls[techName] || "#";
-  };
-
-  // Get the devicon class for each technology
-  const getTechIconClass = (techName) => {
-    const techIcons = {
-      React: "devicon-react-plain colored",
-      "Material UI": "devicon-materialui-plain colored",
-      CSS: "devicon-css3-plain colored",
-      "Responsive Design": "devicon-html5-plain colored",
-      SQL: "devicon-microsoftsqlserver-plain colored",
-      "React Native": "devicon-react-plain colored",
-      Expo: "devicon-react-plain colored", // No specific Expo icon in Devicon
-      "Node.js": "devicon-nodejs-plain colored",
-      Python: "devicon-python-plain colored",
-      "Raspberry Pi": "devicon-raspberrypi-plain colored",
-      "Dexcom API": "devicon-javascript-plain colored", // Using JS icon as placeholder
-      "AI Integration": "devicon-python-plain colored", // Using Python as placeholder
-      Grok: "devicon-tensorflow-original colored", // Using TensorFlow as placeholder
-    };
-
-    return techIcons[techName] || "devicon-github-plain colored"; // Default to github icon if not found
-  };
-
-  // Custom component for Devicon in tech chips
-  const DeviconWrapper = ({ iconClass }) => (
-    <i
-      className={iconClass}
-      style={{
-        fontSize: "18px",
-        marginRight: "6px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    />
-  );
-
-  // Portfolio Website Animation
   const portfolioAnimation = (
     <Box
       sx={{
@@ -156,98 +48,220 @@ export default function Projects() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #101522 0%, #223366 100%)",
+        background: "#ffffff",
         overflow: "hidden",
         position: "relative",
-        minHeight: "250px",
+        minHeight: { xs: "200px", sm: "230px", md: "250px" },
       }}
     >
-      {/* Browser window frame */}
+      {/* Hero Section Content - Direct, no browser frame */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "90%", md: 420 },
-          height: { xs: 320, md: 340 },
-          border: `3px solid ${theme.palette.primary.light}`,
-          borderRadius: "14px",
-          background: theme.palette.primary.dark,
+          width: { xs: "95%", sm: "90%", md: "85%" },
+          height: "100%",
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: "center",
+          justifyContent: "space-between",
           overflow: "hidden",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          background: "#ffffff",
+          p: { xs: 1, sm: 1.5, md: 2 },
+          maxWidth: "100%",
         }}
       >
-        {/* Browser header */}
+        {/* Navigation - Absolute positioned at top */}
         <Box
           sx={{
-            height: "32px",
-            width: "100%",
-            background: theme.palette.primary.main,
+            position: "absolute",
+            top: { xs: "8px", sm: "10px", md: "12px" },
+            left: { xs: "2px", sm: "2px", md: "4px" },
             display: "flex",
-            alignItems: "center",
-            padding: "0 12px",
-            zIndex: 2,
+            gap: { xs: 1, sm: 1.25, md: 1.5 },
+            zIndex: 10,
           }}
         >
-          {/* Browser controls */}
-          <Box sx={{ display: "flex", gap: "6px" }}>
-            {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: "11px",
-                  height: "11px",
-                  borderRadius: "50%",
-                  background: color,
-                }}
-              />
-            ))}
-          </Box>
-          {/* URL bar */}
-          <Box
+          <Typography
+            component="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/skills");
+            }}
             sx={{
-              flex: 1,
-              height: "18px",
-              margin: "0 12px",
-              background: theme.palette.primary.light,
-              borderRadius: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              color: "#1d1d1f",
+              fontSize: { xs: "8px", sm: "9px" },
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              padding: { xs: "2px 4px", sm: 0 },
+              minHeight: { xs: "24px", sm: "auto" },
+              transition: "opacity 0.2s",
+              "&:hover": {
+                opacity: 0.6,
+              },
             }}
           >
-            <Typography
-              variant="caption"
-              sx={{ fontSize: "10px", color: theme.palette.text.secondary }}
-            >
-              taylorfradella.com
-            </Typography>
-          </Box>
+            About
+          </Typography>
+          <Typography
+            component="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/projects");
+            }}
+            sx={{
+              color: "#1d1d1f",
+              fontSize: { xs: "8px", sm: "9px" },
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              padding: { xs: "2px 4px", sm: 0 },
+              minHeight: { xs: "24px", sm: "auto" },
+              transition: "opacity 0.2s",
+              "&:hover": {
+                opacity: 0.6,
+              },
+            }}
+          >
+            Projects
+          </Typography>
+          <Typography
+            component="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/contact");
+            }}
+            sx={{
+              color: "#1d1d1f",
+              fontSize: { xs: "8px", sm: "9px" },
+              fontWeight: 400,
+              letterSpacing: "-0.01em",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              padding: { xs: "2px 4px", sm: 0 },
+              minHeight: { xs: "24px", sm: "auto" },
+              transition: "opacity 0.2s",
+              "&:hover": {
+                opacity: 0.6,
+              },
+            }}
+          >
+            Contact
+          </Typography>
         </Box>
-        {/* Scaled down Hero component replaced with MiniHero */}
+
+        {/* Left Side - Text Content */}
         <Box
           sx={{
-            position: "relative",
-            width: "100%",
-            height: "calc(100% - 32px)",
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            pr: 1.5,
+            mt: 3,
+          }}
+        >
+          {/* Heading */}
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "12px", sm: "14px", md: "16px", lg: "18px" },
+              lineHeight: 1.05,
+              letterSpacing: "-0.02em",
+              mb: { xs: 0.75, sm: 1 },
+              color: "#1d1d1f",
+            }}
+          >
+            Hi, I'm Taylor Fradella.
+          </Typography>
+
+          {/* Subtitle */}
+          <Typography
+            sx={{
+              color: "#86868b",
+              fontWeight: 400,
+              fontSize: { xs: "8px", sm: "9px", md: "10px" },
+              mb: { xs: 1.5, sm: 2 },
+              lineHeight: 1.4,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Designing and engineering thoughtful digital experiences.
+          </Typography>
+
+          {/* Button */}
+          <Box
+            component="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate("/contact");
+            }}
+            sx={{
+              bgcolor: "#e0e0e0",
+              color: "#222",
+              px: { xs: 1, sm: 1.25, md: 1.5 },
+              py: { xs: 0.375, sm: 0.5 },
+              borderRadius: "8px",
+              fontSize: { xs: "8px", sm: "9px" },
+              fontWeight: 500,
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              minHeight: { xs: "28px", sm: "32px" },
+              transition: "background-color 0.2s",
+              "&:hover": {
+                bgcolor: "#d0d0d0",
+              },
+            }}
+          >
+            Get in Touch
+          </Box>
+        </Box>
+
+        {/* Right Side - MacBook */}
+        <Box
+          sx={{
+            flex: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            overflow: "hidden",
-            background: theme.palette.primary.dark,
           }}
         >
-          <MiniHero />
+          <Box
+            component="img"
+            src="/macbook-frame.png"
+            alt="MacBook"
+            sx={{
+              width: "100%",
+              maxWidth: { xs: "150px", sm: "175px", md: "200px" },
+              height: "auto",
+              objectFit: "contain",
+            }}
+          />
         </Box>
       </Box>
     </Box>
   );
 
-  // Lions Den Cinemas Animation
   const lionsTheaterAnimation = (
     <Box
       sx={{
         width: "100%",
         height: "100%",
-        minHeight: 250,
+        minHeight: { xs: 200, sm: 230, md: 250 },
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -260,12 +274,13 @@ export default function Projects() {
       <Box
         sx={{
           position: "relative",
-          width: { xs: "60vw", md: "420px" },
-          maxWidth: "600px",
-          minWidth: "320px",
-          height: { xs: "60vw", md: "340px" },
-          maxHeight: "420px",
-          minHeight: "240px",
+          width: { xs: "90%", sm: "75%", md: "420px" },
+          maxWidth: { xs: "100%", sm: "500px", md: "600px" },
+          minWidth: { xs: "260px", sm: "300px", md: "320px" },
+          height: { xs: "auto", sm: "280px", md: "340px" },
+          maxHeight: { xs: "380px", sm: "380px", md: "420px" },
+          minHeight: { xs: "180px", sm: "220px", md: "240px" },
+          aspectRatio: { xs: "16/10", sm: "auto" },
           background: "#000",
           borderRadius: "16px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
@@ -279,20 +294,20 @@ export default function Projects() {
         {/* Browser Header */}
         <Box
           sx={{
-            height: "28px",
+            height: { xs: "24px", sm: "26px", md: "28px" },
             background: "#1a0000",
             display: "flex",
             alignItems: "center",
-            padding: "0 10px",
-            gap: "6px",
+            padding: { xs: "0 8px", sm: "0 9px", md: "0 10px" },
+            gap: { xs: "4px", sm: "5px", md: "6px" },
           }}
         >
           {["#ff5f57", "#febc2e", "#28c840"].map((color, i) => (
             <Box
               key={i}
               sx={{
-                width: "8px",
-                height: "8px",
+                width: { xs: "6px", sm: "7px", md: "8px" },
+                height: { xs: "6px", sm: "7px", md: "8px" },
                 borderRadius: "50%",
                 background: color,
               }}
@@ -312,7 +327,10 @@ export default function Projects() {
           >
             <Typography
               variant="caption"
-              sx={{ fontSize: "8px", color: "rgba(255,255,255,0.6)" }}
+              sx={{
+                fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
+                color: "rgba(255,255,255,0.6)",
+              }}
             >
               lionsdencinemas.com
             </Typography>
@@ -322,8 +340,16 @@ export default function Projects() {
         {/* Website Content with animated scroll */}
         <Box
           sx={{
-            height: "calc(100% - 28px)",
-            padding: "12px 10px 10px 10px",
+            height: {
+              xs: "calc(100% - 24px)",
+              sm: "calc(100% - 26px)",
+              md: "calc(100% - 28px)",
+            },
+            padding: {
+              xs: "8px 6px 6px 6px",
+              sm: "10px 8px 8px 8px",
+              md: "12px 10px 10px 10px",
+            },
             background: "#000",
             display: "flex",
             flexDirection: "column",
@@ -338,7 +364,11 @@ export default function Projects() {
             sx={{
               display: "flex",
               gap: "12px",
-              padding: "4px 0 8px 0",
+              padding: {
+                xs: "3px 0 6px 0",
+                sm: "3.5px 0 7px 0",
+                md: "4px 0 8px 0",
+              },
               borderBottom: "1px solid rgba(255,0,0,0.15)",
             }}
           >
@@ -346,7 +376,7 @@ export default function Projects() {
               <Typography
                 key={i}
                 sx={{
-                  fontSize: "9px",
+                  fontSize: { xs: "7.5px", sm: "8.5px", md: "9px" },
                   color: i === 0 ? "#ff0000" : "rgba(255,255,255,0.7)",
                   fontWeight: i === 0 ? "bold" : "normal",
                   letterSpacing: 0.5,
@@ -360,12 +390,12 @@ export default function Projects() {
           {/* Featured Movie */}
           <Box
             sx={{
-              height: "38%",
+              height: { xs: "32%", sm: "35%", md: "38%" },
               background: "linear-gradient(45deg, #1a0000, #330000)",
-              borderRadius: "5px",
-              padding: "8px 10px",
+              borderRadius: { xs: "3px", sm: "4px", md: "5px" },
+              padding: { xs: "4px 6px", sm: "6px 8px", md: "8px 10px" },
               display: "flex",
-              gap: "10px",
+              gap: { xs: "6px", sm: "8px", md: "10px" },
               alignItems: "center",
             }}
           >
@@ -374,31 +404,36 @@ export default function Projects() {
               src={moviePosters["Dumbo (1941)"]}
               alt="Dumbo (1941) poster"
               sx={{
-                width: 44,
-                height: 62,
+                width: { xs: 36, sm: 40, md: 44 },
+                height: { xs: 50, sm: 56, md: 62 },
                 objectFit: "cover",
                 borderRadius: "4px",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
                 background: "rgba(255,0,0,0.1)",
-                mr: 2,
+                mr: { xs: 1.5, sm: 1.75, md: 2 },
+                flexShrink: 0,
               }}
             />
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 sx={{
-                  fontSize: "11px",
+                  fontSize: { xs: "8px", sm: "9.5px", md: "11px" },
                   color: "#fff",
                   fontWeight: "bold",
                   marginBottom: "2px",
+                  lineHeight: 1.2,
                 }}
+                noWrap
               >
                 Dumbo (1941)
               </Typography>
               <Typography
                 sx={{
-                  fontSize: "8px",
+                  fontSize: { xs: "6.5px", sm: "7px", md: "8px" },
                   color: "rgba(255,255,255,0.7)",
+                  lineHeight: 1.2,
                 }}
+                noWrap
               >
                 Now Showing - Disney Classic
               </Typography>
@@ -421,7 +456,7 @@ export default function Projects() {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "7px",
+                gap: { xs: "4px", sm: "5.5px", md: "7px" },
                 position: "relative",
                 width: "100%",
               }}
@@ -473,7 +508,7 @@ export default function Projects() {
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       sx={{
-                        fontSize: "8px",
+                        fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
                         color: "#fff",
                         fontWeight: "bold",
                       }}
@@ -482,7 +517,7 @@ export default function Projects() {
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: "7px",
+                        fontSize: { xs: "6px", sm: "6.5px", md: "7px" },
                         color: "rgba(255,255,255,0.7)",
                       }}
                     >
@@ -538,7 +573,7 @@ export default function Projects() {
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       sx={{
-                        fontSize: "8px",
+                        fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
                         color: "#fff",
                         fontWeight: "bold",
                       }}
@@ -547,7 +582,7 @@ export default function Projects() {
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: "7px",
+                        fontSize: { xs: "6px", sm: "6.5px", md: "7px" },
                         color: "rgba(255,255,255,0.7)",
                       }}
                     >
@@ -568,12 +603,12 @@ export default function Projects() {
           right: { xs: "8vw", md: "calc(18% - 30px)" },
           top: { xs: "50%", md: "50%" },
           transform: "translateY(-50%)",
-          width: { xs: "28vw", md: "160px" },
-          maxWidth: "220px",
-          minWidth: "110px",
-          height: { xs: "60vw", md: "340px" },
-          maxHeight: "420px",
-          minHeight: "240px",
+          width: { xs: "140px", sm: "150px", md: "160px" },
+          maxWidth: { xs: "180px", sm: "200px", md: "220px" },
+          minWidth: { xs: "100px", sm: "110px" },
+          height: { xs: "280px", sm: "300px", md: "340px" },
+          maxHeight: { xs: "400px", sm: "380px", md: "420px" },
+          minHeight: { xs: "200px", sm: "240px", md: "240px" },
           background: "#111",
           borderRadius: "38px",
           boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
@@ -598,7 +633,7 @@ export default function Projects() {
         >
           <Typography
             sx={{
-              fontSize: "11px",
+              fontSize: { xs: "9px", sm: "10px", md: "11px" },
               color: "#fff",
               fontWeight: "bold",
               letterSpacing: 1,
@@ -675,18 +710,18 @@ export default function Projects() {
                   }
                   alt={movie.title + " poster"}
                   sx={{
-                    width: 26,
-                    height: 36,
+                    width: { xs: 22, sm: 24, md: 26 },
+                    height: { xs: 30, sm: 33, md: 36 },
                     objectFit: "cover",
                     borderRadius: "2.5px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
                     background: "rgba(255,0,0,0.1)",
                   }}
                 />
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography
                     sx={{
-                      fontSize: "8.5px",
+                      fontSize: { xs: "7px", sm: "7.75px", md: "8.5px" },
                       color: "#fff",
                       fontWeight: "bold",
                       lineHeight: 1.1,
@@ -697,7 +732,7 @@ export default function Projects() {
                   </Typography>
                   <Typography
                     sx={{
-                      fontSize: "6.5px",
+                      fontSize: { xs: "5.5px", sm: "6px", md: "6.5px" },
                       color: "rgba(255,255,255,0.7)",
                       lineHeight: 1.1,
                     }}
@@ -714,11 +749,11 @@ export default function Projects() {
         <Box
           sx={{
             position: "absolute",
-            bottom: "8px",
+            bottom: { xs: "6px", sm: "7px", md: "8px" },
             left: "50%",
             transform: "translateX(-50%)",
-            width: "16%",
-            height: "2px",
+            width: { xs: "18%", sm: "17%", md: "16%" },
+            height: { xs: "1.5px", sm: "1.75px", md: "2px" },
             background: "#222",
             borderRadius: "3px",
             opacity: 0.7,
@@ -746,10 +781,10 @@ export default function Projects() {
           <Box
             key={i}
             sx={{
-              width: "30px",
-              height: "30px",
+              width: { xs: "24px", sm: "27px", md: "30px" },
+              height: { xs: "24px", sm: "27px", md: "30px" },
               background: "rgba(0,0,0,0.8)",
-              borderRadius: "6px",
+              borderRadius: { xs: "5px", sm: "5.5px", md: "6px" },
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -764,7 +799,7 @@ export default function Projects() {
             <i
               className={tech.icon}
               style={{
-                fontSize: "20px",
+                fontSize: "clamp(16px, 4vw, 20px)",
                 color: tech.color,
               }}
             />
@@ -774,7 +809,6 @@ export default function Projects() {
     </Box>
   );
 
-  // Blood Sugar Monitor Animation
   const bloodSugarMonitorAnimation = (
     <Box
       sx={{
@@ -786,21 +820,24 @@ export default function Projects() {
         background: "linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: "250px",
+        minHeight: { xs: "200px", sm: "230px", md: "250px" },
       }}
     >
       {/* Main Device Display */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "90%", md: "70%" },
-          height: { xs: "auto", md: "80%" },
-          background: "#2c3e50",
-          borderRadius: "15px",
+          width: { xs: "85%", sm: "70%", md: "60%" },
+          height: { xs: "auto", sm: "70%", md: "75%" },
+          maxHeight: { xs: "300px", sm: "350px", md: "450px" },
+          minHeight: { xs: "200px", sm: "250px", md: "350px" },
+          background: "#1e293b",
+          borderRadius: { xs: "12px", sm: "13px", md: "15px" },
           display: "flex",
           flexDirection: "column",
-          padding: "15px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+          padding: { xs: "10px", sm: "12px", md: "15px" },
+          boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)",
+          border: "1px solid rgba(255, 255, 255, 0.05)",
         }}
       >
         {/* Header */}
@@ -809,12 +846,12 @@ export default function Projects() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "10px",
+            marginBottom: { xs: "6px", sm: "8px", md: "10px" },
           }}
         >
           <Typography
             sx={{
-              fontSize: "14px",
+              fontSize: { xs: "11px", sm: "12px", md: "14px" },
               color: "white",
               fontWeight: "bold",
             }}
@@ -830,21 +867,22 @@ export default function Projects() {
           >
             <Box
               sx={{
-                width: "8px",
-                height: "8px",
+                width: { xs: "6px", sm: "7px", md: "8px" },
+                height: { xs: "6px", sm: "7px", md: "8px" },
                 borderRadius: "50%",
                 background: "#4caf50",
                 animation: "pulse 2s infinite",
                 "@keyframes pulse": {
-                  "0%": { opacity: 0.5 },
-                  "50%": { opacity: 1 },
-                  "100%": { opacity: 0.5 },
+                  "0%": { opacity: 0.5, transform: "scale(0.9)" },
+                  "50%": { opacity: 1, transform: "scale(1.1)" },
+                  "100%": { opacity: 0.5, transform: "scale(0.9)" },
                 },
+                boxShadow: "0 0 4px rgba(76, 175, 80, 0.6)",
               }}
             />
             <Typography
               sx={{
-                fontSize: "10px",
+                fontSize: { xs: "8px", sm: "9px", md: "10px" },
                 color: "white",
               }}
             >
@@ -864,7 +902,7 @@ export default function Projects() {
         >
           <Typography
             sx={{
-              fontSize: "32px",
+              fontSize: { xs: "24px", sm: "28px", md: "32px" },
               color: "white",
               fontWeight: "bold",
               animation: "fadeInOut 3s infinite",
@@ -878,7 +916,7 @@ export default function Projects() {
           </Typography>
           <Typography
             sx={{
-              fontSize: "14px",
+              fontSize: { xs: "11px", sm: "12px", md: "14px" },
               color: "white",
               marginLeft: "5px",
             }}
@@ -895,13 +933,13 @@ export default function Projects() {
               transform: "translateY(-50%)",
               display: "flex",
               alignItems: "center",
-              gap: "4px",
+              gap: { xs: "3px", sm: "4px", md: "5px" },
             }}
           >
             <Box
               sx={{
-                width: "6px",
-                height: "6px",
+                width: { xs: "5px", sm: "6px", md: "7px" },
+                height: { xs: "5px", sm: "6px", md: "7px" },
                 borderRadius: "50%",
                 background: "#2196f3",
                 animation: "aiPulse 1.5s infinite",
@@ -910,13 +948,14 @@ export default function Projects() {
                   "50%": { transform: "scale(1.2)", opacity: 1 },
                   "100%": { transform: "scale(0.8)", opacity: 0.5 },
                 },
+                boxShadow: "0 0 4px rgba(33, 150, 243, 0.6)",
               }}
             />
             <Typography
               sx={{
-                fontSize: "10px",
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
                 color: "#2196f3",
-                fontWeight: "bold",
+                fontWeight: "600",
               }}
             >
               AI Processing
@@ -928,11 +967,12 @@ export default function Projects() {
         <Box
           sx={{
             flex: 1,
-            background: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "10px",
-            padding: "10px",
+            background: "rgba(255, 255, 255, 0.08)",
+            borderRadius: { xs: "8px", sm: "9px", md: "10px" },
+            padding: { xs: "6px", sm: "8px", md: "10px" },
             position: "relative",
             overflow: "hidden",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
           }}
         >
           {/* Graph Background Grid */}
@@ -946,7 +986,7 @@ export default function Projects() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              padding: "10px",
+              padding: { xs: "6px", sm: "8px", md: "10px" },
             }}
           >
             {[...Array(5)].map((_, i) => (
@@ -954,8 +994,8 @@ export default function Projects() {
                 key={i}
                 sx={{
                   width: "100%",
-                  height: "1px",
-                  background: "rgba(255, 255, 255, 0.1)",
+                  height: { xs: "0.5px", sm: "0.75px", md: "1px" },
+                  background: "rgba(255, 255, 255, 0.08)",
                 }}
               />
             ))}
@@ -971,16 +1011,20 @@ export default function Projects() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              padding: "10px 0",
+              padding: { xs: "6px 0", sm: "8px 0", md: "10px 0" },
             }}
           >
             {[400, 300, 200, 100, 0].map((value) => (
               <Typography
                 key={value}
                 sx={{
-                  fontSize: "8px",
-                  color: "rgba(255, 255, 255, 0.5)",
-                  transform: "translateX(-20px)",
+                  fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                  color: "rgba(255, 255, 255, 0.6)",
+                  transform: {
+                    xs: "translateX(-15px)",
+                    sm: "translateX(-18px)",
+                    md: "translateX(-20px)",
+                  },
                 }}
               >
                 {value}
@@ -1013,11 +1057,12 @@ export default function Projects() {
               d="M0,50 C10,45 20,55 30,40 C40,35 50,45 60,30 C70,35 80,25 90,40 C95,45 100,40 100,40"
               fill="none"
               stroke="#2196f3"
-              strokeWidth="1.5"
+              strokeWidth="2"
               strokeDasharray="200"
               strokeDashoffset="200"
               style={{
                 animation: "drawLine 3s linear forwards",
+                filter: "drop-shadow(0 0 2px #2196f3)",
               }}
             />
 
@@ -1029,11 +1074,12 @@ export default function Projects() {
                   key={i}
                   cx={`${x}%`}
                   cy={`${yPoints[i]}%`}
-                  r="1.5"
+                  r="2"
                   fill="#2196f3"
                   opacity="0"
                   style={{
                     animation: `fadeIn 0.3s ease forwards ${1 + i * 0.3}s`,
+                    filter: "drop-shadow(0 0 2px #2196f3)",
                   }}
                 />
               );
@@ -1043,10 +1089,10 @@ export default function Projects() {
             <circle
               cx="0%"
               cy="50%"
-              r="2"
+              r="2.5"
               fill="#2196f3"
               style={{
-                filter: "drop-shadow(0 0 3px #2196f3)",
+                filter: "drop-shadow(0 0 4px #2196f3)",
                 animation: "moveDot 3s linear forwards",
               }}
             />
@@ -1076,113 +1122,85 @@ export default function Projects() {
           </svg>
         </Box>
 
-        {/* AI Insights Panel with Code-like Elements */}
+        {/* AI Insights Panel */}
         <Box
           sx={{
-            marginTop: "10px",
-            background: "rgba(255, 255, 255, 0.1)",
-            borderRadius: "8px",
-            padding: "8px",
+            marginTop: { xs: "8px", sm: "10px", md: "12px" },
+            background: "rgba(255, 255, 255, 0.08)",
+            borderRadius: { xs: "6px", sm: "7px", md: "8px" },
+            padding: { xs: "6px", sm: "8px", md: "10px" },
             position: "relative",
             overflow: "hidden",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
           }}
         >
           <Typography
+            component="div"
             sx={{
-              fontSize: "10px",
+              fontSize: { xs: "7px", sm: "8px", md: "10px" },
               color: "white",
               fontWeight: "bold",
-              marginBottom: "4px",
+              marginBottom: { xs: "6px", sm: "8px", md: "10px" },
               display: "flex",
               alignItems: "center",
-              gap: "4px",
+              gap: { xs: "3px", sm: "4px", md: "5px" },
             }}
           >
             <Box
               sx={{
-                width: "8px",
-                height: "8px",
+                width: { xs: "5px", sm: "6px", md: "8px" },
+                height: { xs: "5px", sm: "6px", md: "8px" },
                 borderRadius: "50%",
                 background: "#2196f3",
                 animation: "aiPulse 1.5s infinite",
+                "@keyframes aiPulse": {
+                  "0%": { transform: "scale(0.8)", opacity: 0.5 },
+                  "50%": { transform: "scale(1.2)", opacity: 1 },
+                  "100%": { transform: "scale(0.8)", opacity: 0.5 },
+                },
+                boxShadow: "0 0 6px rgba(33, 150, 243, 0.6)",
               }}
             />
             Grok AI Analysis
           </Typography>
 
-          {/* Code-like Elements */}
           <Box
             sx={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              opacity: 0.1,
-              fontSize: "8px",
-              fontFamily: "monospace",
-              color: "white",
-              padding: "4px",
-              animation: "scrollCode 10s linear infinite",
-              "@keyframes scrollCode": {
-                "0%": { transform: "translateY(0)" },
-                "100%": { transform: "translateY(-100%)" },
-              },
-            }}
-          >
-            {[
-              "def analyze_glucose(data):",
-              "    trend = detect_trend(data)",
-              "    if trend == 'stable':",
-              "        return 'Glucose stable'",
-              "    elif trend == 'rising':",
-              "        return 'Consider insulin'",
-              "    return 'Monitor closely'",
-              "",
-              "def predict_next_reading():",
-              "    model = load_grok_model()",
-              "    prediction = model.predict()",
-              "    return prediction",
-            ].map((line, i) => (
-              <Box key={i} sx={{ whiteSpace: "pre" }}>
-                {line}
-              </Box>
-            ))}
-          </Box>
-
-          <Box
-            sx={{
-              animation: "fadeInOut 3s infinite",
-              position: "relative",
-              zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: "4px", sm: "5px", md: "6px" },
             }}
           >
             <Typography
               sx={{
-                fontSize: "8px",
-                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                color: "rgba(255, 255, 255, 0.9)",
                 fontFamily: "monospace",
+                lineHeight: 1.4,
               }}
             >
               {">"} Glucose trending stable
             </Typography>
             <Typography
               sx={{
-                fontSize: "8px",
-                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                color: "rgba(255, 255, 255, 0.9)",
                 fontFamily: "monospace",
+                lineHeight: 1.4,
               }}
             >
               {">"} Consider light exercise
             </Typography>
             <Typography
               sx={{
-                fontSize: "8px",
-                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                color: "rgba(255, 255, 255, 0.9)",
                 fontFamily: "monospace",
-                animation: "typewriter 2s steps(40) infinite",
-                "@keyframes typewriter": {
-                  "0%": { opacity: 0 },
+                lineHeight: 1.4,
+                animation: "fadeInOut 3s infinite",
+                "@keyframes fadeInOut": {
+                  "0%, 100%": { opacity: 0.7 },
                   "50%": { opacity: 1 },
-                  "100%": { opacity: 0 },
                 },
               }}
             >
@@ -1196,25 +1214,27 @@ export default function Projects() {
       <Box
         sx={{
           position: "absolute",
-          top: "10%",
-          right: "10%",
+          top: { xs: "8%", sm: "12%", md: "15%" },
+          right: { xs: "8%", sm: "15%", md: "20%" },
           animation: "float 3s infinite ease-in-out",
           "@keyframes float": {
             "0%, 100%": { transform: "translateY(0)" },
-            "50%": { transform: "translateY(-10px)" },
+            "50%": { transform: "translateY(-8px)" },
           },
+          zIndex: 1,
         }}
       >
         <Box
           sx={{
-            width: "40px",
-            height: "40px",
-            background: "#111",
+            width: { xs: "28px", sm: "32px", md: "40px" },
+            height: { xs: "28px", sm: "32px", md: "40px" },
+            background: "rgba(17, 17, 17, 0.9)",
             borderRadius: "50%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
           }}
         >
           <Box
@@ -1225,6 +1245,7 @@ export default function Projects() {
               width: "70%",
               height: "70%",
               objectFit: "contain",
+              maxWidth: "100%",
             }}
           />
         </Box>
@@ -1232,7 +1253,415 @@ export default function Projects() {
     </Box>
   );
 
-  // Projects array with animations
+  const worklyAnimation = (
+    <Box
+      sx={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)",
+        overflow: "hidden",
+        position: "relative",
+        minHeight: { xs: "200px", sm: "230px", md: "250px" },
+      }}
+    >
+      {/* Mobile Phone Frame */}
+      <Box
+        sx={{
+          position: "relative",
+          width: { xs: "110px", sm: "135px", md: "170px" },
+          height: { xs: "220px", sm: "270px", md: "340px" },
+          bgcolor: "#1a1a1a",
+          borderRadius: { xs: "24px", sm: "26px", md: "28px" },
+          padding: { xs: "6px", sm: "7px", md: "8px" },
+          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+          border: { xs: "1.5px solid #2a2a2a", sm: "2px solid #2a2a2a" },
+        }}
+      >
+        {/* Screen - Gradient background with color */}
+        <Box
+          sx={{
+            width: "100%",
+            height: "100%",
+            borderRadius: { xs: "18px", sm: "20px", md: "22px" },
+            borderTopLeftRadius: { xs: "18px", sm: "20px", md: "22px" },
+            borderTopRightRadius: { xs: "18px", sm: "20px", md: "22px" },
+            borderBottomLeftRadius: { xs: "18px", sm: "20px", md: "22px" },
+            borderBottomRightRadius: { xs: "18px", sm: "20px", md: "22px" },
+            overflow: "hidden",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            background:
+              "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #a855f7 100%)",
+          }}
+        >
+          {/* Status Bar - Different color to avoid double purple */}
+          <Box
+            sx={{
+              height: { xs: "18px", sm: "19px", md: "20px" },
+              bgcolor: "rgba(255,255,255,0.1)",
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: { xs: 1, sm: 1.25, md: 1.5 },
+              pt: { xs: 0.25, sm: 0.375, md: 0.5 },
+              borderTopLeftRadius: "22px",
+              borderTopRightRadius: "22px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                color: "#ffffff",
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+              }}
+            >
+              9:41
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: { xs: 0.25, sm: 0.375, md: 0.5 },
+                alignItems: "center",
+              }}
+            >
+              <Box
+                sx={{
+                  width: { xs: "14px", sm: "15px", md: "16px" },
+                  height: { xs: "8px", sm: "8.5px", md: "9px" },
+                  border: "1.5px solid #ffffff",
+                  borderRadius: "3px",
+                  position: "relative",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: "1.5px",
+                    top: "1.5px",
+                    width: "65%",
+                    height: "calc(100% - 3px)",
+                    bgcolor: "#ffffff",
+                    borderRadius: "2px",
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+
+          {/* App Content */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              pt: { xs: 1, sm: 1.25, md: 1.5 },
+              pb: { xs: 1.5, sm: 1.75, md: 2 },
+              px: { xs: 1.5, sm: 1.75, md: 2 },
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Swipeable Job Card */}
+            <motion.div
+              animate={{
+                x: [0, 12, -12, 0],
+                rotate: [0, 3, -3, 0],
+              }}
+              transition={{
+                duration: 3.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                position: "absolute",
+                width: "88%",
+                height: "70%",
+                top: "8%",
+              }}
+            >
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  bgcolor: "#ffffff",
+                  borderRadius: { xs: "12px", sm: "14px", md: "16px" },
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
+                  p: { xs: 1, sm: 1.25, md: 1.5 },
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Brown Briefcase Icon - Centered at top */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mb: { xs: 0.5, sm: 0.625, md: 0.75 },
+                    flexShrink: 0,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      fontSize: { xs: "18px", sm: "21px", md: "24px" },
+                      filter: "hue-rotate(25deg) saturate(1.2)",
+                    }}
+                  >
+                    💼
+                  </Box>
+                </Box>
+
+                {/* Job Title */}
+                <Typography
+                  sx={{
+                    fontSize: { xs: "10px", sm: "11.5px", md: "13px" },
+                    fontWeight: 700,
+                    color: "#1d1d1f",
+                    mb: { xs: 0.125, sm: 0.2, md: 0.25 },
+                    textAlign: "center",
+                    letterSpacing: "-0.01em",
+                    flexShrink: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Software Engineer
+                </Typography>
+
+                {/* Company Name */}
+                <Typography
+                  sx={{
+                    fontSize: { xs: "8px", sm: "9px", md: "10px" },
+                    color: "#86868b",
+                    mb: { xs: 0.75, sm: 0.875, md: 1 },
+                    textAlign: "center",
+                    fontWeight: 400,
+                    flexShrink: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Tech Company Inc.
+                </Typography>
+
+                {/* Job Details with colored icons */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: { xs: 0.375, sm: 0.5 },
+                    mb: { xs: 0.75, sm: 0.875, md: 1 },
+                    minHeight: 0,
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: { xs: 0.375, sm: 0.5 },
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "8px", sm: "9px", md: "10px" },
+                        filter: "hue-rotate(320deg) saturate(1.3)",
+                      }}
+                    >
+                      📍
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
+                        color: "#4a5568",
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Remote
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "9px", sm: "9.5px", md: "10px" },
+                        filter: "hue-rotate(25deg) saturate(1.2)",
+                      }}
+                    >
+                      💰
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
+                        color: "#4a5568",
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      $80k-$120k
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "9px", sm: "9.5px", md: "10px" },
+                        filter: "hue-rotate(0deg) saturate(1.4)",
+                      }}
+                    >
+                      ⏰
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
+                        color: "#4a5568",
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Full-time
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Skills Tags - Different colors for each */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: { xs: 0.3, sm: 0.35, md: 0.4 },
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    mt: "auto",
+                    flexShrink: 0,
+                    pt: { xs: 0.3, sm: 0.4, md: 0.5 },
+                  }}
+                >
+                  {[
+                    { name: "React", color: "#000000", bg: "#61dafb" },
+                    { name: "Node.js", color: "#ffffff", bg: "#339933" },
+                    { name: "TypeScript", color: "#ffffff", bg: "#3178c6" },
+                  ].map((tag, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        bgcolor: tag.bg,
+                        color: tag.color,
+                        px: { xs: 0.4, sm: 0.5, md: 0.75 },
+                        py: { xs: 0.15, sm: 0.2, md: 0.3 },
+                        borderRadius: { xs: "4px", sm: "5px", md: "6px" },
+                        fontSize: { xs: "5.5px", sm: "6px", md: "8px" },
+                        fontWeight: 600,
+                        letterSpacing: "0.01em",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                        lineHeight: 1.2,
+                        minWidth: { xs: "20px", sm: "auto" },
+                      }}
+                    >
+                      {tag.name}
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </motion.div>
+
+            {/* Action Buttons - Both Dislike and Like */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: { xs: "8px", sm: "12px", md: "16px" },
+                display: "flex",
+                gap: { xs: 2, sm: 2.5, md: 3 },
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+                width: "100%",
+              }}
+            >
+              {/* Dislike Button - Red X */}
+              <Box
+                sx={{
+                  width: { xs: "36px", sm: "40px", md: "44px" },
+                  height: { xs: "36px", sm: "40px", md: "44px" },
+                  borderRadius: "50%",
+                  bgcolor: "#ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 6px 16px rgba(239,68,68,0.4)",
+                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: { xs: "16px", sm: "18px", md: "22px" },
+                    color: "#fff",
+                    fontWeight: 700,
+                    lineHeight: 1,
+                  }}
+                >
+                  ✕
+                </Typography>
+              </Box>
+
+              {/* Like Button - Green Heart */}
+              <Box
+                sx={{
+                  width: { xs: "36px", sm: "40px", md: "44px" },
+                  height: { xs: "36px", sm: "40px", md: "44px" },
+                  borderRadius: "50%",
+                  bgcolor: "#22c55e",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 6px 16px rgba(34,197,94,0.4)",
+                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: { xs: "16px", sm: "18px", md: "22px" },
+                    color: "#fff",
+                    fontWeight: 700,
+                    lineHeight: 1,
+                  }}
+                >
+                  ♥
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+
   const projects = [
     {
       id: 1,
@@ -1241,7 +1670,7 @@ export default function Projects() {
       title: "Personal Portfolio Website",
       tags: ["React", "Material UI", "Framer Motion"],
       description:
-        "A hand-crafted, interactive portfolio built with React and Framer Motion. Showcases my work, skills, and story through custom animations, live project previews, and a modern, accessible design. Every detail—from the animated hero to the project cards—was designed to be both beautiful and highly usable on any device.",
+        "A minimalist portfolio website designed with Apple's design philosophy in mind. Crafted with React and Material-UI, it features fluid animations, fully responsive layouts, and an emphasis on clean typography and whitespace. Every interaction is thoughtfully designed to create a seamless, professional experience across all devices.",
       status: "LIVE",
       github: "https://github.com/taylfrad/taylorfradella.com",
       animation: portfolioAnimation,
@@ -1268,23 +1697,32 @@ export default function Projects() {
       description:
         "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API alongside Grok AI.",
       status: "GITHUB ONLY",
-      github: "https://github.com/taylfrad/blood-sugar-monitor",
+      github:
+        "https://www.youtube.com/watch?v=64Pnq-MybS8&list=PLk22IJ-X9itqH1UIuWYtNs3cfTwHqOIvM&index=14",
       animation: bloodSugarMonitorAnimation,
+    },
+    {
+      id: 4,
+      image: "/images/workly.png",
+      role: "TEAM PROJECT",
+      title: "Workly",
+      tags: ["Flutter", "Dart", "Firebase", "Mobile"],
+      description:
+        "A mobile application that revolutionizes job searching with a Tinder-like swipe interface. Built with Flutter, Workly allows job seekers to quickly browse opportunities by swiping right on interesting positions or left to pass. The app features real-time job matching, user profiles, and seamless navigation across iOS, Android, and web platforms.",
+      status: "GITHUB ONLY",
+      github: "https://github.com/maheessh/workly",
+      animation: worklyAnimation,
     },
   ];
 
   const sectionRef = useRef();
-  const stickyRef = useRef();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end end"],
   });
 
-  // Animation for the "View More Projects on GitHub" button
-  const buttonOpacity = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]); // Fade out from 70% to 90% scrolled
-  const buttonY = useTransform(scrollYProgress, [0.7, 0.9], [0, 50]); // Slide down from 70% to 90% scrolled
-
-  // Animation variants for image and text
+  const buttonOpacity = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]);
+  const buttonY = useTransform(scrollYProgress, [0.7, 0.9], [0, 50]);
   const imageVariants = (isImageLeft) => ({
     hidden: { opacity: 0, x: isImageLeft ? -80 : 80 },
     visible: {
@@ -1315,7 +1753,7 @@ export default function Projects() {
       id="projects"
       ref={sectionRef}
       sx={{
-        minHeight: "100vh",
+        minHeight: "auto",
         position: "relative",
         bgcolor: "#ffffff",
         width: "100%",
@@ -1323,275 +1761,249 @@ export default function Projects() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        pt: 0,
+        pb: 0,
+        px: 0,
       }}
     >
-      <SectionHeader
-        title="Projects"
-        sectionRef={sectionRef}
-        accentColor={theme.palette.primary.main}
-      />
-      <Typography
-        variant="subtitle1"
+      <Container
+        maxWidth="lg"
         sx={{
-          color: "#6b7280",
-          maxWidth: 700,
-          mx: "auto",
-          mt: { xs: 2, md: 3 },
-          mb: { xs: 4, md: 6 },
-          fontSize: { xs: "1.15rem", md: "1.22rem" },
-          fontWeight: 400,
-          lineHeight: 1.7,
-          textAlign: "center",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        Here are some of my recent projects that showcase my technical skills
-        and problem-solving abilities.
-      </Typography>
-      <motion.div
-        ref={containerRef}
-        variants={{
-          visible: {
-            transition: {
-              staggerChildren: 0.18,
-            },
+          width: "100%",
+          px: { xs: 2, sm: 3, md: 4 },
+          "& .MuiContainer-root": {
+            maxWidth: "100% !important",
           },
-          hidden: {},
         }}
-        initial="hidden"
-        animate="visible"
-        style={{ width: "100%" }}
       >
-        <Box sx={{ width: "100%", maxWidth: 1400, mx: "auto" }}>
-          {projects.map((project, idx) => {
-            const isImageLeft = idx % 2 === 0;
-            const [ref, inView] = useInView({
-              threshold: 0.35,
-              triggerOnce: false,
-            });
-
-            return (
-              <Box
-                key={project.id}
-                ref={ref}
-                component={motion.div}
-                initial="hidden"
-                animate={inView ? "visible" : "hidden"}
-                sx={{
-                  display: "flex",
-                  flexDirection: {
-                    xs: "column",
-                    md: isImageLeft ? "row" : "row-reverse",
-                  },
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: { xs: 4, md: 8 },
-                  my: { xs: 6, md: 10 },
-                  width: "100%",
-                }}
-              >
-                {/* Animated Project Image */}
-                <Box
-                  component={motion.div}
-                  variants={imageVariants(isImageLeft)}
-                  sx={{
-                    maxWidth: "100%",
-                    width: { md: 460 },
-                    height: { xs: "auto", md: 360 },
-                    flexShrink: 0,
-                    mb: { xs: 2, md: 0 },
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 6,
-                    overflow: "hidden",
-                    boxShadow: "0 6px 32px 0 rgba(31, 38, 135, 0.13)",
-                    background: "none",
-                  }}
-                >
-                  {project.animation}
-                </Box>
-                {/* Animated Project Details */}
-                <Box
-                  component={motion.div}
-                  variants={textVariants(isImageLeft)}
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: {
-                      xs: "center",
-                      md: isImageLeft ? "flex-start" : "flex-end",
-                    },
-                    justifyContent: "center",
-                    textAlign: {
-                      xs: "center",
-                      md: isImageLeft ? "left" : "right",
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="overline"
-                    sx={{
-                      color: "#b0b0b0",
-                      fontWeight: 700,
-                      letterSpacing: 2,
-                    }}
-                  >
-                    {project.role}
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      mt: 1,
-                      mb: 2,
-                      color: "#222",
-                      fontSize: { xs: "1.6rem", md: "2.2rem" },
-                    }}
-                  >
-                    {project.title}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      mb: 2,
-                      flexWrap: "wrap",
-                      justifyContent: {
-                        xs: "center",
-                        md: isImageLeft ? "flex-start" : "flex-end",
-                      },
-                    }}
-                  >
-                    {project.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        sx={{
-                          bgcolor: "#e3f0fd",
-                          color: "#3b82f6",
-                          fontWeight: 600,
-                          fontSize: "0.85rem",
-                          borderRadius: 2,
-                          px: 1.5,
-                          py: 0.5,
-                          letterSpacing: 1,
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography
-                    variant="body1"
-                    component="div"
-                    sx={{ color: "#555", fontSize: "1.1rem", mb: 2 }}
-                  >
-                    {project.description}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      mt: 2,
-                      justifyContent: {
-                        xs: "center",
-                        md: isImageLeft ? "flex-start" : "flex-end",
-                      },
-                    }}
-                  >
-                    {project.status === "LIVE" && (
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          color: "#b0b0b0",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          fontSize: "0.92rem",
-                          letterSpacing: 1.5,
-                          lineHeight: 1,
-                          mr: 1,
-                        }}
-                      >
-                        {project.status}
-                      </Typography>
-                    )}
-                    {project.github && (
-                      <motion.a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          fontSize: "0.92rem",
-                          color: "#b0b0b0",
-                          letterSpacing: 1.5,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          textDecoration: "none",
-                          lineHeight: 1,
-                          marginLeft: 8,
-                          transition: "color 0.2s",
-                        }}
-                        whileHover={{
-                          x: 8,
-                          color: "#3b82f6",
-                          transition: {
-                            type: "tween",
-                            duration: 0.25,
-                            ease: "easeOut",
-                          },
-                        }}
-                      >
-                        View Project{" "}
-                        <ArrowForwardIcon
-                          style={{ fontSize: 16, marginLeft: 4 }}
-                        />
-                      </motion.a>
-                    )}
-                  </Box>
-                </Box>
-              </Box>
-            );
-          })}
-        </Box>
-      </motion.div>
-
-      {/* GitHub projects link button */}
-      <Box
-        component={motion.div}
-        style={{ opacity: buttonOpacity, y: buttonY }}
-        sx={{ textAlign: "center", mt: 6, mb: { xs: 8, md: 12 } }}
-      >
-        <Button
-          component={Link}
-          href="https://github.com/taylfrad"
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="outlined"
-          color="primary"
-          size="large"
-          startIcon={<GitHubIcon />}
+        <Paper
+          elevation={0}
           sx={{
-            borderRadius: "10px",
-            px: 4,
-            py: 1.5,
-            borderWidth: "2px",
-            textTransform: "none",
-            fontSize: "1rem",
-            boxShadow: "0 0 10px rgba(56, 189, 248, 0.1)",
-            "&:hover": {
-              borderWidth: "2px",
-              boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
-              transform: "translateY(-3px)",
-            },
+            bgcolor: "#f5f5f7",
+            borderRadius: "18px",
+            p: { xs: 2.5, sm: 3.5, md: 4, lg: 5 },
+            boxShadow: "none",
+            border: "none",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
-          View More Projects on GitHub
-        </Button>
-      </Box>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 600,
+              fontSize: {
+                xs: "1.75rem",
+                sm: "2.25rem",
+                md: "2.5rem",
+                lg: "2.75rem",
+              },
+              mb: { xs: 3.5, md: 4.5 },
+              color: "#1d1d1f",
+              textAlign: "left",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.05,
+            }}
+          >
+            Recent Projects
+          </Typography>
+          <motion.div
+            ref={containerRef}
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.18,
+                },
+              },
+              hidden: {},
+            }}
+            initial="hidden"
+            animate="visible"
+            style={{ width: "100%" }}
+          >
+            <Box sx={{ width: "100%", mx: "auto" }}>
+              {projects.map((project, idx) => {
+                const isImageLeft = idx % 2 === 0;
+                const [ref, inView] = useInView({
+                  threshold: 0.35,
+                  triggerOnce: false,
+                });
+
+                return (
+                  <Box
+                    key={project.id}
+                    ref={ref}
+                    component={motion.div}
+                    initial="hidden"
+                    animate={inView ? "visible" : "hidden"}
+                    sx={{
+                      display: "flex",
+                      flexDirection: {
+                        xs: "column",
+                        md: "row",
+                      },
+                      alignItems: { xs: "flex-start", md: "center" },
+                      justifyContent: "flex-start",
+                      gap: { xs: 3, sm: 4, md: 5 },
+                      mb: { xs: 4, sm: 5, md: 6 },
+                      width: "100%",
+                    }}
+                  >
+                    {/* Animated Project Image */}
+                    <Box
+                      component={motion.div}
+                      variants={imageVariants(isImageLeft)}
+                      sx={{
+                        maxWidth: "100%",
+                        width: { xs: "100%", sm: "90%", md: 460 },
+                        height: { xs: "auto", sm: "280px", md: 360 },
+                        minHeight: { xs: "200px", sm: "280px", md: 360 },
+                        maxWidth: "100%",
+                        flexShrink: 0,
+                        mb: { xs: 3, sm: 3, md: 0 },
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 8,
+                        overflow: "hidden",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                        background: "none",
+                      }}
+                    >
+                      {project.animation}
+                    </Box>
+                    {/* Animated Project Details */}
+                    <Box
+                      component={motion.div}
+                      variants={textVariants(isImageLeft)}
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 600,
+                          mb: { xs: 1.5, md: 1 },
+                          color: "#222",
+                          fontSize: {
+                            xs: "1.125rem",
+                            sm: "1.25rem",
+                            md: "1.5rem",
+                          },
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {project.title}
+                      </Typography>
+                      <Typography
+                        component="div"
+                        sx={{
+                          color: "#666",
+                          mb: { xs: 2.5, md: 2 },
+                          fontSize: {
+                            xs: "0.8125rem",
+                            sm: "0.875rem",
+                            md: "0.9375rem",
+                          },
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {project.description}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: { xs: "flex-start", md: "flex-end" },
+                          width: "100%",
+                          mt: { xs: 1, md: 0 },
+                        }}
+                      >
+                        <Button
+                          component="a"
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="contained"
+                          sx={{
+                            bgcolor: "#e0e0e0",
+                            color: "#222",
+                            textTransform: "none",
+                            fontSize: {
+                              xs: "0.875rem",
+                              sm: "0.9rem",
+                              md: "1rem",
+                            },
+                            fontWeight: 500,
+                            px: { xs: 2, sm: 2.5, md: 3.5 },
+                            py: { xs: 1, sm: 1.25, md: 1.75 },
+                            minHeight: { xs: "40px", sm: "44px", md: "48px" },
+                            borderRadius: "8px",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                            border: "1px solid #d0d0d0",
+                            "&:hover": {
+                              bgcolor: "#d0d0d0",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                            },
+                          }}
+                        >
+                          View Project
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+          </motion.div>
+
+          {/* GitHub projects link button */}
+          <Box
+            component={motion.div}
+            style={{ opacity: buttonOpacity, y: buttonY }}
+            sx={{
+              textAlign: "center",
+              mt: { xs: 4, sm: 5, md: 6 },
+              mb: { xs: 2, md: 2 },
+            }}
+          >
+            <Button
+              component={Link}
+              href="https://github.com/taylfrad"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outlined"
+              color="primary"
+              size="large"
+              startIcon={<GitHubIcon />}
+              sx={{
+                borderRadius: "10px",
+                px: { xs: 3, sm: 3.5, md: 4 },
+                py: { xs: 1.25, sm: 1.5 },
+                borderWidth: "2px",
+                textTransform: "none",
+                fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
+                minHeight: { xs: "44px", sm: "48px", md: "52px" },
+                boxShadow: "0 0 10px rgba(56, 189, 248, 0.1)",
+                "&:hover": {
+                  borderWidth: "2px",
+                  boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
+                  transform: "translateY(-3px)",
+                },
+              }}
+            >
+              View More Projects on GitHub
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 }
