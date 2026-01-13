@@ -65,17 +65,13 @@ function App() {
       if (footerElement) {
         setTimeout(() => {
           if (scrollContainer) {
-            const containerRect = scrollContainer.getBoundingClientRect();
-            const footerRect = footerElement.getBoundingClientRect();
-            const scrollTop = scrollContainer.scrollTop;
-            const targetY = scrollTop + footerRect.top - containerRect.top - 80;
-            scrollContainer.scrollTo({ top: targetY, behavior: "smooth" });
+            footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
           } else {
             const yOffset = -80;
             const y = footerElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
             window.scrollTo({ top: y, behavior: "smooth" });
           }
-        }, 100);
+        }, 150);
         return;
       }
     }
@@ -83,17 +79,13 @@ function App() {
     if (element) {
       setTimeout(() => {
         if (scrollContainer) {
-          const containerRect = scrollContainer.getBoundingClientRect();
-          const elementRect = element.getBoundingClientRect();
-          const scrollTop = scrollContainer.scrollTop;
-          const targetY = scrollTop + elementRect.top - containerRect.top - 80;
-          scrollContainer.scrollTo({ top: targetY, behavior: "smooth" });
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
           const yOffset = -80;
           const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: "smooth" });
         }
-      }, 100);
+      }, 150);
     }
   }, [location]);
 
