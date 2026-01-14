@@ -214,13 +214,14 @@ export default function Hero({ onNav }) {
         component="nav"
         sx={{
           position: "absolute",
-          top: { xs: "16px", sm: "20px", md: "24px" },
-          left: { xs: "16px", sm: "32px", md: "48px" },
+          top: { xs: "12px", sm: "16px", md: "24px" },
+          left: { xs: "12px", sm: "24px", md: "48px" },
           display: "flex",
-          gap: { xs: 2, sm: 3, md: 4 },
+          gap: { xs: 1.5, sm: 2.5, md: 4 },
           zIndex: 10,
           margin: 0,
           padding: 0,
+          flexWrap: { xs: "wrap", sm: "nowrap" },
         }}
       >
         <motion.div
@@ -236,12 +237,12 @@ export default function Hero({ onNav }) {
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
-              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
               fontWeight: 500,
               letterSpacing: "-0.01em",
-              px: { xs: 1.5, sm: 2, md: 2.5 },
-              py: { xs: 0.75, sm: 1, md: 1.25 },
-              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              px: { xs: 1.25, sm: 1.75, md: 2.5 },
+              py: { xs: 0.625, sm: 0.875, md: 1.25 },
+              minHeight: { xs: "40px", sm: "44px", md: "52px" },
               transition: "opacity 0.2s ease",
               "&:hover": {
                 opacity: 0.6,
@@ -265,12 +266,12 @@ export default function Hero({ onNav }) {
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
-              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
               fontWeight: 500,
               letterSpacing: "-0.01em",
-              px: { xs: 1.5, sm: 2, md: 2.5 },
-              py: { xs: 0.75, sm: 1, md: 1.25 },
-              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              px: { xs: 1.25, sm: 1.75, md: 2.5 },
+              py: { xs: 0.625, sm: 0.875, md: 1.25 },
+              minHeight: { xs: "40px", sm: "44px", md: "52px" },
               transition: "opacity 0.2s ease",
               "&:hover": {
                 opacity: 0.6,
@@ -294,12 +295,12 @@ export default function Hero({ onNav }) {
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
-              fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
               fontWeight: 500,
               letterSpacing: "-0.01em",
-              px: { xs: 1.5, sm: 2, md: 2.5 },
-              py: { xs: 0.75, sm: 1, md: 1.25 },
-              minHeight: { xs: "44px", sm: "48px", md: "52px" },
+              px: { xs: 1.25, sm: 1.75, md: 2.5 },
+              py: { xs: 0.625, sm: 0.875, md: 1.25 },
+              minHeight: { xs: "40px", sm: "44px", md: "52px" },
               transition: "opacity 0.2s ease",
               "&:hover": {
                 opacity: 0.6,

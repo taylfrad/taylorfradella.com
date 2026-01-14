@@ -11,6 +11,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { projectsData } from "../data/projectsData";
+import OptimizedImage from "./OptimizedImage";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -256,26 +257,24 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = "#0071e3" }
                   }}
                   sx={{
                     position: "absolute",
-                    width: "calc(100% - 80px)",
-                    height: "calc(100% - 80px)",
+                    width: { xs: "calc(100% - 40px)", sm: "calc(100% - 60px)", md: "calc(100% - 80px)" },
+                    height: { xs: "calc(100% - 40px)", sm: "calc(100% - 60px)", md: "calc(100% - 80px)" },
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: { xs: "20px", sm: "30px", md: "40px" },
+                    padding: { xs: "12px", sm: "20px", md: "40px" },
                   }}
                 >
-                  <Box
-                    component="img"
+                  <OptimizedImage
                     src={screenshots[currentIndex]}
                     alt={`${projectTitle} screenshot ${currentIndex + 1}`}
                     onClick={() => openLightbox(currentIndex)}
-                    loading="lazy"
-                    decoding="async"
+                    priority={currentIndex === 0}
                     sx={{
                       width: "100%",
                       height: "100%",
                       objectFit: "contain",
-                      borderRadius: "20px",
+                      borderRadius: { xs: "12px", sm: "16px", md: "20px" },
                       boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04)",
                       userSelect: "none",
                       pointerEvents: "auto",
@@ -301,18 +300,19 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = "#0071e3" }
               transition={{ delay: 0.3 }}
               sx={{
                 position: "absolute",
-                bottom: { xs: 24, sm: 28, md: 32 },
-                right: { xs: "15%", sm: "20%", md: "25%" },
+                bottom: { xs: 16, sm: 20, md: 32 },
+                right: { xs: "50%", sm: "20%", md: "25%" },
+                transform: { xs: "translateX(50%)", sm: "none" },
                 display: "flex",
-                gap: { xs: 2.5, sm: 3, md: 3.5 },
+                gap: { xs: 2, sm: 2.5, md: 3.5 },
                 alignItems: "center",
                 zIndex: 10,
                 bgcolor: "rgba(255,255,255,0.95)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                px: { xs: 2.5, sm: 3, md: 3.5 },
-                py: { xs: 1.25, sm: 1.5, md: 1.75 },
-                borderRadius: "32px",
+                px: { xs: 2, sm: 2.5, md: 3.5 },
+                py: { xs: 1, sm: 1.25, md: 1.75 },
+                borderRadius: { xs: "24px", sm: "28px", md: "32px" },
                 border: "1px solid rgba(0,0,0,0.06)",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08)",
               }}
@@ -495,12 +495,10 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = "#0071e3" }
                   justifyContent: "center",
                 }}
               >
-                <Box
-                  component="img"
+                <OptimizedImage
                   src={screenshots[lightboxIndex]}
                   alt={`${projectTitle} screenshot ${lightboxIndex + 1}`}
-                  loading="lazy"
-                  decoding="async"
+                  priority={true}
                   sx={{
                     maxWidth: "95%",
                     maxHeight: "95%",
@@ -640,13 +638,14 @@ export default function ProjectDetail() {
   }, []);
 
   return (
-    <Box
+            <Box
       data-project-detail
       sx={{
         minHeight: "100vh",
         bgcolor: "#f5f5f7",
-        pt: { xs: 2, sm: 3, md: 4 },
-        pb: { xs: 4, sm: 5, md: 6 },
+        pt: { xs: 1, sm: 2, md: 4 },
+        pb: { xs: 3, sm: 4, md: 6 },
+        px: { xs: 1, sm: 2, md: 0 },
         position: "fixed",
         top: 0,
         left: 0,
@@ -663,7 +662,7 @@ export default function ProjectDetail() {
         transition: "opacity 0.3s ease-out",
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -686,9 +685,13 @@ export default function ProjectDetail() {
                 }, 200);
               }}
               sx={{
-                mb: 3,
+                mb: { xs: 2, sm: 2.5, md: 3 },
                 color: "#1d1d1f",
                 textTransform: "none",
+                fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
+                px: { xs: 1.5, sm: 2, md: 2.5 },
+                py: { xs: 0.75, sm: 1, md: 1.25 },
+                minHeight: { xs: "40px", sm: "44px", md: "48px" },
                 transition: "all 0.2s ease",
                 "&:hover": {
                   bgcolor: "rgba(0,0,0,0.05)",
@@ -705,8 +708,8 @@ export default function ProjectDetail() {
             elevation={0}
             sx={{
               bgcolor: "#ffffff",
-              borderRadius: "24px",
-              p: { xs: 3, sm: 4, md: 6 },
+              borderRadius: { xs: "16px", sm: "20px", md: "24px" },
+              p: { xs: 2, sm: 3, md: 6 },
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.05)",
               overflow: "hidden",
@@ -753,8 +756,8 @@ export default function ProjectDetail() {
                   variant="h3"
                   sx={{
                     fontWeight: 700,
-                    fontSize: { xs: "2rem", sm: "2.75rem", md: "3.5rem" },
-                    mb: 3,
+                    fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3.5rem" },
+                    mb: { xs: 2, sm: 2.5, md: 3 },
                     color: "#1d1d1f",
                     letterSpacing: "-0.03em",
                     lineHeight: 1.1,
@@ -874,9 +877,9 @@ export default function ProjectDetail() {
                 <Box
                   sx={{
                     width: "100%",
-                    height: { xs: "auto", sm: "400px", md: "500px" },
-                    minHeight: { xs: "250px", sm: "400px", md: "500px" },
-                    mb: 4,
+                      height: { xs: "auto", sm: "400px", md: "500px" },
+                      minHeight: { xs: "200px", sm: "350px", md: "500px" },
+                      mb: { xs: 3, sm: 3.5, md: 4 },
                     borderRadius: "12px",
                     overflow: "hidden",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
@@ -894,14 +897,14 @@ export default function ProjectDetail() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1.5,
-                    mb: 3,
+                    gap: { xs: 1, sm: 1.25, md: 1.5 },
+                    mb: { xs: 2, sm: 2.5, md: 3 },
                   }}
                 >
                   <Box
                     sx={{
                       width: "4px",
-                      height: "24px",
+                      height: { xs: "20px", sm: "22px", md: "24px" },
                       borderRadius: "2px",
                       bgcolor: project.accentColor || "#0071e3",
                     }}
@@ -911,7 +914,7 @@ export default function ProjectDetail() {
                     sx={{
                       fontWeight: 700,
                       color: "#1d1d1f",
-                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
+                      fontSize: { xs: "1.125rem", sm: "1.375rem", md: "1.75rem" },
                       letterSpacing: "-0.02em",
                     }}
                   >
@@ -921,9 +924,9 @@ export default function ProjectDetail() {
                 <Typography
                   sx={{
                     color: "#4a4a4a",
-                    mb: 3,
-                    fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
-                    lineHeight: 1.8,
+                    mb: { xs: 2.5, sm: 2.75, md: 3 },
+                    fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
+                    lineHeight: { xs: 1.7, sm: 1.75, md: 1.8 },
                     fontWeight: 400,
                   }}
                 >
@@ -957,7 +960,7 @@ export default function ProjectDetail() {
               />
             )}
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{ my: { xs: 3, sm: 3.5, md: 4 } }} />
 
             {/* Tools & Technologies */}
             <motion.div variants={itemVariants}>
@@ -966,14 +969,14 @@ export default function ProjectDetail() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1.5,
-                    mb: 3,
+                    gap: { xs: 1, sm: 1.25, md: 1.5 },
+                    mb: { xs: 2, sm: 2.5, md: 3 },
                   }}
                 >
                   <Box
                     sx={{
                       width: "4px",
-                      height: "24px",
+                      height: { xs: "20px", sm: "22px", md: "24px" },
                       borderRadius: "2px",
                       bgcolor: project.accentColor || "#0071e3",
                     }}
@@ -983,7 +986,7 @@ export default function ProjectDetail() {
                     sx={{
                       fontWeight: 700,
                       color: "#1d1d1f",
-                      fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
+                      fontSize: { xs: "1.125rem", sm: "1.375rem", md: "1.75rem" },
                       letterSpacing: "-0.02em",
                     }}
                   >
@@ -1003,12 +1006,12 @@ export default function ProjectDetail() {
                       key={index}
                       label={tool}
                       sx={{
-                        fontSize: { xs: "0.875rem", sm: "0.9375rem" },
+                        fontSize: { xs: "0.8125rem", sm: "0.875rem", md: "0.9375rem" },
                         fontWeight: 600,
                         color: "#1d1d1f",
                         backgroundColor: "#f5f5f7",
-                        height: "40px",
-                        px: 2,
+                        height: { xs: "36px", sm: "38px", md: "40px" },
+                        px: { xs: 1.5, sm: 1.75, md: 2 },
                         border: "1px solid rgba(0,0,0,0.08)",
                         transition: "all 0.2s ease",
                         "&:hover": {
@@ -1360,19 +1363,17 @@ export default function ProjectDetail() {
           <CloseIcon />
         </IconButton>
         {selectedImage && (
-          <Box
-                  component="img"
-                  src={selectedImage}
-                  alt="Full screen screenshot"
-                  loading="lazy"
-                  decoding="async"
-                  sx={{
-                    width: "100%",
-                    height: "auto",
-                    maxHeight: "90vh",
-                    objectFit: "contain",
-                    willChange: "auto",
-                  }}
+          <OptimizedImage
+            src={selectedImage}
+            alt="Full screen screenshot"
+            priority={true}
+            sx={{
+              width: "100%",
+              height: "auto",
+              maxHeight: "90vh",
+              objectFit: "contain",
+              willChange: "auto",
+            }}
           />
         )}
       </Dialog>
