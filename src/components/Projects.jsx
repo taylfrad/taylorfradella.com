@@ -1,4 +1,13 @@
-import { Box, Typography, Button, Container, Link, Paper, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Container,
+  Link,
+  Paper,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { useRef, useState, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -62,9 +71,9 @@ const getAnimationState = (
 const ParallaxProjectItem = memo(
   function ParallaxProjectItem({ project, index, isImageLeft }) {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const navigate = useNavigate();
     const itemRef = useRef();
     const [ref, inView] = useInView({
@@ -226,7 +235,9 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-image-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
+            whileInView={
+              shouldAnimate && !hasBeenVisible ? "visible" : undefined
+            }
             viewport={{ once: true, margin: "-50px" }}
             animate={animationState}
             variants={imageVariants(isImageLeft)}
@@ -241,24 +252,30 @@ const ParallaxProjectItem = memo(
           >
             <Box
               component={motion.div}
-              whileHover={isDesktop ? {
-                scale: 1.08,
-                rotateY: isImageLeft ? 8 : -8,
-                rotateX: 3,
-                transition: {
-                  duration: 0.5,
-                  ease: [0.23, 1, 0.32, 1],
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 20,
-                },
-              } : isTablet ? {
-                scale: 1.05,
-                transition: {
-                  duration: 0.5,
-                  ease: [0.23, 1, 0.32, 1],
-                },
-              } : undefined}
+              whileHover={
+                isDesktop
+                  ? {
+                      scale: 1.08,
+                      rotateY: isImageLeft ? 8 : -8,
+                      rotateX: 3,
+                      transition: {
+                        duration: 0.5,
+                        ease: [0.23, 1, 0.32, 1],
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      },
+                    }
+                  : isTablet
+                  ? {
+                      scale: 1.05,
+                      transition: {
+                        duration: 0.5,
+                        ease: [0.23, 1, 0.32, 1],
+                      },
+                    }
+                  : undefined
+              }
               style={{
                 transformStyle: isDesktop ? "preserve-3d" : "flat",
                 willChange: "transform",
@@ -267,7 +284,7 @@ const ParallaxProjectItem = memo(
                 maxWidth: "100%",
                 width: { xs: "100%", sm: "90%", md: 460 },
                 height: { xs: "auto", sm: "280px", md: 360 },
-                minHeight: { xs: "180px", sm: "260px", md: 360 },
+                minHeight: { xs: "210px", sm: "260px", md: 360 },
                 flexShrink: 0,
                 mb: { xs: 3, sm: 3, md: 0 },
                 display: "flex",
@@ -298,15 +315,21 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-details-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
+            whileInView={
+              shouldAnimate && !hasBeenVisible ? "visible" : undefined
+            }
             viewport={{ once: true, margin: "-50px" }}
             animate={animationState}
             variants={textVariants(isImageLeft)}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            whileHover={isDesktop ? {
-              x: isImageLeft ? 8 : -8,
-              transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
-            } : undefined}
+            whileHover={
+              isDesktop
+                ? {
+                    x: isImageLeft ? 8 : -8,
+                    transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
+                  }
+                : undefined
+            }
             onAnimationStart={() => {}}
             onAnimationComplete={() => {}}
             style={{
@@ -713,7 +736,7 @@ function Projects() {
         background: "#ffffff",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "180px", sm: "220px", md: "250px" },
+        minHeight: { xs: "210px", sm: "230px", md: "250px" },
       }}
     >
       {/* Hero Section Content - Direct, no browser frame */}
@@ -923,7 +946,7 @@ function Projects() {
       sx={{
         width: "100%",
         height: "100%",
-        minHeight: { xs: 200, sm: 230, md: 250 },
+        minHeight: { xs: "210px", sm: "230px", md: 250 },
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -941,7 +964,7 @@ function Projects() {
           minWidth: { xs: "280px", sm: "320px", md: "320px" },
           height: { xs: "auto", sm: "280px", md: "340px" },
           maxHeight: { xs: "400px", sm: "380px", md: "420px" },
-          minHeight: { xs: "200px", sm: "240px", md: "240px" },
+          minHeight: { xs: "210px", sm: "240px", md: "240px" },
           aspectRatio: { xs: "16/10", sm: "auto" },
           background: "#000",
           borderRadius: "16px",
@@ -1482,7 +1505,7 @@ function Projects() {
         background: "linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "220px", sm: "240px", md: "250px" },
+        minHeight: { xs: "210px", sm: "230px", md: "250px" },
         imageRendering: "crisp-edges",
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
@@ -1497,7 +1520,7 @@ function Projects() {
           width: { xs: "90%", sm: "75%", md: "60%" },
           height: { xs: "auto", sm: "70%", md: "75%" },
           maxHeight: { xs: "320px", sm: "360px", md: "450px" },
-          minHeight: { xs: "200px", sm: "240px", md: "350px" },
+          minHeight: { xs: "210px", sm: "240px", md: "350px" },
           background: "#f3f4f6",
           borderRadius: { xs: "12px", sm: "13px", md: "15px" },
           display: "flex",
@@ -1950,15 +1973,15 @@ function Projects() {
         background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "180px", sm: "220px", md: "250px" },
+        minHeight: { xs: "210px", sm: "230px", md: "250px" },
       }}
     >
       {/* Mobile Phone Frame */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "120px", sm: "140px", md: "170px" },
-          height: { xs: "240px", sm: "280px", md: "340px" },
+          width: { xs: "130px", sm: "140px", md: "170px" },
+          height: { xs: "260px", sm: "280px", md: "340px" },
           bgcolor: "#1a1a1a",
           borderRadius: { xs: "24px", sm: "26px", md: "28px" },
           padding: { xs: "6px", sm: "7px", md: "8px" },
