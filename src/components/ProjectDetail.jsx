@@ -271,8 +271,10 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = "#0071e3" }
                     onClick={() => openLightbox(currentIndex)}
                     priority={currentIndex === 0}
                     sx={{
-                      width: "100%",
-                      height: "100%",
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      width: "auto",
+                      height: "auto",
                       objectFit: "contain",
                       borderRadius: { xs: "12px", sm: "16px", md: "20px" },
                       boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04)",
