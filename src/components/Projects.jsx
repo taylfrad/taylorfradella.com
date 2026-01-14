@@ -231,9 +231,9 @@ const ParallaxProjectItem = memo(
             <Box
               component={motion.div}
               whileHover={{
-                scale: 1.08,
-                rotateY: isImageLeft ? 8 : -8,
-                rotateX: 3,
+                scale: { xs: 1, sm: 1.05, md: 1.08 },
+                rotateY: { xs: 0, sm: 0, md: isImageLeft ? 8 : -8 },
+                rotateX: { xs: 0, sm: 0, md: 3 },
                 transition: {
                   duration: 0.5,
                   ease: [0.23, 1, 0.32, 1],
@@ -243,28 +243,28 @@ const ParallaxProjectItem = memo(
                 },
               }}
               style={{
-                transformStyle: "preserve-3d",
+                transformStyle: { xs: "flat", sm: "flat", md: "preserve-3d" },
                 willChange: "transform",
               }}
               sx={{
                 maxWidth: "100%",
                 width: { xs: "100%", sm: "90%", md: 460 },
                 height: { xs: "auto", sm: "280px", md: 360 },
-                minHeight: { xs: "200px", sm: "280px", md: 360 },
+                minHeight: { xs: "180px", sm: "260px", md: 360 },
                 flexShrink: 0,
                 mb: { xs: 3, sm: 3, md: 0 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: 12,
+                borderRadius: { xs: 8, sm: 10, md: 12 },
                 overflow: "hidden",
                 boxShadow: isHovered
-                  ? "0 20px 40px rgba(0,0,0,0.2)"
+                  ? { xs: "0 6px 20px rgba(0,0,0,0.1)", sm: "0 12px 30px rgba(0,0,0,0.15)", md: "0 20px 40px rgba(0,0,0,0.2)" }
                   : "0 6px 20px rgba(0,0,0,0.1)",
                 background: "none",
                 cursor: "pointer",
                 transition: "box-shadow 0.4s ease",
-                transformStyle: "preserve-3d",
+                transformStyle: { xs: "flat", sm: "flat", md: "preserve-3d" },
                 transform: "translateZ(0)",
                 backfaceVisibility: "hidden",
               }}
@@ -690,7 +690,7 @@ function Projects() {
         background: "#ffffff",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "200px", sm: "230px", md: "250px" },
+        minHeight: { xs: "180px", sm: "220px", md: "250px" },
       }}
     >
       {/* Hero Section Content - Direct, no browser frame */}
@@ -729,7 +729,7 @@ function Projects() {
             }}
             sx={{
               color: "#1d1d1f",
-              fontSize: { xs: "8px", sm: "9px" },
+              fontSize: { xs: "9px", sm: "9px", md: "9px" },
               fontWeight: 400,
               letterSpacing: "-0.01em",
               border: "none",
@@ -755,7 +755,7 @@ function Projects() {
             }}
             sx={{
               color: "#1d1d1f",
-              fontSize: { xs: "8px", sm: "9px" },
+              fontSize: { xs: "9px", sm: "9px", md: "9px" },
               fontWeight: 400,
               letterSpacing: "-0.01em",
               border: "none",
@@ -781,7 +781,7 @@ function Projects() {
             }}
             sx={{
               color: "#1d1d1f",
-              fontSize: { xs: "8px", sm: "9px" },
+              fontSize: { xs: "9px", sm: "9px", md: "9px" },
               fontWeight: 400,
               letterSpacing: "-0.01em",
               border: "none",
@@ -854,7 +854,7 @@ function Projects() {
               px: { xs: 1, sm: 1.25, md: 1.5 },
               py: { xs: 0.375, sm: 0.5 },
               borderRadius: "8px",
-              fontSize: { xs: "8px", sm: "9px" },
+              fontSize: { xs: "9px", sm: "9px", md: "9px" },
               fontWeight: 500,
               border: "none",
               cursor: "pointer",
@@ -913,12 +913,12 @@ function Projects() {
       <Box
         sx={{
           position: "relative",
-          width: { xs: "90%", sm: "75%", md: "420px" },
+          width: { xs: "95%", sm: "80%", md: "420px" },
           maxWidth: { xs: "100%", sm: "500px", md: "600px" },
-          minWidth: { xs: "260px", sm: "300px", md: "320px" },
+          minWidth: { xs: "280px", sm: "320px", md: "320px" },
           height: { xs: "auto", sm: "280px", md: "340px" },
-          maxHeight: { xs: "380px", sm: "380px", md: "420px" },
-          minHeight: { xs: "180px", sm: "220px", md: "240px" },
+          maxHeight: { xs: "400px", sm: "380px", md: "420px" },
+          minHeight: { xs: "200px", sm: "240px", md: "240px" },
           aspectRatio: { xs: "16/10", sm: "auto" },
           background: "#000",
           borderRadius: "16px",
@@ -1459,7 +1459,7 @@ function Projects() {
         background: "linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "200px", sm: "230px", md: "250px" },
+        minHeight: { xs: "220px", sm: "240px", md: "250px" },
         imageRendering: "crisp-edges",
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
@@ -1471,10 +1471,10 @@ function Projects() {
       <Box
         sx={{
           position: "relative",
-          width: { xs: "85%", sm: "70%", md: "60%" },
+          width: { xs: "90%", sm: "75%", md: "60%" },
           height: { xs: "auto", sm: "70%", md: "75%" },
-          maxHeight: { xs: "300px", sm: "350px", md: "450px" },
-          minHeight: { xs: "200px", sm: "250px", md: "350px" },
+          maxHeight: { xs: "320px", sm: "360px", md: "450px" },
+          minHeight: { xs: "200px", sm: "240px", md: "350px" },
           background: "#f3f4f6",
           borderRadius: { xs: "12px", sm: "13px", md: "15px" },
           display: "flex",
@@ -1927,15 +1927,15 @@ function Projects() {
         background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "200px", sm: "230px", md: "250px" },
+        minHeight: { xs: "180px", sm: "220px", md: "250px" },
       }}
     >
       {/* Mobile Phone Frame */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "110px", sm: "135px", md: "170px" },
-          height: { xs: "220px", sm: "270px", md: "340px" },
+          width: { xs: "120px", sm: "140px", md: "170px" },
+          height: { xs: "240px", sm: "280px", md: "340px" },
           bgcolor: "#1a1a1a",
           borderRadius: { xs: "24px", sm: "26px", md: "28px" },
           padding: { xs: "6px", sm: "7px", md: "8px" },
