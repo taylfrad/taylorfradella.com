@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Container, Link, Paper } from "@mui/material";
+import { Box, Typography, Button, Container, Link, Paper, useMediaQuery, useTheme } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { useRef, useState, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -59,6 +59,10 @@ const getAnimationState = (
 // Parallax Project Item Component - Memoized for performance
 const ParallaxProjectItem = memo(
   function ParallaxProjectItem({ project, index, isImageLeft }) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
     const navigate = useNavigate();
     const itemRef = useRef();
     const [ref, inView] = useInView({
@@ -173,11 +177,13 @@ const ParallaxProjectItem = memo(
         component={motion.div}
         key={`project-wrapper-${project.id}-${animationKey}`}
         initial="hidden"
-        whileInView={shouldAnimate ? "visible" : undefined}
+        whileInView={shouldAnimate ? "visible" : "hidden"}
         viewport={{ once: false, margin: "-50px" }}
         animate={animationState}
         variants={cardVariants}
         transition={{ duration: 0.6, ease: "easeOut" }}
+        onAnimationStart={() => {}}
+        onAnimationComplete={() => {}}
         sx={{
           mb: index < 3 ? { xs: 4, sm: 5, md: 6 } : 0,
           width: "100%",
@@ -218,7 +224,7 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-image-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate ? "visible" : undefined}
+            whileInView={shouldAnimate ? "visible" : "hidden"}
             viewport={{ once: false, margin: "-50px" }}
             animate={animationState}
             variants={imageVariants(isImageLeft)}
@@ -228,13 +234,15 @@ const ParallaxProjectItem = memo(
               willChange: "transform, opacity",
               transform: "translateZ(0)",
             }}
+            onAnimationStart={() => {}}
+            onAnimationComplete={() => {}}
           >
             <Box
               component={motion.div}
-              whileHover={{
-                scale: { xs: 1, sm: 1.05, md: 1.08 },
-                rotateY: { xs: 0, sm: 0, md: isImageLeft ? 8 : -8 },
-                rotateX: { xs: 0, sm: 0, md: 3 },
+              whileHover={isDesktop ? {
+                scale: 1.08,
+                rotateY: isImageLeft ? 8 : -8,
+                rotateX: 3,
                 transition: {
                   duration: 0.5,
                   ease: [0.23, 1, 0.32, 1],
@@ -242,9 +250,15 @@ const ParallaxProjectItem = memo(
                   stiffness: 300,
                   damping: 20,
                 },
-              }}
+              } : isTablet ? {
+                scale: 1.05,
+                transition: {
+                  duration: 0.5,
+                  ease: [0.23, 1, 0.32, 1],
+                },
+              } : undefined}
               style={{
-                transformStyle: { xs: "flat", sm: "flat", md: "preserve-3d" },
+                transformStyle: isDesktop ? "preserve-3d" : "flat",
                 willChange: "transform",
               }}
               sx={{
@@ -269,7 +283,7 @@ const ParallaxProjectItem = memo(
                 background: "none",
                 cursor: "pointer",
                 transition: "box-shadow 0.4s ease",
-                transformStyle: { xs: "flat", sm: "flat", md: "preserve-3d" },
+                transformStyle: isDesktop ? "preserve-3d" : "flat",
                 transform: "translateZ(0)",
                 backfaceVisibility: "hidden",
               }}
@@ -282,15 +296,17 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-details-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate ? "visible" : undefined}
+            whileInView={shouldAnimate ? "visible" : "hidden"}
             viewport={{ once: false, margin: "-50px" }}
             animate={animationState}
             variants={textVariants(isImageLeft)}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            whileHover={{
+            whileHover={isDesktop ? {
               x: isImageLeft ? 8 : -8,
               transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
-            }}
+            } : undefined}
+            onAnimationStart={() => {}}
+            onAnimationComplete={() => {}}
             style={{
               flex: 1,
               minWidth: 0,

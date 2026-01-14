@@ -617,7 +617,9 @@ export default function ProjectDetail() {
     if (mainContent) {
       mainContent.scrollTop = 0;
       mainContent.scrollTo(0, 0);
+      // Hide main content when viewing project detail
       mainContent.style.display = "none";
+      mainContent.style.visibility = "hidden";
     }
     
     window.scrollTo(0, 0);
@@ -633,6 +635,7 @@ export default function ProjectDetail() {
     return () => {
       if (mainContent) {
         mainContent.style.display = "";
+        mainContent.style.visibility = "";
       }
     };
   }, []);
