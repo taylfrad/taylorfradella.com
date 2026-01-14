@@ -1,8 +1,11 @@
 name: Deploy React Site to GitHub Pages
+# Disabled - using manual deployment with gh-pages instead
+# on:
+#   push:
+#     branches: ["main"]
+#   workflow_dispatch:
 on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
+  workflow_dispatch:  # Only allow manual triggers, not automatic
 
 # Prevent multiple deployments from running at the same time
 concurrency:
