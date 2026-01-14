@@ -40,24 +40,29 @@ export default function Home() {
       }
     }
     
-    // Track if we've already scrolled to prevent race conditions
-    let hasScrolled = false;
-    
     const scrollToHero = () => {
-      if (hasScrolled) return; // Prevent multiple scrolls
-      
       // Get main scroll container
       const mainContent = mainScrollRef.current || document.querySelector("main");
       
-      // Force scroll main container to top
+      // Force scroll main container to top FIRST (most important)
       if (mainContent) {
         // Disable scroll snap temporarily to prevent snapping
         const originalScrollSnap = mainContent.style.scrollSnapType;
         mainContent.style.scrollSnapType = 'none';
         
+        // Force scroll multiple ways
         mainContent.scrollTop = 0;
         mainContent.scrollLeft = 0;
         mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        
+        // Also try scrollIntoView on hero if available
+        if (heroRef.current) {
+          try {
+            heroRef.current.scrollIntoView({ behavior: "instant", block: "start" });
+          } catch (e) {
+            // Ignore errors
+          }
+        }
         
         // Re-enable scroll snap after a moment
         setTimeout(() => {
@@ -71,18 +76,12 @@ export default function Home() {
       document.documentElement.scrollLeft = 0;
       document.body.scrollTop = 0;
       document.body.scrollLeft = 0;
-      
-      // Scroll hero into view if ref exists
-      if (heroRef.current) {
-        heroRef.current.scrollIntoView({ behavior: "instant", block: "start" });
-      }
     };
     
-    // Immediate scroll - mark as scrolled
+    // Immediate scroll - run multiple times to ensure it sticks
     scrollToHero();
-    hasScrolled = true;
     
-    // Multiple attempts to ensure it sticks
+    // Multiple attempts to ensure it sticks (especially important on refresh)
     requestAnimationFrame(() => {
       scrollToHero();
       requestAnimationFrame(() => {
@@ -91,11 +90,12 @@ export default function Home() {
           scrollToHero();
           setTimeout(scrollToHero, 10);
           setTimeout(scrollToHero, 50);
+          setTimeout(scrollToHero, 100);
         }, 0);
       });
     });
     
-    // Final check after a delay
+    // Final check after delays
     setTimeout(() => {
       scrollToHero();
       setTimeout(scrollToHero, 100);
@@ -120,7 +120,7 @@ export default function Home() {
         }, 500);
       }
     }
-  }, [location.state]); // Include location.state to check for scrollToProjects
+  }, [location.pathname, location.state]); // Run on pathname change (page refresh) and state change
 
   // Throttled scroll handler using requestAnimationFrame
   useEffect(() => {

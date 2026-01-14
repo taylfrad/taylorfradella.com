@@ -22,6 +22,23 @@ if (typeof window !== 'undefined') {
     document.body.scrollTop = 0;
   }
   
+  // Also scroll main container if it exists
+  const scrollMainToTop = () => {
+    const mainContent = document.querySelector("main");
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+      mainContent.scrollLeft = 0;
+    }
+  };
+  
+  // Try immediately and on DOM ready
+  scrollMainToTop();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scrollMainToTop);
+  } else {
+    scrollMainToTop();
+  }
+  
   // Preconnect to external domains for faster loading
   const preconnectDomains = [
     'https://fonts.googleapis.com',
