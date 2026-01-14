@@ -7,11 +7,19 @@ import {
 } from "@mui/material";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import { motion } from "framer-motion";
+import { useState, useEffect, useMemo, memo } from "react";
 
 export default function Skills() {
   const [containerRef, isVisible] = useIntersectionObserver({
     threshold: 0.2,
   });
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) {
+      setHasBeenVisible(true);
+    }
+  }, [isVisible]);
 
   const containerVariants = {
     hidden: {},
@@ -29,8 +37,8 @@ export default function Skills() {
     },
   };
 
-  // Main skill categories matching the mock design
-  const skillCategories = [
+  // Main skill categories matching the mock design - Memoized
+  const skillCategories = useMemo(() => [
     {
       title: "Web Development",
       icon: "devicon-react-plain colored",
@@ -43,10 +51,10 @@ export default function Skills() {
     },
     {
       title: "Cloud & Tools",
-      icon: "devicon-azure-plain colored",
+      icon: "devicon-github-plain colored",
       description: "Azure, Git, VS Code, CI/CD",
     },
-  ];
+  ], []);
 
   return (
     <Box
@@ -105,7 +113,7 @@ export default function Skills() {
           <motion.div
             variants={containerVariants}
             initial="hidden"
-            animate={isVisible ? "visible" : "hidden"}
+            animate={isVisible || hasBeenVisible ? "visible" : "hidden"}
           >
             <Grid 
               container 

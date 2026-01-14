@@ -194,3 +194,20 @@ html {
     scroll-padding-top: 60px;
   }
 }
+
+/* Scroll to top button responsive positioning */
+.scroll-to-top-button {
+  bottom: 24px !important;
+}
+
+@media (min-width: 600px) {
+  .scroll-to-top-button {
+    bottom: 32px !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .scroll-to-top-button {
+    bottom: 40px !important;
+  }
+}

@@ -1,6 +1,9 @@
 import { Box, Typography, Link, IconButton } from "@mui/material";
 import { keyframes } from "@mui/system";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { useState, useEffect } from "react";
 
 const bounceAnimation = keyframes`
   0%, 100% { transform: translateY(0); }
@@ -8,6 +11,17 @@ const bounceAnimation = keyframes`
 `;
 
 const Footer = () => {
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  const [ref, inView] = useInView({
+    threshold: 0.1,
+    triggerOnce: false,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      setHasBeenVisible(true);
+    }
+  }, [inView]);
 
   const scrollToTop = () => {
     const heroSection = document.getElementById("hero");
@@ -46,6 +60,7 @@ const Footer = () => {
   return (
     <>
       <Box
+        ref={ref}
         id="footer"
         component="footer"
         sx={{
@@ -97,33 +112,44 @@ const Footer = () => {
           <KeyboardArrowUpIcon sx={{ fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" } }} />
         </IconButton>
 
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: 1200,
-            mx: "auto",
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            justifyContent: { xs: "center", md: "space-between" },
-            alignItems: { xs: "center", md: "flex-start" },
-            gap: { xs: 3, sm: 4, md: 0 },
-            px: { xs: 2, sm: 3, md: 6 },
-            mb: { xs: 1, md: 1 },
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ width: "100%" }}
         >
-          {/* Contact Me */}
           <Box
             sx={{
-              flex: 1,
-              minWidth: { xs: "auto", sm: 200, md: 220 },
-              flexBasis: 0,
-              mb: { xs: 2, sm: 2, md: 0 },
+              width: "100%",
+              maxWidth: 1200,
+              mx: "auto",
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
+              flexDirection: { xs: "column", md: "row" },
+              justifyContent: { xs: "center", md: "space-between" },
+              alignItems: { xs: "center", md: "flex-start" },
+              gap: { xs: 3, sm: 4, md: 0 },
+              px: { xs: 2, sm: 3, md: 6 },
+              mb: { xs: 1, md: 1 },
             }}
           >
+            {/* Contact Me */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: { xs: "auto", sm: 200, md: 220 },
+                  flexBasis: 0,
+                  mb: { xs: 2, sm: 2, md: 0 },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
             <Typography
               variant="subtitle2"
               sx={{
@@ -149,20 +175,26 @@ const Footer = () => {
             >
               taylor.fradella@selu.edu
             </Typography>
-          </Box>
-          {/* Let's Connect */}
-          <Box
-            sx={{
-              flex: 1,
-              minWidth: { xs: "auto", sm: 200, md: 220 },
-              flexBasis: 0,
-              mb: { xs: 2, sm: 2, md: 0 },
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
+              </Box>
+            </motion.div>
+            {/* Let's Connect */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: { xs: "auto", sm: 200, md: 220 },
+                  flexBasis: 0,
+                  mb: { xs: 2, sm: 2, md: 0 },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
             <Typography
               variant="subtitle2"
               sx={{
@@ -242,19 +274,25 @@ const Footer = () => {
                 GitHub
               </Link>
             </Box>
-          </Box>
-          {/* Copyright */}
-          <Box
-            sx={{
-              flex: 1,
-              minWidth: { xs: "auto", sm: 200, md: 220 },
-              flexBasis: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-            }}
-          >
+              </Box>
+            </motion.div>
+            {/* Copyright */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: { xs: "auto", sm: 200, md: 220 },
+                  flexBasis: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
             <Typography
               variant="subtitle2"
               sx={{
@@ -285,8 +323,10 @@ const Footer = () => {
                 💻
               </span>
             </Typography>
+              </Box>
+            </motion.div>
           </Box>
-        </Box>
+        </motion.div>
       </Box>
     </>
   );

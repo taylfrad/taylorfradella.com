@@ -1,6 +1,7 @@
 import { Box, Typography, Container, Button, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { motion } from "framer-motion";
+import LiquidMetalBackground from "./LiquidMetalBackground";
 
 export default function Hero({ onNav }) {
   // Navigation click handler
@@ -22,9 +23,15 @@ export default function Hero({ onNav }) {
         flexDirection: "column",
         px: 0,
         py: 0,
-        overflow: "visible",
+        overflow: "hidden",
+        // 120fps optimizations
+        transform: "translateZ(0)",
+        willChange: "auto",
+        contain: "layout style paint",
       }}
     >
+      {/* Dynamic Liquid Metal Background */}
+      <LiquidMetalBackground />
       {/* Main Content - Two Column Layout */}
       <Container
         maxWidth="lg"
@@ -40,6 +47,8 @@ export default function Hero({ onNav }) {
           py: { xs: 0, sm: 0, md: 0 },
           pt: { xs: 16, sm: 14, md: 0 },
           pb: { xs: 8, sm: 6, md: 0 },
+          position: "relative",
+          zIndex: 1,
         }}
       >
         {/* Left Side - Text Content */}
@@ -56,9 +65,10 @@ export default function Hero({ onNav }) {
           }}
         >
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            style={{ willChange: "auto" }}
           >
             <Typography
               variant="h1"
@@ -77,20 +87,24 @@ export default function Hero({ onNav }) {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
+            style={{ willChange: "auto" }}
           >
             <Typography
               variant="h4"
               component="h2"
               sx={{
-                color: "#86868b",
-                fontWeight: 400,
+                color: "#1d1d1f",
+                fontWeight: 500,
                 fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "1.625rem" },
                 mb: 4,
                 lineHeight: 1.47059,
                 letterSpacing: "-0.016em",
+                textShadow: "0 1px 3px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.06)",
+                position: "relative",
+                zIndex: 2,
               }}
             >
               Designing and engineering thoughtful digital experiences.
@@ -98,9 +112,12 @@ export default function Hero({ onNav }) {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{ willChange: "auto" }}
           >
             <Button
               variant="contained"
@@ -145,10 +162,14 @@ export default function Hero({ onNav }) {
           }}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            style={{ width: "100%", maxWidth: "1000px" }}
+            transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
+            style={{ 
+              width: "100%", 
+              maxWidth: "1000px",
+              willChange: "auto",
+            }}
           >
             {/* Device Mockup - Screen Inside Frame */}
             <Box
@@ -165,6 +186,8 @@ export default function Hero({ onNav }) {
                 component="img"
                 src="/macbook-frame.png"
                 alt="MacBook Pro"
+                loading="lazy"
+                decoding="async"
                 sx={{
                   width: "100%",
                   height: "auto",
@@ -172,9 +195,12 @@ export default function Hero({ onNav }) {
                   maxWidth: { xs: "100%", sm: "95%", md: "100%" },
                   display: "block",
                   objectFit: "contain",
-                  filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.06))",
+                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.04))",
                   zIndex: 2,
                   position: "relative",
+                  willChange: "auto",
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
                 }}
               />
 
@@ -192,16 +218,21 @@ export default function Hero({ onNav }) {
           left: { xs: "16px", sm: "32px", md: "48px" },
           display: "flex",
           gap: { xs: 2, sm: 3, md: 4 },
-          zIndex: 1000,
+          zIndex: 10,
           margin: 0,
           padding: 0,
         }}
       >
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavClick("skills");
-          }}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("skills");
+            }}
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
@@ -217,14 +248,20 @@ export default function Hero({ onNav }) {
                 bgcolor: "transparent",
               },
             }}
+          >
+            About
+          </Button>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          About
-        </Button>
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavClick("projects");
-          }}
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("projects");
+            }}
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
@@ -240,14 +277,20 @@ export default function Hero({ onNav }) {
                 bgcolor: "transparent",
               },
             }}
+          >
+            Projects
+          </Button>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          Projects
-        </Button>
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            handleNavClick("contact");
-          }}
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("contact");
+            }}
             sx={{
               color: "#1d1d1f",
               textTransform: "none",
@@ -263,9 +306,10 @@ export default function Hero({ onNav }) {
                 bgcolor: "transparent",
               },
             }}
-        >
-          Contact
-        </Button>
+          >
+            Contact
+          </Button>
+        </motion.div>
       </Box>
 
       {/* Bouncing Down Arrow - Only visible on hero page */}
@@ -275,7 +319,7 @@ export default function Hero({ onNav }) {
           bottom: { xs: 3, sm: 4, md: 5 },
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 1000,
+          zIndex: 10,
           margin: 0,
         }}
       >
@@ -287,6 +331,10 @@ export default function Hero({ onNav }) {
             duration: 1.5,
             repeat: Infinity,
             ease: "easeInOut",
+          }}
+          style={{
+            willChange: "transform",
+            transform: "translateZ(0)",
           }}
         >
           <IconButton

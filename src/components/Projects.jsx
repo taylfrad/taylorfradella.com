@@ -1,9 +1,633 @@
 import { Box, Typography, Button, Container, Link, Paper } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
-import { useRef } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useNavigate } from "react-router-dom";
+import { projectsData } from "../data/projectsData";
+
+// Animation variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const imageVariants = (isImageLeft) => ({
+  hidden: { opacity: 0, x: isImageLeft ? -60 : 60 },
+  visible: { opacity: 1, x: 0 },
+});
+
+const textVariants = (isImageLeft) => ({
+  hidden: { opacity: 0, x: isImageLeft ? 60 : -60 },
+  visible: { opacity: 1, x: 0 },
+});
+
+const roleBadgeVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const tagsContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+};
+
+const tagVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1 },
+};
+
+const statusBadgeVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 },
+};
+
+// Helper function to determine animation state
+const getAnimationState = (
+  forceReset,
+  shouldAnimate,
+  inView,
+  hasBeenVisible
+) => {
+  if (forceReset) return "hidden";
+  if (shouldAnimate && inView) return "visible";
+  if (hasBeenVisible) return "visible";
+  return "hidden";
+};
+
+// Parallax Project Item Component - Memoized for performance
+const ParallaxProjectItem = memo(
+  function ParallaxProjectItem({ project, index, isImageLeft }) {
+    const navigate = useNavigate();
+    const itemRef = useRef();
+    const [ref, inView] = useInView({
+      threshold: 0.2,
+      triggerOnce: false,
+    });
+    const [hasBeenVisible, setHasBeenVisible] = useState(false);
+    const [shouldAnimate, setShouldAnimate] = useState(true);
+    const [animationKey, setAnimationKey] = useState(0);
+    const [forceReset, setForceReset] = useState(false);
+
+    const handleCardClick = useCallback(
+      (e) => {
+        if (e.target.closest("a[href]") || e.target.closest("button")) {
+          return;
+        }
+        navigate(`/project/${project.id}`);
+      },
+      [navigate, project.id]
+    );
+
+    // Throttled scroll handler for hero visibility check
+    useEffect(() => {
+      let ticking = false;
+      let rafId = null;
+
+      const checkHeroVisibility = () => {
+        if (!ticking) {
+          rafId = requestAnimationFrame(() => {
+            const heroElement = document.getElementById("hero");
+            if (!heroElement) {
+              ticking = false;
+              return;
+            }
+
+            const rect = heroElement.getBoundingClientRect();
+            const isHeroVisible =
+              rect.top >= 0 && rect.top < window.innerHeight * 0.5;
+
+            if (isHeroVisible && hasBeenVisible) {
+              setForceReset(true);
+              setHasBeenVisible(false);
+              setShouldAnimate(false);
+
+              setTimeout(() => {
+                setForceReset(false);
+                setShouldAnimate(true);
+                setAnimationKey((prev) => prev + 1);
+              }, 50);
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      window.addEventListener("scroll", checkHeroVisibility, { passive: true });
+      const mainContent = document.querySelector("main");
+      if (mainContent) {
+        mainContent.addEventListener("scroll", checkHeroVisibility, {
+          passive: true,
+        });
+      }
+
+      checkHeroVisibility();
+
+      return () => {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+        window.removeEventListener("scroll", checkHeroVisibility);
+        if (mainContent) {
+          mainContent.removeEventListener("scroll", checkHeroVisibility);
+        }
+      };
+    }, [hasBeenVisible]);
+
+    // Mark as visible after animation completes
+    useEffect(() => {
+      if (inView && shouldAnimate) {
+        const timer = setTimeout(() => {
+          setHasBeenVisible(true);
+          setShouldAnimate(false);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }, [inView, shouldAnimate]);
+
+    // Parallax scale effect
+    const { scrollYProgress } = useScroll({
+      target: itemRef,
+      offset: ["start end", "end start"],
+    });
+    const imageScale = useTransform(
+      scrollYProgress,
+      [0, 0.5, 1],
+      [0.96, 1, 0.96]
+    );
+
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Memoize animation state getter
+    const animationState = useMemo(
+      () =>
+        getAnimationState(forceReset, shouldAnimate, inView, hasBeenVisible),
+      [forceReset, shouldAnimate, inView, hasBeenVisible]
+    );
+
+    return (
+      <Box
+        ref={itemRef}
+        component={motion.div}
+        key={`project-wrapper-${project.id}-${animationKey}`}
+        initial="hidden"
+        whileInView={shouldAnimate ? "visible" : undefined}
+        viewport={{ once: false, margin: "-50px" }}
+        animate={animationState}
+        variants={cardVariants}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        sx={{
+          mb: index < 3 ? { xs: 4, sm: 5, md: 6 } : 0,
+          width: "100%",
+        }}
+      >
+        <Box
+          ref={ref}
+          component={motion.div}
+          onClick={handleCardClick}
+          onHoverStart={() => setIsHovered(true)}
+          onHoverEnd={() => setIsHovered(false)}
+          whileHover={{
+            y: -12,
+            transition: {
+              duration: 0.4,
+              ease: [0.23, 1, 0.32, 1],
+              staggerChildren: 0.1,
+              delayChildren: 0.1,
+            },
+          }}
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "flex-start", md: "center" },
+            justifyContent: "flex-start",
+            gap: { xs: 3, sm: 4, md: 5 },
+            width: "100%",
+            cursor: "pointer",
+            perspective: "1000px",
+            position: "relative",
+            zIndex: 1,
+            willChange: "transform",
+            transform: "translateZ(0)",
+          }}
+          style={{ pointerEvents: "auto" }}
+        >
+          {/* Parallax Project Image */}
+          <motion.div
+            key={`project-image-${project.id}-${animationKey}`}
+            initial="hidden"
+            whileInView={shouldAnimate ? "visible" : undefined}
+            viewport={{ once: false, margin: "-50px" }}
+            animate={animationState}
+            variants={imageVariants(isImageLeft)}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+            style={{
+              scale: imageScale,
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+            }}
+          >
+            <Box
+              component={motion.div}
+              whileHover={{
+                scale: 1.08,
+                rotateY: isImageLeft ? 8 : -8,
+                rotateX: 3,
+                transition: {
+                  duration: 0.5,
+                  ease: [0.23, 1, 0.32, 1],
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                },
+              }}
+              style={{
+                transformStyle: "preserve-3d",
+                willChange: "transform",
+              }}
+              sx={{
+                maxWidth: "100%",
+                width: { xs: "100%", sm: "90%", md: 460 },
+                height: { xs: "auto", sm: "280px", md: 360 },
+                minHeight: { xs: "200px", sm: "280px", md: 360 },
+                flexShrink: 0,
+                mb: { xs: 3, sm: 3, md: 0 },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 12,
+                overflow: "hidden",
+                boxShadow: isHovered
+                  ? "0 20px 40px rgba(0,0,0,0.2)"
+                  : "0 6px 20px rgba(0,0,0,0.1)",
+                background: "none",
+                cursor: "pointer",
+                transition: "box-shadow 0.4s ease",
+                transformStyle: "preserve-3d",
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden",
+              }}
+            >
+              {project.animation}
+            </Box>
+          </motion.div>
+
+          {/* Parallax Project Details */}
+          <motion.div
+            key={`project-details-${project.id}-${animationKey}`}
+            initial="hidden"
+            whileInView={shouldAnimate ? "visible" : undefined}
+            viewport={{ once: false, margin: "-50px" }}
+            animate={animationState}
+            variants={textVariants(isImageLeft)}
+            transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+            whileHover={{
+              x: isImageLeft ? 8 : -8,
+              transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
+            }}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              textAlign: "left",
+              willChange: "transform",
+              transform: "translateZ(0)",
+            }}
+          >
+            {/* Role Badge */}
+            {project.role && (
+              <motion.div
+                initial="hidden"
+                animate={animationState}
+                variants={roleBadgeVariants}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: {
+                      xs: "0.6875rem",
+                      sm: "0.75rem",
+                      md: "0.8125rem",
+                    },
+                    fontWeight: 600,
+                    color: "#86868b",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    mb: { xs: 0.75, md: 1 },
+                    pointerEvents: "none",
+                  }}
+                >
+                  {project.role}
+                </Typography>
+              </motion.div>
+            )}
+
+            <motion.div
+              whileHover={{
+                scale: 1.05,
+                x: 4,
+                transition: {
+                  duration: 0.3,
+                  ease: [0.23, 1, 0.32, 1],
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 17,
+                },
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 600,
+                  mb: { xs: 1.5, md: 1 },
+                  color: "#222",
+                  fontSize: {
+                    xs: "1.125rem",
+                    sm: "1.25rem",
+                    md: "1.5rem",
+                  },
+                  lineHeight: 1.3,
+                  cursor: "pointer",
+                }}
+              >
+                {project.title}
+              </Typography>
+            </motion.div>
+
+            {/* Tags */}
+            {project.tags && project.tags.length > 0 && (
+              <Box
+                component={motion.div}
+                initial="hidden"
+                animate={animationState}
+                variants={tagsContainerVariants}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 1,
+                  mb: 2,
+                  pointerEvents: "none",
+                }}
+              >
+                {project.tags.map((tag, tagIdx) => (
+                  <Box
+                    key={tagIdx}
+                    component={motion.div}
+                    initial="hidden"
+                    animate={animationState}
+                    variants={tagVariants}
+                    transition={{ duration: 0.3, delay: 0.4 + tagIdx * 0.1 }}
+                    sx={{
+                      fontSize: { xs: "0.6875rem", sm: "0.75rem" },
+                      fontWeight: 500,
+                      color: "#666",
+                      backgroundColor: "#f0f0f0",
+                      px: 1.25,
+                      py: 0.5,
+                      borderRadius: "12px",
+                      display: "inline-block",
+                    }}
+                  >
+                    {tag}
+                  </Box>
+                ))}
+              </Box>
+            )}
+
+            <Typography
+              component="div"
+              sx={{
+                color: "#666",
+                mb: { xs: 2.5, md: 2 },
+                fontSize: {
+                  xs: "0.8125rem",
+                  sm: "0.875rem",
+                  md: "0.9375rem",
+                },
+                lineHeight: 1.6,
+                pointerEvents: "none",
+              }}
+            >
+              {project.description}
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: { xs: "flex-start", md: "flex-end" },
+                width: "100%",
+                mt: { xs: 1, md: 0 },
+                gap: 1,
+              }}
+            >
+              {/* Status Badge and Link Tags */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                {project.status && (
+                  <motion.div
+                    initial="hidden"
+                    animate={animationState}
+                    variants={statusBadgeVariants}
+                    transition={{ duration: 0.4, delay: 0.5 }}
+                  >
+                    <Box
+                      sx={{
+                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
+                        fontWeight: 600,
+                        color:
+                          project.status === "Live"
+                            ? "#22c55e"
+                            : project.status === "Completed"
+                            ? "#3b82f6"
+                            : "#86868b",
+                        backgroundColor:
+                          project.status === "Live"
+                            ? "rgba(34, 197, 94, 0.1)"
+                            : project.status === "Completed"
+                            ? "rgba(59, 130, 246, 0.1)"
+                            : "rgba(134, 134, 139, 0.1)",
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        display: "inline-block",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {project.status}
+                    </Box>
+                  </motion.div>
+                )}
+
+                {/* GitHub Tag */}
+                {project.github && (
+                  <motion.div
+                    initial="hidden"
+                    animate={animationState}
+                    variants={statusBadgeVariants}
+                    transition={{ duration: 0.4, delay: 0.55 }}
+                    whileHover={{
+                      scale: 1.1,
+                      transition: {
+                        duration: 0.2,
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 10,
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      window.open(
+                        project.github,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Box
+                      sx={{
+                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
+                        fontWeight: 600,
+                        color: "#1d1d1f",
+                        backgroundColor: "#f0f0f0",
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      GitHub
+                    </Box>
+                  </motion.div>
+                )}
+
+                {/* YouTube Tag */}
+                {project.youtube && (
+                  <motion.div
+                    initial="hidden"
+                    animate={animationState}
+                    variants={statusBadgeVariants}
+                    transition={{ duration: 0.4, delay: 0.55 }}
+                    whileHover={{
+                      scale: 1.1,
+                      transition: {
+                        duration: 0.2,
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 10,
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      window.open(
+                        project.youtube,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Box
+                      sx={{
+                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
+                        fontWeight: 600,
+                        color: "#dc2626",
+                        backgroundColor: "rgba(220, 38, 38, 0.1)",
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      YouTube
+                    </Box>
+                  </motion.div>
+                )}
+              </Box>
+
+              <motion.div
+                whileHover={{
+                  scale: 1.08,
+                  y: -4,
+                  transition: {
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 17,
+                  },
+                }}
+                whileTap={{
+                  scale: 0.95,
+                  y: 0,
+                  transition: { duration: 0.1 },
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  navigate(`/project/${project.id}`);
+                }}
+                data-no-navigate
+                style={{
+                  pointerEvents: "auto",
+                  zIndex: 10,
+                  position: "relative",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: "#1d1d1f",
+                    color: "#ffffff",
+                    textTransform: "none",
+                    fontSize: {
+                      xs: "0.875rem",
+                      sm: "0.9rem",
+                      md: "1rem",
+                    },
+                    fontWeight: 500,
+                    px: { xs: 2, sm: 2.5, md: 3.5 },
+                    py: { xs: 1, sm: 1.25, md: 1.75 },
+                    minHeight: { xs: "40px", sm: "44px", md: "48px" },
+                    borderRadius: "8px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    "&:hover": {
+                      bgcolor: "#000000",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  View Project
+                </Button>
+              </motion.div>
+            </Box>
+          </motion.div>
+        </Box>
+      </Box>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison to prevent unnecessary re-renders
+    return (
+      prevProps.project.id === nextProps.project.id &&
+      prevProps.index === nextProps.index &&
+      prevProps.isImageLeft === nextProps.isImageLeft
+    );
+  }
+);
 
 const moviePosters = {
   Interstellar:
@@ -32,15 +656,10 @@ const moviePosters = {
     "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gO9k7t9jSdkkWVG0deMZDpELZGw.jpg",
 };
 
-export default function Projects() {
-  const [containerRef] = useIntersectionObserver({
-    threshold: 0.1,
-    rootMargin: "-100px",
-  });
-
+function Projects() {
   const scrollToSection = (sectionId) => {
     let element = null;
-    
+
     if (sectionId === "hero" || sectionId === "/") {
       element = document.getElementById("hero");
     } else if (sectionId === "skills") {
@@ -52,10 +671,10 @@ export default function Projects() {
     }
 
     if (element) {
-      element.scrollIntoView({ 
-        behavior: "smooth", 
+      element.scrollIntoView({
+        behavior: "smooth",
         block: "start",
-        inline: "nearest"
+        inline: "nearest",
       });
     }
   };
@@ -837,10 +1456,15 @@ export default function Projects() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)",
+        background: "linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)",
         overflow: "hidden",
         position: "relative",
         minHeight: { xs: "200px", sm: "230px", md: "250px" },
+        imageRendering: "crisp-edges",
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
       }}
     >
       {/* Main Device Display */}
@@ -851,13 +1475,15 @@ export default function Projects() {
           height: { xs: "auto", sm: "70%", md: "75%" },
           maxHeight: { xs: "300px", sm: "350px", md: "450px" },
           minHeight: { xs: "200px", sm: "250px", md: "350px" },
-          background: "#1e293b",
+          background: "#f3f4f6",
           borderRadius: { xs: "12px", sm: "13px", md: "15px" },
           display: "flex",
           flexDirection: "column",
           padding: { xs: "10px", sm: "12px", md: "15px" },
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)",
-          border: "1px solid rgba(255, 255, 255, 0.05)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+          border: "2px solid #d1d5db",
+          transform: "translateZ(0)",
+          willChange: "auto",
         }}
       >
         {/* Header */}
@@ -872,11 +1498,11 @@ export default function Projects() {
           <Typography
             sx={{
               fontSize: { xs: "11px", sm: "12px", md: "14px" },
-              color: "white",
+              color: "#1f2937",
               fontWeight: "bold",
             }}
           >
-            Dexcom G6 + Grok AI
+            SweetSpot
           </Typography>
           <Box
             sx={{
@@ -890,20 +1516,20 @@ export default function Projects() {
                 width: { xs: "6px", sm: "7px", md: "8px" },
                 height: { xs: "6px", sm: "7px", md: "8px" },
                 borderRadius: "50%",
-                background: "#4caf50",
+                background: "#22c55e",
                 animation: "pulse 2s infinite",
                 "@keyframes pulse": {
                   "0%": { opacity: 0.5, transform: "scale(0.9)" },
                   "50%": { opacity: 1, transform: "scale(1.1)" },
                   "100%": { opacity: 0.5, transform: "scale(0.9)" },
                 },
-                boxShadow: "0 0 4px rgba(76, 175, 80, 0.6)",
+                boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
               }}
             />
             <Typography
               sx={{
                 fontSize: { xs: "8px", sm: "9px", md: "10px" },
-                color: "white",
+                color: "#1f2937",
               }}
             >
               Connected
@@ -923,7 +1549,7 @@ export default function Projects() {
           <Typography
             sx={{
               fontSize: { xs: "24px", sm: "28px", md: "32px" },
-              color: "white",
+              color: "#1f2937",
               fontWeight: "bold",
               animation: "fadeInOut 3s infinite",
               "@keyframes fadeInOut": {
@@ -937,7 +1563,7 @@ export default function Projects() {
           <Typography
             sx={{
               fontSize: { xs: "11px", sm: "12px", md: "14px" },
-              color: "white",
+              color: "#1f2937",
               marginLeft: "5px",
             }}
           >
@@ -961,20 +1587,20 @@ export default function Projects() {
                 width: { xs: "5px", sm: "6px", md: "7px" },
                 height: { xs: "5px", sm: "6px", md: "7px" },
                 borderRadius: "50%",
-                background: "#2196f3",
+                background: "#22c55e",
                 animation: "aiPulse 1.5s infinite",
                 "@keyframes aiPulse": {
                   "0%": { transform: "scale(0.8)", opacity: 0.5 },
                   "50%": { transform: "scale(1.2)", opacity: 1 },
                   "100%": { transform: "scale(0.8)", opacity: 0.5 },
                 },
-                boxShadow: "0 0 4px rgba(33, 150, 243, 0.6)",
+                boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
               }}
             />
             <Typography
               sx={{
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#2196f3",
+                color: "#22c55e",
                 fontWeight: "600",
               }}
             >
@@ -987,12 +1613,15 @@ export default function Projects() {
         <Box
           sx={{
             flex: 1,
-            background: "rgba(255, 255, 255, 0.08)",
+            background: "#ffffff",
             borderRadius: { xs: "8px", sm: "9px", md: "10px" },
             padding: { xs: "6px", sm: "8px", md: "10px" },
             position: "relative",
             overflow: "hidden",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            border: "2px solid #e5e7eb",
+            imageRendering: "crisp-edges",
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
           }}
         >
           {/* Graph Background Grid */}
@@ -1014,8 +1643,8 @@ export default function Projects() {
                 key={i}
                 sx={{
                   width: "100%",
-                  height: { xs: "0.5px", sm: "0.75px", md: "1px" },
-                  background: "rgba(255, 255, 255, 0.08)",
+                  height: { xs: "1px", sm: "1.5px", md: "2px" },
+                  background: "#e5e7eb",
                 }}
               />
             ))}
@@ -1039,7 +1668,8 @@ export default function Projects() {
                 key={value}
                 sx={{
                   fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                  color: "rgba(255, 255, 255, 0.6)",
+                  color: "#6b7280",
+                  fontWeight: 600,
                   transform: {
                     xs: "translateX(-15px)",
                     sm: "translateX(-18px)",
@@ -1062,27 +1692,33 @@ export default function Projects() {
               position: "absolute",
               top: 0,
               left: 0,
+              shapeRendering: "geometricPrecision",
             }}
           >
             {/* Target Range Area */}
             <path
               d="M0,40 L100,40 L100,60 L0,60 Z"
-              fill="rgba(76, 175, 80, 0.1)"
-              stroke="rgba(76, 175, 80, 0.3)"
-              strokeWidth="0.5"
+              fill="rgba(34, 197, 94, 0.15)"
+              stroke="rgba(34, 197, 94, 0.5)"
+              strokeWidth="1"
+              shapeRendering="crispEdges"
             />
 
             {/* Glucose Line */}
             <path
-              d="M0,50 C10,45 20,55 30,40 C40,35 50,45 60,30 C70,35 80,25 90,40 C95,45 100,40 100,40"
+              d="M 0,50 C 10,45 20,55 30,40 C 40,35 50,45 60,30 C 70,35 80,25 90,40 C 95,45 100,40 100,40"
               fill="none"
-              stroke="#2196f3"
-              strokeWidth="2"
-              strokeDasharray="200"
-              strokeDashoffset="200"
+              stroke="#22c55e"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="none"
+              shapeRendering="geometricPrecision"
+              vectorEffect="non-scaling-stroke"
               style={{
-                animation: "drawLine 3s linear forwards",
-                filter: "drop-shadow(0 0 2px #2196f3)",
+                strokeDasharray: "250",
+                strokeDashoffset: "250",
+                animation: "drawLineComplete 3s linear forwards",
               }}
             />
 
@@ -1094,12 +1730,14 @@ export default function Projects() {
                   key={i}
                   cx={`${x}%`}
                   cy={`${yPoints[i]}%`}
-                  r="2"
-                  fill="#2196f3"
+                  r="3"
+                  fill="#22c55e"
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
                   opacity="0"
+                  shapeRendering="geometricPrecision"
                   style={{
                     animation: `fadeIn 0.3s ease forwards ${1 + i * 0.3}s`,
-                    filter: "drop-shadow(0 0 2px #2196f3)",
                   }}
                 />
               );
@@ -1109,18 +1747,23 @@ export default function Projects() {
             <circle
               cx="0%"
               cy="50%"
-              r="2.5"
-              fill="#2196f3"
+              r="4"
+              fill="#22c55e"
+              stroke="#ffffff"
+              strokeWidth="2"
+              shapeRendering="geometricPrecision"
               style={{
-                filter: "drop-shadow(0 0 4px #2196f3)",
                 animation: "moveDot 3s linear forwards",
               }}
             />
 
             <style>
               {`
-                @keyframes drawLine {
-                  to {
+                @keyframes drawLineComplete {
+                  0% {
+                    stroke-dashoffset: 250;
+                  }
+                  100% {
                     stroke-dashoffset: 0;
                   }
                 }
@@ -1146,19 +1789,19 @@ export default function Projects() {
         <Box
           sx={{
             marginTop: { xs: "8px", sm: "10px", md: "12px" },
-            background: "rgba(255, 255, 255, 0.08)",
+            background: "#ffffff",
             borderRadius: { xs: "6px", sm: "7px", md: "8px" },
             padding: { xs: "6px", sm: "8px", md: "10px" },
             position: "relative",
             overflow: "hidden",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            border: "2px solid #e5e7eb",
           }}
         >
           <Typography
             component="div"
             sx={{
               fontSize: { xs: "7px", sm: "8px", md: "10px" },
-              color: "white",
+              color: "#1f2937",
               fontWeight: "bold",
               marginBottom: { xs: "6px", sm: "8px", md: "10px" },
               display: "flex",
@@ -1171,17 +1814,17 @@ export default function Projects() {
                 width: { xs: "5px", sm: "6px", md: "8px" },
                 height: { xs: "5px", sm: "6px", md: "8px" },
                 borderRadius: "50%",
-                background: "#2196f3",
+                background: "#22c55e",
                 animation: "aiPulse 1.5s infinite",
                 "@keyframes aiPulse": {
                   "0%": { transform: "scale(0.8)", opacity: 0.5 },
                   "50%": { transform: "scale(1.2)", opacity: 1 },
                   "100%": { transform: "scale(0.8)", opacity: 0.5 },
                 },
-                boxShadow: "0 0 6px rgba(33, 150, 243, 0.6)",
+                boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
               }}
             />
-            Grok AI Analysis
+            AI Analysis
           </Typography>
 
           <Box
@@ -1194,7 +1837,7 @@ export default function Projects() {
             <Typography
               sx={{
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "rgba(255, 255, 255, 0.9)",
+                color: "#374151",
                 fontFamily: "monospace",
                 lineHeight: 1.4,
               }}
@@ -1204,7 +1847,7 @@ export default function Projects() {
             <Typography
               sx={{
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "rgba(255, 255, 255, 0.9)",
+                color: "#374151",
                 fontFamily: "monospace",
                 lineHeight: 1.4,
               }}
@@ -1214,7 +1857,7 @@ export default function Projects() {
             <Typography
               sx={{
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "rgba(255, 255, 255, 0.9)",
+                color: "#374151",
                 fontFamily: "monospace",
                 lineHeight: 1.4,
                 animation: "fadeInOut 3s infinite",
@@ -1281,7 +1924,7 @@ export default function Projects() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)",
+        background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
         overflow: "hidden",
         position: "relative",
         minHeight: { xs: "200px", sm: "230px", md: "250px" },
@@ -1315,7 +1958,7 @@ export default function Projects() {
             display: "flex",
             flexDirection: "column",
             background:
-              "linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #a855f7 100%)",
+              "linear-gradient(135deg, #b3363d 0%, #9d2e35 50%, #c94a52 100%)",
           }}
         >
           {/* Status Bar - Different color to avoid double purple */}
@@ -1624,11 +2267,11 @@ export default function Projects() {
                   width: { xs: "36px", sm: "40px", md: "44px" },
                   height: { xs: "36px", sm: "40px", md: "44px" },
                   borderRadius: "50%",
-                  bgcolor: "#ef4444",
+                  bgcolor: "#b3363d",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 6px 16px rgba(239,68,68,0.4)",
+                  boxShadow: "0 6px 16px rgba(179,54,61,0.4)",
                   transition: "transform 0.2s ease",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -1682,58 +2325,26 @@ export default function Projects() {
     </Box>
   );
 
-  const projects = [
-    {
-      id: 1,
-      image: "/images/portfolio.png",
-      role: "PERSONAL PROJECT",
-      title: "Personal Portfolio Website",
-      tags: ["React", "Material UI", "Framer Motion"],
-      description:
-        "A minimalist portfolio website designed with Apple's design philosophy in mind. Crafted with React and Material-UI, it features fluid animations, fully responsive layouts, and an emphasis on clean typography and whitespace. Every interaction is thoughtfully designed to create a seamless, professional experience across all devices.",
-      status: "LIVE",
-      github: "https://github.com/taylfrad/taylorfradella.com",
-      animation: portfolioAnimation,
-    },
-    {
-      id: 2,
-      image: "/images/lionsden.png",
-      role: "TEAM PROJECT",
-      title: "Lions Den Cinemas Website and Mobile App",
-      tags: ["React Native", "Node.js", "SQL"],
-      description:
-        "My team and I brought Lions Den Cinemas to life online by creating both a website and a mobile app where anyone can browse showtimes, buy tickets and snacks—either as a guest or by signing up. We also built an easy-to-use admin panel so cinema staff can quickly update movie listings, manage ticket availability, and tweak concession options on the fly. This project highlights our ability to design and deliver a seamless, end-to-end experience for both customers and administrators.",
-      status: "COMPLETED",
-      github:
-        "https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g06",
-      animation: lionsTheaterAnimation,
-    },
-    {
-      id: 3,
-      image: "/images/bloodsugar.png",
-      role: "HARDWARE + AI",
-      title: "Blood Sugar Monitor with AI",
-      tags: ["Python", "Raspberry Pi", "Dexcom API", "AI"],
-      description:
-        "A Raspberry Pi-powered system that tracks glucose levels, visualizes data, and provides AI-driven suggestions using the Dexcom API alongside Grok AI.",
-      status: "GITHUB ONLY",
-      github:
-        "https://www.youtube.com/watch?v=64Pnq-MybS8&list=PLk22IJ-X9itqH1UIuWYtNs3cfTwHqOIvM&index=14",
-      animation: bloodSugarMonitorAnimation,
-    },
-    {
-      id: 4,
-      image: "/images/workly.png",
-      role: "TEAM PROJECT",
-      title: "Workly",
-      tags: ["Flutter", "Dart", "Firebase", "Mobile"],
-      description:
-        "A mobile application that revolutionizes job searching with a Tinder-like swipe interface. Built with Flutter, Workly allows job seekers to quickly browse opportunities by swiping right on interesting positions or left to pass. The app features real-time job matching, user profiles, and seamless navigation across iOS, Android, and web platforms.",
-      status: "GITHUB ONLY",
-      github: "https://github.com/maheessh/workly",
-      animation: worklyAnimation,
-    },
-  ];
+  // Map animations to projects - Memoized
+  const animationMap = useMemo(
+    () => ({
+      1: portfolioAnimation,
+      2: lionsTheaterAnimation,
+      3: bloodSugarMonitorAnimation,
+      4: worklyAnimation,
+    }),
+    []
+  );
+
+  // Memoize projects array to prevent unnecessary recalculations
+  const projects = useMemo(
+    () =>
+      projectsData.map((project) => ({
+        ...project,
+        animation: animationMap[project.id] || portfolioAnimation,
+      })),
+    [animationMap]
+  );
 
   const sectionRef = useRef();
   const { scrollYProgress } = useScroll({
@@ -1743,30 +2354,6 @@ export default function Projects() {
 
   const buttonOpacity = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]);
   const buttonY = useTransform(scrollYProgress, [0.7, 0.9], [0, 50]);
-  const imageVariants = (isImageLeft) => ({
-    hidden: { opacity: 0, x: isImageLeft ? -80 : 80 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.23, 1, 0.32, 1],
-      },
-    },
-  });
-
-  const textVariants = (isImageLeft) => ({
-    hidden: { opacity: 0, x: isImageLeft ? 80 : -80 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.23, 1, 0.32, 1],
-        delay: 0.18,
-      },
-    },
-  });
 
   return (
     <Box
@@ -1784,6 +2371,8 @@ export default function Projects() {
         pt: 0,
         pb: 0,
         px: 0,
+        contain: "layout style paint",
+        willChange: "scroll-position",
       }}
     >
       <Container
@@ -1808,180 +2397,43 @@ export default function Projects() {
             boxSizing: "border-box",
           }}
         >
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 600,
-              fontSize: {
-                xs: "1.75rem",
-                sm: "2.25rem",
-                md: "2.5rem",
-                lg: "2.75rem",
-              },
-              mb: { xs: 3.5, md: 4.5 },
-              color: "#1d1d1f",
-              textAlign: "left",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.05,
-            }}
-          >
-            Recent Projects
-          </Typography>
           <motion.div
-            ref={containerRef}
-            variants={{
-              visible: {
-                transition: {
-                  staggerChildren: 0.18,
-                },
-              },
-              hidden: {},
-            }}
-            initial="hidden"
-            animate="visible"
-            style={{ width: "100%" }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <Box sx={{ width: "100%", mx: "auto" }}>
-              {projects.map((project, idx) => {
-                const isImageLeft = idx % 2 === 0;
-                const [ref, inView] = useInView({
-                  threshold: 0.35,
-                  triggerOnce: false,
-                });
-
-                return (
-                  <Box
-                    key={project.id}
-                    ref={ref}
-                    component={motion.div}
-                    initial="hidden"
-                    animate={inView ? "visible" : "hidden"}
-                    sx={{
-                      display: "flex",
-                      flexDirection: {
-                        xs: "column",
-                        md: "row",
-                      },
-                      alignItems: { xs: "flex-start", md: "center" },
-                      justifyContent: "flex-start",
-                      gap: { xs: 3, sm: 4, md: 5 },
-                      mb: { xs: 4, sm: 5, md: 6 },
-                      width: "100%",
-                    }}
-                  >
-                    {/* Animated Project Image */}
-                    <Box
-                      component={motion.div}
-                      variants={imageVariants(isImageLeft)}
-                      sx={{
-                        maxWidth: "100%",
-                        width: { xs: "100%", sm: "90%", md: 460 },
-                        height: { xs: "auto", sm: "280px", md: 360 },
-                        minHeight: { xs: "200px", sm: "280px", md: 360 },
-                        flexShrink: 0,
-                        mb: { xs: 3, sm: 3, md: 0 },
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                        background: "none",
-                      }}
-                    >
-                      {project.animation}
-                    </Box>
-                    {/* Animated Project Details */}
-                    <Box
-                      component={motion.div}
-                      variants={textVariants(isImageLeft)}
-                      sx={{
-                        flex: 1,
-                        minWidth: 0,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        justifyContent: "center",
-                        textAlign: "left",
-                      }}
-                    >
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 600,
-                          mb: { xs: 1.5, md: 1 },
-                          color: "#222",
-                          fontSize: {
-                            xs: "1.125rem",
-                            sm: "1.25rem",
-                            md: "1.5rem",
-                          },
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {project.title}
-                      </Typography>
-                      <Typography
-                        component="div"
-                        sx={{
-                          color: "#666",
-                          mb: { xs: 2.5, md: 2 },
-                          fontSize: {
-                            xs: "0.8125rem",
-                            sm: "0.875rem",
-                            md: "0.9375rem",
-                          },
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        {project.description}
-                      </Typography>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: { xs: "flex-start", md: "flex-end" },
-                          width: "100%",
-                          mt: { xs: 1, md: 0 },
-                        }}
-                      >
-                        <Button
-                          component="a"
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          variant="contained"
-                          sx={{
-                            bgcolor: "#e0e0e0",
-                            color: "#222",
-                            textTransform: "none",
-                            fontSize: {
-                              xs: "0.875rem",
-                              sm: "0.9rem",
-                              md: "1rem",
-                            },
-                            fontWeight: 500,
-                            px: { xs: 2, sm: 2.5, md: 3.5 },
-                            py: { xs: 1, sm: 1.25, md: 1.75 },
-                            minHeight: { xs: "40px", sm: "44px", md: "48px" },
-                            borderRadius: "8px",
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                            border: "1px solid #d0d0d0",
-                            "&:hover": {
-                              bgcolor: "#d0d0d0",
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                            },
-                          }}
-                        >
-                          View Project
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Box>
-                );
-              })}
-            </Box>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 600,
+                fontSize: {
+                  xs: "1.75rem",
+                  sm: "2.25rem",
+                  md: "2.5rem",
+                  lg: "2.75rem",
+                },
+                mb: { xs: 3.5, md: 4.5 },
+                color: "#1d1d1f",
+                textAlign: "left",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.05,
+              }}
+            >
+              Recent Projects
+            </Typography>
           </motion.div>
+          {/* Parallax Projects Container */}
+          <Box sx={{ width: "100%", position: "relative" }}>
+            {projects.map((project, idx) => (
+              <ParallaxProjectItem
+                key={project.id}
+                project={project}
+                index={idx}
+                isImageLeft={idx % 2 === 0}
+              />
+            ))}
+          </Box>
 
           {/* GitHub projects link button */}
           <Box
@@ -2026,3 +2478,6 @@ export default function Projects() {
     </Box>
   );
 }
+
+// Memoize Projects component to prevent unnecessary re-renders
+export default memo(Projects);

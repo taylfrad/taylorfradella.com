@@ -1,9 +1,24 @@
 import { Box, Typography, Container } from "@mui/material";
 import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { useEffect, useState } from "react";
 
 export default function StatementSection() {
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  const [ref, inView] = useInView({
+    threshold: 0.2,
+    triggerOnce: false,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      setHasBeenVisible(true);
+    }
+  }, [inView]);
+
   return (
     <Box
+      ref={ref}
       sx={{
         width: "100%",
         bgcolor: "#f5f5f7",
@@ -17,8 +32,7 @@ export default function StatementSection() {
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8 }}
         >
           <Typography
@@ -39,8 +53,7 @@ export default function StatementSection() {
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <Typography
@@ -62,8 +75,7 @@ export default function StatementSection() {
         {/* Device Mockups - Single Image */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
           <Box
@@ -92,8 +104,7 @@ export default function StatementSection() {
         {/* Thanks for stopping by */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <Typography
