@@ -77,19 +77,41 @@ export default function Home() {
         }, 10);
         
         // Re-enable scroll snap after a longer moment (prevent snap on refresh)
+        // Keep it disabled longer to prevent scroll-snap from interfering
         setTimeout(() => {
           // Double-check we're still at top before re-enabling
           if (mainContent.scrollTop < 50) {
-            mainContent.style.scrollSnapType = originalScrollSnap || '';
+            // Still at top, but wait a bit more to ensure no snap happens
+            setTimeout(() => {
+              if (mainContent.scrollTop < 50) {
+                mainContent.style.scrollSnapType = originalScrollSnap || '';
+              } else {
+                // Something scrolled, force back to top and keep snap disabled
+                mainContent.scrollTop = 0;
+                mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                setTimeout(() => {
+                  mainContent.style.scrollSnapType = originalScrollSnap || '';
+                }, 1000);
+              }
+            }, 500);
           } else {
             // If we're not at top, force scroll again and keep snap disabled longer
             mainContent.scrollTop = 0;
             mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
             setTimeout(() => {
-              mainContent.style.scrollSnapType = originalScrollSnap || '';
+              if (mainContent.scrollTop < 50) {
+                mainContent.style.scrollSnapType = originalScrollSnap || '';
+              } else {
+                // Still not at top, keep trying
+                mainContent.scrollTop = 0;
+                mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                setTimeout(() => {
+                  mainContent.style.scrollSnapType = originalScrollSnap || '';
+                }, 1000);
+              }
             }, 500);
           }
-        }, 500);
+        }, 1000);
       }
       
       // Force scroll window to top
@@ -303,6 +325,16 @@ export default function Home() {
             contain: "layout style paint",
             willChange: "scroll-position",
             transform: "translateZ(0)",
+            // Prevent scroll restoration on initial load
+            scrollBehavior: "auto",
+          }}
+          onLoad={() => {
+            // Ensure scroll to top when main loads
+            const mainContent = mainScrollRef.current;
+            if (mainContent) {
+              mainContent.scrollTop = 0;
+              mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            }
           }}
         >
         <Box
