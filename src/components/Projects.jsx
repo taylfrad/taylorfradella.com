@@ -259,7 +259,11 @@ const ParallaxProjectItem = memo(
                 borderRadius: { xs: 8, sm: 10, md: 12 },
                 overflow: "hidden",
                 boxShadow: isHovered
-                  ? { xs: "0 6px 20px rgba(0,0,0,0.1)", sm: "0 12px 30px rgba(0,0,0,0.15)", md: "0 20px 40px rgba(0,0,0,0.2)" }
+                  ? {
+                      xs: "0 6px 20px rgba(0,0,0,0.1)",
+                      sm: "0 12px 30px rgba(0,0,0,0.15)",
+                      md: "0 20px 40px rgba(0,0,0,0.2)",
+                    }
                   : "0 6px 20px rgba(0,0,0,0.1)",
                 background: "none",
                 cursor: "pointer",
