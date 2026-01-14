@@ -51,8 +51,10 @@ const getAnimationState = (
   hasBeenVisible
 ) => {
   if (forceReset) return "hidden";
-  if (shouldAnimate && inView) return "visible";
+  // Once visible, always stay visible
   if (hasBeenVisible) return "visible";
+  // Animate in when in view and should animate
+  if (shouldAnimate && inView) return "visible";
   return "hidden";
 };
 
@@ -142,14 +144,14 @@ const ParallaxProjectItem = memo(
 
     // Mark as visible after animation completes
     useEffect(() => {
-      if (inView && shouldAnimate) {
+      if (inView && shouldAnimate && !hasBeenVisible) {
         const timer = setTimeout(() => {
           setHasBeenVisible(true);
           setShouldAnimate(false);
-        }, 1000);
+        }, 800);
         return () => clearTimeout(timer);
       }
-    }, [inView, shouldAnimate]);
+    }, [inView, shouldAnimate, hasBeenVisible]);
 
     // Parallax scale effect
     const { scrollYProgress } = useScroll({
@@ -177,8 +179,8 @@ const ParallaxProjectItem = memo(
         component={motion.div}
         key={`project-wrapper-${project.id}-${animationKey}`}
         initial="hidden"
-        whileInView={shouldAnimate ? "visible" : "hidden"}
-        viewport={{ once: false, margin: "-50px" }}
+        whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
+        viewport={{ once: true, margin: "-50px" }}
         animate={animationState}
         variants={cardVariants}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -224,8 +226,8 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-image-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate ? "visible" : "hidden"}
-            viewport={{ once: false, margin: "-50px" }}
+            whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
+            viewport={{ once: true, margin: "-50px" }}
             animate={animationState}
             variants={imageVariants(isImageLeft)}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
@@ -296,8 +298,8 @@ const ParallaxProjectItem = memo(
           <motion.div
             key={`project-details-${project.id}-${animationKey}`}
             initial="hidden"
-            whileInView={shouldAnimate ? "visible" : "hidden"}
-            viewport={{ once: false, margin: "-50px" }}
+            whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
+            viewport={{ once: true, margin: "-50px" }}
             animate={animationState}
             variants={textVariants(isImageLeft)}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
