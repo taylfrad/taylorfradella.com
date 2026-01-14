@@ -2,6 +2,7 @@ import { Box, Typography, Container, Button, IconButton } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { motion } from "framer-motion";
 import LiquidMetalBackground from "./LiquidMetalBackground";
+import OptimizedImage from "./OptimizedImage";
 
 export default function Hero({ onNav }) {
   // Navigation click handler
@@ -182,12 +183,10 @@ export default function Hero({ onNav }) {
               }}
             >
               {/* Device Frame Image */}
-              <Box
-                component="img"
+              <OptimizedImage
                 src="/macbook-frame.png"
                 alt="MacBook Pro"
-                loading="lazy"
-                decoding="async"
+                priority={true}
                 sx={{
                   width: "100%",
                   height: "auto",

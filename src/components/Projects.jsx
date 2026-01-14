@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useNavigate } from "react-router-dom";
 import { projectsData } from "../data/projectsData";
+import OptimizedImage from "./OptimizedImage";
 
 // Animation variants
 const cardVariants = {
@@ -883,8 +884,7 @@ function Projects() {
             justifyContent: "center",
           }}
         >
-          <Box
-            component="img"
+          <OptimizedImage
             src="/macbook-frame.png"
             alt="MacBook"
             sx={{
@@ -892,6 +892,7 @@ function Projects() {
               maxWidth: { xs: "150px", sm: "175px", md: "200px" },
               height: "auto",
               objectFit: "contain",
+              filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.06))",
             }}
           />
         </Box>

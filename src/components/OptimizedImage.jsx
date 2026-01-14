@@ -33,14 +33,24 @@ export default function OptimizedImage({
 
   // Preload image if priority
   useEffect(() => {
-    if (priority && webpSrc) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = webpSrc;
-      document.head.appendChild(link);
+    if (priority) {
+      // Preload WebP first, then PNG as fallback
+      if (webpSrc) {
+        const webpLink = document.createElement('link');
+        webpLink.rel = 'preload';
+        webpLink.as = 'image';
+        webpLink.href = webpSrc;
+        webpLink.type = 'image/webp';
+        document.head.appendChild(webpLink);
+      }
+      // Also preload PNG fallback for older browsers
+      const pngLink = document.createElement('link');
+      pngLink.rel = 'preload';
+      pngLink.as = 'image';
+      pngLink.href = fallbackSrc;
+      document.head.appendChild(pngLink);
     }
-  }, [priority, webpSrc]);
+  }, [priority, webpSrc, fallbackSrc]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -102,11 +112,12 @@ export default function OptimizedImage({
           onError={handleError}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
+          fetchPriority={priority ? "high" : "auto"}
           sx={{
             width: '100%',
             height: '100%',
             opacity: isLoaded ? 1 : 0,
-            transition: 'opacity 0.3s ease-in-out',
+            transition: 'opacity 0.2s ease-in-out',
             display: 'block',
           }}
           {...props}

@@ -17,10 +17,12 @@ import { readdir, stat } from 'fs/promises';
 import { join, extname } from 'path';
 import { existsSync } from 'fs';
 
-const IMAGES_DIR = join(process.cwd(), 'public', 'images');
+const IMAGES_DIR = join(process.cwd(), 'public');
 
-async function findPngFiles(dir) {
+async function findPngFiles(dir, maxDepth = 3, currentDepth = 0) {
   const files = [];
+  if (currentDepth >= maxDepth) return files;
+  
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     
@@ -28,7 +30,7 @@ async function findPngFiles(dir) {
       const fullPath = join(dir, entry.name);
       
       if (entry.isDirectory()) {
-        const subFiles = await findPngFiles(fullPath);
+        const subFiles = await findPngFiles(fullPath, maxDepth, currentDepth + 1);
         files.push(...subFiles);
       } else if (entry.isFile() && extname(entry.name).toLowerCase() === '.png') {
         files.push(fullPath);

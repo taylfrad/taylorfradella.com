@@ -21,6 +21,23 @@ if (typeof window !== 'undefined') {
   if (document.body) {
     document.body.scrollTop = 0;
   }
+  
+  // Preconnect to external domains for faster loading
+  const preconnectDomains = [
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com',
+    'https://cdn.jsdelivr.net',
+  ];
+  
+  preconnectDomains.forEach(domain => {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = domain;
+    if (domain.includes('fonts.gstatic.com')) {
+      link.crossOrigin = 'anonymous';
+    }
+    document.head.appendChild(link);
+  });
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(

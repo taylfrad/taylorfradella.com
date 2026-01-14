@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import LiquidMetalBackground from "./LiquidMetalBackground";
+import OptimizedImage from "./OptimizedImage";
 
 export default function MiniHero({ onNav }) {
   // Navigation click handler - same as Hero component
@@ -298,12 +299,9 @@ export default function MiniHero({ onNav }) {
               justifyContent: "center",
             }}
           >
-            <Box
-              component="img"
+            <OptimizedImage
               src="/macbook-frame.png"
               alt="MacBook Pro"
-              loading="lazy"
-              decoding="async"
               sx={{
                 width: "100%",
                 height: "auto",

@@ -2,6 +2,7 @@ import { Box, Typography, Container } from "@mui/material";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useState } from "react";
+import OptimizedImage from "./OptimizedImage";
 
 export default function StatementSection() {
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
@@ -86,8 +87,7 @@ export default function StatementSection() {
               mb: { xs: 2, md: 3 },
             }}
           >
-            <Box
-              component="img"
+            <OptimizedImage
               src="/devices.png"
               alt="Devices"
               sx={{
