@@ -38,6 +38,10 @@ export default function Home() {
       if (window.location.hash) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
       }
+      
+      // Clear any stored scroll position
+      sessionStorage.removeItem('scrollPosition');
+      localStorage.removeItem('scrollPosition');
     }
     
     const scrollToHero = () => {
@@ -50,12 +54,12 @@ export default function Home() {
         const originalScrollSnap = mainContent.style.scrollSnapType;
         mainContent.style.scrollSnapType = 'none';
         
-        // Force scroll multiple ways
+        // Force scroll multiple ways - be very aggressive
         mainContent.scrollTop = 0;
         mainContent.scrollLeft = 0;
         mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
         
-        // Also try scrollIntoView on hero if available
+        // Also scroll hero into view if available
         if (heroRef.current) {
           try {
             heroRef.current.scrollIntoView({ behavior: "instant", block: "start" });
@@ -64,10 +68,28 @@ export default function Home() {
           }
         }
         
-        // Re-enable scroll snap after a moment
+        // Double-check scroll position after a brief moment
         setTimeout(() => {
-          mainContent.style.scrollSnapType = originalScrollSnap || '';
-        }, 200);
+          if (mainContent.scrollTop > 50) {
+            mainContent.scrollTop = 0;
+            mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+          }
+        }, 10);
+        
+        // Re-enable scroll snap after a longer moment (prevent snap on refresh)
+        setTimeout(() => {
+          // Double-check we're still at top before re-enabling
+          if (mainContent.scrollTop < 50) {
+            mainContent.style.scrollSnapType = originalScrollSnap || '';
+          } else {
+            // If we're not at top, force scroll again and keep snap disabled longer
+            mainContent.scrollTop = 0;
+            mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            setTimeout(() => {
+              mainContent.style.scrollSnapType = originalScrollSnap || '';
+            }, 500);
+          }
+        }, 500);
       }
       
       // Force scroll window to top
@@ -82,6 +104,7 @@ export default function Home() {
     scrollToHero();
     
     // Multiple attempts to ensure it sticks (especially important on refresh)
+    // Use requestAnimationFrame to ensure DOM is ready
     requestAnimationFrame(() => {
       scrollToHero();
       requestAnimationFrame(() => {
@@ -91,33 +114,39 @@ export default function Home() {
           setTimeout(scrollToHero, 10);
           setTimeout(scrollToHero, 50);
           setTimeout(scrollToHero, 100);
+          setTimeout(scrollToHero, 200);
+          setTimeout(scrollToHero, 300);
         }, 0);
       });
     });
     
-    // Final check after delays
+    // Final check after delays - very aggressive for page refresh
     setTimeout(() => {
       scrollToHero();
       setTimeout(scrollToHero, 100);
       setTimeout(scrollToHero, 200);
+      setTimeout(scrollToHero, 400);
+      setTimeout(scrollToHero, 600);
     }, 100);
     
-    // Prevent any scroll events from changing position for a short time
+    // Prevent any scroll events from changing position for a longer time
     // BUT only if NOT scrolling to projects
     if (!location.state?.scrollToProjects) {
       const preventScroll = (e) => {
         const mainContent = mainScrollRef.current || document.querySelector("main");
-        if (mainContent && mainContent.scrollTop > 100) {
+        if (mainContent && mainContent.scrollTop > 50) {
           mainContent.scrollTop = 0;
+          mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
         }
       };
       
       const mainContent = mainScrollRef.current || document.querySelector("main");
       if (mainContent) {
         mainContent.addEventListener('scroll', preventScroll, { passive: false });
+        // Keep preventing scroll for longer on page refresh
         setTimeout(() => {
           mainContent.removeEventListener('scroll', preventScroll);
-        }, 500);
+        }, 1000);
       }
     }
   }, [location.pathname, location.state]); // Run on pathname change (page refresh) and state change
