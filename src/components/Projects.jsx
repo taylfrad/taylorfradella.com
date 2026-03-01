@@ -116,6 +116,8 @@ function ProjectFloatingLines({ theme, reducedMotion = false }) {
           parallax={false}
           bendRadius={5}
           bendStrength={-0.5}
+          maxDpr={1.1}
+          targetFps={reducedMotion ? 20 : 30}
           mixBlendMode="screen"
         />
       </Box>

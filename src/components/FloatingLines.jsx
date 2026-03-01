@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   Scene,
   OrthographicCamera,
@@ -10,6 +10,7 @@ import {
   Vector2,
   Clock
 } from 'three';
+import { isLikelyLowEndDevice } from '@/lib/performance';
 
 const vertexShader = `
 precision highp float;
@@ -242,15 +243,47 @@ export default function FloatingLines({
   mouseDamping = 0.05,
   parallax = true,
   parallaxStrength = 0.2,
-  mixBlendMode = 'screen'
+  mixBlendMode = 'screen',
+  active = true,
+  maxDpr = 1.2,
+  targetFps = 36
 }) {
   const containerRef = useRef(null);
+  const activeRef = useRef(active);
+  const isInViewportRef = useRef(true);
+  const isDocumentVisibleRef = useRef(
+    typeof document === 'undefined' ? true : !document.hidden
+  );
   const targetMouseRef = useRef(new Vector2(-1000, -1000));
   const currentMouseRef = useRef(new Vector2(-1000, -1000));
   const targetInfluenceRef = useRef(0);
   const currentInfluenceRef = useRef(0);
   const targetParallaxRef = useRef(new Vector2(0, 0));
   const currentParallaxRef = useRef(new Vector2(0, 0));
+  const safeTargetFps =
+    Number.isFinite(targetFps) && targetFps > 0 ? targetFps : 0;
+  const lowEndDevice = useMemo(() => isLikelyLowEndDevice(), []);
+  const adaptiveMaxDpr = lowEndDevice ? Math.min(maxDpr, 1) : maxDpr;
+  const adaptiveTargetFps = lowEndDevice
+    ? Math.min(safeTargetFps, 24)
+    : safeTargetFps;
+
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+
+    const handleVisibilityChange = () => {
+      isDocumentVisibleRef.current = !document.hidden;
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const getLineCount = waveType => {
     if (typeof lineCount === 'number') return lineCount;
@@ -283,7 +316,7 @@ export default function FloatingLines({
     camera.position.z = 1;
 
     const renderer = new WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, adaptiveMaxDpr));
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     containerRef.current.appendChild(renderer.domElement);
@@ -414,7 +447,23 @@ export default function FloatingLines({
     }
 
     let raf = 0;
-    const renderLoop = () => {
+    let observer = null;
+    let lastFrameTime = 0;
+    const frameInterval =
+      adaptiveTargetFps > 0 ? 1000 / adaptiveTargetFps : 0;
+    const renderLoop = (time) => {
+      raf = requestAnimationFrame(renderLoop);
+      if (
+        !activeRef.current ||
+        !isDocumentVisibleRef.current ||
+        !isInViewportRef.current
+      ) {
+        return;
+      }
+      if (frameInterval > 0 && time - lastFrameTime < frameInterval) {
+        return;
+      }
+      lastFrameTime = time;
       uniforms.iTime.value = clock.getElapsedTime();
 
       if (interactive) {
@@ -431,12 +480,25 @@ export default function FloatingLines({
       }
 
       renderer.render(scene, camera);
-      raf = requestAnimationFrame(renderLoop);
     };
-    renderLoop();
+    raf = requestAnimationFrame(renderLoop);
+
+    if (typeof window.IntersectionObserver === 'function') {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          isInViewportRef.current = entry.isIntersecting;
+        },
+        {
+          threshold: 0,
+          rootMargin: '250px 0px 250px 0px'
+        }
+      );
+      observer.observe(containerRef.current);
+    }
 
     return () => {
       cancelAnimationFrame(raf);
+      observer?.disconnect();
       if (ro) {
         ro.disconnect();
       }
@@ -456,6 +518,8 @@ export default function FloatingLines({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     linesGradient,
+    adaptiveMaxDpr,
+    adaptiveTargetFps,
     enabledWaves,
     lineCount,
     lineDistance,
