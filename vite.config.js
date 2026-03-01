@@ -30,38 +30,6 @@ export default defineConfig({
         warn(warning);
       },
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return undefined;
-          const normalizedId = id.replace(/\\/g, "/");
-
-          if (normalizedId.includes("framer-motion")) {
-            return "motion";
-          }
-
-          if (
-            normalizedId.includes("/@react-three/") ||
-            normalizedId.includes("/three/") ||
-            normalizedId.includes("/three-stdlib/") ||
-            normalizedId.includes("/three-mesh-bvh/") ||
-            normalizedId.includes("/meshline/")
-          ) {
-            return "three-stack";
-          }
-
-          if (normalizedId.includes("/ogl/")) {
-            return "ogl";
-          }
-
-          if (
-            normalizedId.includes("/react/") ||
-            normalizedId.includes("/react-dom/") ||
-            normalizedId.includes("/react-router-dom/")
-          ) {
-            return "vendor";
-          }
-
-          return undefined;
-        },
         chunkFileNames: "assets/[name]-[hash].js",
         entryFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
