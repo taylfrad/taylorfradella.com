@@ -1,20 +1,24 @@
 import {
-  Box,
-  Typography,
-  Button,
-  Container,
-  Link,
-  Paper,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import { useRef, useState, useEffect, useCallback, useMemo, memo } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+  Banknote,
+  BriefcaseBusiness,
+  Clock3,
+  Github,
+  Heart,
+  MapPin,
+  X,
+} from "lucide-react";
+import { Suspense, lazy, useRef, useCallback, useMemo, memo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { projectsData } from "../data/projectsData";
+import { projectsSummary } from "../data/projectsSummary";
 import OptimizedImage from "./OptimizedImage";
+import GlassSurface from "@/components/surfaces/GlassSurface";
+import HeroBackground from "./backgrounds/HeroBackground";
+import FloatingLines from "./FloatingLines";
+import { Button } from "@/components/ui/button";
+import { Box, Typography } from "@/components/ui/sx-primitives";
+
+const Lanyard = lazy(() => import("./Lanyard"));
 
 // Animation variants
 const cardVariants = {
@@ -51,39 +55,89 @@ const statusBadgeVariants = {
   hidden: { opacity: 0, scale: 0.9 },
   visible: { opacity: 1, scale: 1 },
 };
+const FLOATING_LINE_WAVES = ["top", "middle", "bottom"];
+const HERO_PREVIEW_FONT_FAMILY = "font_shi8d64tg, sans-serif";
 
-// Helper function to determine animation state
-const getAnimationState = (
-  forceReset,
-  shouldAnimate,
-  inView,
-  hasBeenVisible
-) => {
-  if (forceReset) return "hidden";
-  // Once visible, always stay visible
-  if (hasBeenVisible) return "visible";
-  // Animate in when in view and should animate
-  if (shouldAnimate && inView) return "visible";
-  return "hidden";
+const projectFloatingLineThemes = {
+  lions: {
+    linesGradient: ["#fecdd3", "#fda4af", "#fca5a5", "#fdba74"],
+    lineCount: 4,
+    lineDistance: 7,
+    animationSpeed: 0.62,
+    topWavePosition: { x: 9.2, y: 0.44, rotate: -0.38 },
+    middleWavePosition: { x: 4.6, y: 0.03, rotate: 0.16 },
+    bottomWavePosition: { x: 2.2, y: -0.67, rotate: 0.34 },
+    veil: "linear-gradient(180deg, rgba(2,6,23,0.18) 0%, rgba(2,6,23,0.07) 52%, rgba(2,6,23,0.22) 100%)",
+  },
+  sweetspot: {
+    linesGradient: ["#bbf7d0", "#86efac", "#6ee7b7", "#34d399"],
+    lineCount: 4,
+    lineDistance: 6.5,
+    animationSpeed: 0.58,
+    topWavePosition: { x: 8.8, y: 0.48, rotate: -0.34 },
+    middleWavePosition: { x: 4.2, y: 0.05, rotate: 0.14 },
+    bottomWavePosition: { x: 2.0, y: -0.64, rotate: 0.32 },
+    veil: "linear-gradient(180deg, rgba(3,10,26,0.17) 0%, rgba(5,16,34,0.07) 54%, rgba(3,10,26,0.22) 100%)",
+  },
+  workly: {
+    linesGradient: ["#fbcfe8", "#fda4af", "#fb7185", "#f9a8d4"],
+    lineCount: 4,
+    lineDistance: 6.8,
+    animationSpeed: 0.6,
+    topWavePosition: { x: 9.4, y: 0.42, rotate: -0.36 },
+    middleWavePosition: { x: 4.8, y: 0.04, rotate: 0.17 },
+    bottomWavePosition: { x: 2.15, y: -0.66, rotate: 0.33 },
+    veil: "linear-gradient(180deg, rgba(7,10,31,0.18) 0%, rgba(9,13,36,0.08) 52%, rgba(7,10,31,0.22) 100%)",
+  },
 };
+
+function ProjectFloatingLines({ theme, reducedMotion = false }) {
+  return (
+    <>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          opacity: 0.42,
+        }}
+      >
+        <FloatingLines
+          linesGradient={theme.linesGradient}
+          enabledWaves={FLOATING_LINE_WAVES}
+          lineCount={theme.lineCount}
+          lineDistance={theme.lineDistance}
+          topWavePosition={theme.topWavePosition}
+          middleWavePosition={theme.middleWavePosition}
+          bottomWavePosition={theme.bottomWavePosition}
+          animationSpeed={reducedMotion ? 0.28 : theme.animationSpeed}
+          interactive={false}
+          parallax={false}
+          bendRadius={5}
+          bendStrength={-0.5}
+          mixBlendMode="screen"
+        />
+      </Box>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          background: theme.veil,
+        }}
+      />
+    </>
+  );
+}
 
 // Parallax Project Item Component - Memoized for performance
 const ParallaxProjectItem = memo(
   function ParallaxProjectItem({ project, index, isImageLeft }) {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
     const navigate = useNavigate();
+    const reducedMotion = useReducedMotion();
     const itemRef = useRef();
-    const [ref, inView] = useInView({
-      threshold: 0.2,
-      triggerOnce: false,
-    });
-    const [hasBeenVisible, setHasBeenVisible] = useState(false);
-    const [shouldAnimate, setShouldAnimate] = useState(true);
-    const [animationKey, setAnimationKey] = useState(0);
-    const [forceReset, setForceReset] = useState(false);
 
     const handleCardClick = useCallback(
       (e) => {
@@ -92,577 +146,241 @@ const ParallaxProjectItem = memo(
         }
         navigate(`/project/${project.id}`);
       },
-      [navigate, project.id]
+      [navigate, project.id],
     );
 
-    // Throttled scroll handler for hero visibility check
-    useEffect(() => {
-      let ticking = false;
-      let rafId = null;
-
-      const checkHeroVisibility = () => {
-        if (!ticking) {
-          rafId = requestAnimationFrame(() => {
-            const heroElement = document.getElementById("hero");
-            if (!heroElement) {
-              ticking = false;
-              return;
-            }
-
-            const rect = heroElement.getBoundingClientRect();
-            const isHeroVisible =
-              rect.top >= 0 && rect.top < window.innerHeight * 0.5;
-
-            if (isHeroVisible && hasBeenVisible) {
-              setForceReset(true);
-              setHasBeenVisible(false);
-              setShouldAnimate(false);
-
-              setTimeout(() => {
-                setForceReset(false);
-                setShouldAnimate(true);
-                setAnimationKey((prev) => prev + 1);
-              }, 50);
-            }
-            ticking = false;
-          });
-          ticking = true;
-        }
-      };
-
-      window.addEventListener("scroll", checkHeroVisibility, { passive: true });
-      const mainContent = document.querySelector("main");
-      if (mainContent) {
-        mainContent.addEventListener("scroll", checkHeroVisibility, {
-          passive: true,
-        });
-      }
-
-      checkHeroVisibility();
-
-      return () => {
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-        }
-        window.removeEventListener("scroll", checkHeroVisibility);
-        if (mainContent) {
-          mainContent.removeEventListener("scroll", checkHeroVisibility);
-        }
-      };
-    }, [hasBeenVisible]);
-
-    // Mark as visible after animation completes
-    useEffect(() => {
-      if (inView && shouldAnimate && !hasBeenVisible) {
-        const timer = setTimeout(() => {
-          setHasBeenVisible(true);
-          setShouldAnimate(false);
-        }, 800);
-        return () => clearTimeout(timer);
-      }
-    }, [inView, shouldAnimate, hasBeenVisible]);
-
-    // Parallax scale effect
-    const { scrollYProgress } = useScroll({
-      target: itemRef,
-      offset: ["start end", "end start"],
-    });
-    const imageScale = useTransform(
-      scrollYProgress,
-      [0, 0.5, 1],
-      [0.96, 1, 0.96]
-    );
-
-    const [isHovered, setIsHovered] = useState(false);
-
-    // Memoize animation state getter
-    const animationState = useMemo(
+    const revealMotionProps = useMemo(
       () =>
-        getAnimationState(forceReset, shouldAnimate, inView, hasBeenVisible),
-      [forceReset, shouldAnimate, inView, hasBeenVisible]
+        reducedMotion
+          ? { initial: false, animate: "visible" }
+          : {
+              initial: "hidden",
+              whileInView: "visible",
+              viewport: { once: true, margin: "-50px" },
+            },
+      [reducedMotion],
+    );
+
+    const imageMotionVariants = useMemo(
+      () => imageVariants(isImageLeft),
+      [isImageLeft],
+    );
+    const textMotionVariants = useMemo(
+      () => textVariants(isImageLeft),
+      [isImageLeft],
     );
 
     return (
-      <Box
+      <motion.div
         ref={itemRef}
-        component={motion.div}
-        key={`project-wrapper-${project.id}-${animationKey}`}
-        initial="hidden"
-        whileInView={shouldAnimate && !hasBeenVisible ? "visible" : undefined}
-        viewport={{ once: true, margin: "-50px" }}
-        animate={animationState}
+        key={`project-wrapper-${project.id}`}
+        {...revealMotionProps}
         variants={cardVariants}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        onAnimationStart={() => {}}
-        onAnimationComplete={() => {}}
-        sx={{
-          mb: index < 3 ? { xs: 4, sm: 5, md: 6 } : 0,
-          width: "100%",
-        }}
+        className={`relative w-full ${index < 3 ? "mb-4 sm:mb-5 md:mb-6" : ""}`}
       >
-        <Box
-          ref={ref}
-          component={motion.div}
+        {/* Individual project card */}
+        <motion.div
           onClick={handleCardClick}
-          onHoverStart={() => setIsHovered(true)}
-          onHoverEnd={() => setIsHovered(false)}
-          whileHover={{
-            y: -12,
-            transition: {
-              duration: 0.4,
-              ease: [0.23, 1, 0.32, 1],
-              staggerChildren: 0.1,
-              delayChildren: 0.1,
-            },
-          }}
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: { xs: "flex-start", md: "center" },
-            justifyContent: "flex-start",
-            gap: { xs: 3, sm: 4, md: 5 },
-            width: "100%",
-            cursor: "pointer",
-            perspective: "1000px",
-            position: "relative",
-            zIndex: 1,
-            willChange: "transform",
-            transform: "translateZ(0)",
-          }}
-          style={{ pointerEvents: "auto" }}
+          whileHover={
+            reducedMotion
+              ? undefined
+              : {
+                  y: -2,
+                  transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                }
+          }
+          className="relative z-[1] w-full cursor-pointer will-change-transform"
+          style={{ pointerEvents: "auto", transform: "translateZ(0)" }}
         >
-          {/* Parallax Project Image */}
-          <motion.div
-            key={`project-image-${project.id}-${animationKey}`}
-            initial="hidden"
-            whileInView={
-              shouldAnimate && !hasBeenVisible ? "visible" : undefined
-            }
-            viewport={{ once: true, margin: "-50px" }}
-            animate={animationState}
-            variants={imageVariants(isImageLeft)}
-            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-            style={{
-              scale: imageScale,
-              willChange: "transform, opacity",
-              transform: "translateZ(0)",
-            }}
-            onAnimationStart={() => {}}
-            onAnimationComplete={() => {}}
+          <GlassSurface
+            variant="card"
+            className="flex w-full flex-col items-start justify-start gap-5 border-white/10 bg-background/20 p-5 backdrop-blur-2xl transition-colors duration-200 ease-out hover:bg-background/28 md:flex-row md:items-center md:gap-8 md:p-7"
           >
-            <Box
-              component={motion.div}
-              whileHover={
-                isDesktop
-                  ? {
-                      scale: 1.08,
-                      rotateY: isImageLeft ? 8 : -8,
-                      rotateX: 3,
-                      transition: {
-                        duration: 0.5,
-                        ease: [0.23, 1, 0.32, 1],
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 20,
-                      },
-                    }
-                  : isTablet
-                  ? {
-                      scale: 1.05,
-                      transition: {
-                        duration: 0.5,
-                        ease: [0.23, 1, 0.32, 1],
-                      },
-                    }
-                  : undefined
-              }
-              style={{
-                transformStyle: isDesktop ? "preserve-3d" : "flat",
-                willChange: "transform",
-              }}
-              sx={{
-                maxWidth: "100%",
-                width: { xs: "100%", sm: "90%", md: 460 },
-                height: { xs: "auto", sm: "280px", md: 360 },
-                minHeight: { xs: "210px", sm: "260px", md: 360 },
-                flexShrink: 0,
-                mb: { xs: 3, sm: 3, md: 0 },
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: { xs: 8, sm: 10, md: 12 },
-                overflow: "hidden",
-                boxShadow: isHovered
-                  ? {
-                      xs: "0 6px 20px rgba(0,0,0,0.1)",
-                      sm: "0 12px 30px rgba(0,0,0,0.15)",
-                      md: "0 20px 40px rgba(0,0,0,0.2)",
-                    }
-                  : "0 6px 20px rgba(0,0,0,0.1)",
-                background: "none",
-                cursor: "pointer",
-                transition: "box-shadow 0.4s ease",
-                transformStyle: isDesktop ? "preserve-3d" : "flat",
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden",
-              }}
-            >
-              {project.animation}
-            </Box>
-          </motion.div>
-
-          {/* Parallax Project Details */}
-          <motion.div
-            key={`project-details-${project.id}-${animationKey}`}
-            initial="hidden"
-            whileInView={
-              shouldAnimate && !hasBeenVisible ? "visible" : undefined
-            }
-            viewport={{ once: true, margin: "-50px" }}
-            animate={animationState}
-            variants={textVariants(isImageLeft)}
-            transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            whileHover={
-              isDesktop
-                ? {
-                    x: isImageLeft ? 8 : -8,
-                    transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
-                  }
-                : undefined
-            }
-            onAnimationStart={() => {}}
-            onAnimationComplete={() => {}}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              textAlign: "left",
-              willChange: "transform",
-              transform: "translateZ(0)",
-            }}
-          >
-            {/* Role Badge */}
-            {project.role && (
-              <motion.div
-                initial="hidden"
-                animate={animationState}
-                variants={roleBadgeVariants}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Typography
-                  sx={{
-                    fontSize: {
-                      xs: "0.6875rem",
-                      sm: "0.75rem",
-                      md: "0.8125rem",
-                    },
-                    fontWeight: 600,
-                    color: "#86868b",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    mb: { xs: 0.75, md: 1 },
-                    pointerEvents: "none",
-                  }}
-                >
-                  {project.role}
-                </Typography>
-              </motion.div>
-            )}
-
+            {/* Parallax Project Image */}
             <motion.div
-              whileHover={{
-                scale: 1.05,
-                x: 4,
-                transition: {
-                  duration: 0.3,
-                  ease: [0.23, 1, 0.32, 1],
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 17,
-                },
+              key={`project-image-${project.id}`}
+              {...revealMotionProps}
+              variants={imageMotionVariants}
+              transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+              style={{
+                willChange: "transform, opacity",
+                transform: "translateZ(0)",
               }}
+              className="mb-6 flex max-w-full w-full shrink-0 items-center justify-center overflow-hidden rounded-lg transition-shadow duration-300 sm:h-[280px] sm:min-h-[260px] sm:w-[90%] md:mb-0 md:h-[360px] md:min-h-[360px] md:w-[460px] md:rounded-xl"
             >
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 600,
-                  mb: { xs: 1.5, md: 1 },
-                  color: "#222",
-                  fontSize: {
-                    xs: "1.125rem",
-                    sm: "1.25rem",
-                    md: "1.5rem",
-                  },
-                  lineHeight: 1.3,
-                  cursor: "pointer",
+              <motion.div
+                whileHover={
+                  reducedMotion
+                    ? undefined
+                    : {
+                        scale: 1.015,
+                        transition: {
+                          duration: 0.24,
+                          ease: [0.22, 1, 0.36, 1],
+                        },
+                      }
+                }
+                className="flex h-full min-h-[210px] w-full items-center justify-center sm:min-h-[260px]"
+                style={{
+                  willChange: "transform",
                 }}
               >
-                {project.title}
-              </Typography>
+                {project.animation}
+              </motion.div>
             </motion.div>
 
-            {/* Tags */}
-            {project.tags && project.tags.length > 0 && (
-              <Box
-                component={motion.div}
-                initial="hidden"
-                animate={animationState}
-                variants={tagsContainerVariants}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 1,
-                  mb: 2,
-                  pointerEvents: "none",
-                }}
-              >
-                {project.tags.map((tag, tagIdx) => (
-                  <Box
-                    key={tagIdx}
-                    component={motion.div}
-                    initial="hidden"
-                    animate={animationState}
-                    variants={tagVariants}
-                    transition={{ duration: 0.3, delay: 0.4 + tagIdx * 0.1 }}
-                    sx={{
-                      fontSize: { xs: "0.6875rem", sm: "0.75rem" },
-                      fontWeight: 500,
-                      color: "#666",
-                      backgroundColor: "#f0f0f0",
-                      px: 1.25,
-                      py: 0.5,
-                      borderRadius: "12px",
-                      display: "inline-block",
-                    }}
-                  >
-                    {tag}
-                  </Box>
-                ))}
-              </Box>
-            )}
-
-            <Typography
-              component="div"
-              sx={{
-                color: "#666",
-                mb: { xs: 2.5, md: 2 },
-                fontSize: {
-                  xs: "0.8125rem",
-                  sm: "0.875rem",
-                  md: "0.9375rem",
-                },
-                lineHeight: 1.6,
-                pointerEvents: "none",
-              }}
+            {/* Parallax Project Details */}
+            <motion.div
+              key={`project-details-${project.id}`}
+              {...revealMotionProps}
+              variants={textMotionVariants}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+              className="flex min-w-0 flex-1 flex-col items-start justify-center text-left will-change-transform"
+              style={{ transform: "translateZ(0)" }}
             >
-              {project.description}
-            </Typography>
+              {project.role && (
+                <motion.div
+                  variants={roleBadgeVariants}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="pointer-events-none mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/60 sm:text-xs md:mb-3"
+                >
+                  {project.role}
+                </motion.div>
+              )}
 
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: { xs: "flex-start", md: "flex-end" },
-                width: "100%",
-                mt: { xs: 1, md: 0 },
-                gap: 1,
-              }}
-            >
-              {/* Status Badge and Link Tags */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  flexWrap: "wrap",
-                }}
-              >
-                {project.status && (
-                  <motion.div
-                    initial="hidden"
-                    animate={animationState}
-                    variants={statusBadgeVariants}
-                    transition={{ duration: 0.4, delay: 0.5 }}
-                  >
-                    <Box
-                      sx={{
-                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
-                        fontWeight: 600,
-                        color:
-                          project.status === "Live"
-                            ? "#22c55e"
-                            : project.status === "Completed"
-                            ? "#3b82f6"
-                            : "#86868b",
-                        backgroundColor:
-                          project.status === "Live"
-                            ? "rgba(34, 197, 94, 0.1)"
-                            : project.status === "Completed"
-                            ? "rgba(59, 130, 246, 0.1)"
-                            : "rgba(134, 134, 139, 0.1)",
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        display: "inline-block",
-                        pointerEvents: "none",
-                      }}
+              <div>
+                <h3 className="mb-3 cursor-pointer text-lg font-semibold leading-tight text-white sm:text-xl md:mb-4 md:text-2xl">
+                  {project.title}
+                </h3>
+              </div>
+
+              {project.tags && project.tags.length > 0 && (
+                <motion.div
+                  variants={tagsContainerVariants}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="pointer-events-none mb-4 flex flex-wrap gap-2"
+                >
+                  {project.tags.map((tag, tagIdx) => (
+                    <motion.span
+                      key={tagIdx}
+                      variants={tagVariants}
+                      transition={{ duration: 0.3, delay: 0.4 + tagIdx * 0.1 }}
+                      className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-white/80 sm:text-xs"
+                    >
+                      {tag}
+                    </motion.span>
+                  ))}
+                </motion.div>
+              )}
+
+              <p className="pointer-events-none mb-4 text-sm leading-relaxed text-white/75 sm:text-base md:mb-5 md:text-[0.9375rem]">
+                {project.description}
+              </p>
+
+              <div className="mt-2 flex w-full flex-wrap items-center gap-2 md:mt-0 md:justify-end">
+                <div className="flex flex-wrap items-center gap-2">
+                  {project.status && (
+                    <motion.span
+                      variants={statusBadgeVariants}
+                      transition={{ duration: 0.4, delay: 0.5 }}
+                      className={`inline-block rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-semibold sm:text-xs ${
+                        project.status === "Live"
+                          ? "bg-green-500/10 text-green-400"
+                          : project.status === "Completed"
+                            ? "bg-blue-500/10 text-blue-400"
+                            : "bg-white/5 text-white/60"
+                      }`}
                     >
                       {project.status}
-                    </Box>
-                  </motion.div>
-                )}
+                    </motion.span>
+                  )}
 
-                {/* GitHub Tag */}
-                {project.github && (
-                  <motion.div
-                    initial="hidden"
-                    animate={animationState}
-                    variants={statusBadgeVariants}
-                    transition={{ duration: 0.4, delay: 0.55 }}
-                    whileHover={{
-                      scale: 1.1,
-                      transition: {
-                        duration: 0.2,
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 10,
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      window.open(
-                        project.github,
-                        "_blank",
-                        "noopener,noreferrer"
-                      );
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Box
-                      sx={{
-                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
-                        fontWeight: 600,
-                        color: "#1d1d1f",
-                        backgroundColor: "#f0f0f0",
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
+                  {project.github && (
+                    <motion.button
+                      type="button"
+                      variants={statusBadgeVariants}
+                      transition={{ duration: 0.4, delay: 0.55 }}
+                      whileHover={
+                        reducedMotion
+                          ? undefined
+                          : {
+                              scale: 1.02,
+                              transition: { duration: 0.16, ease: "easeOut" },
+                            }
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        window.open(
+                          project.github,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
                       }}
+                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/80 transition-colors duration-200 hover:border-white/15 sm:text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       GitHub
-                    </Box>
-                  </motion.div>
-                )}
+                    </motion.button>
+                  )}
 
-                {/* YouTube Tag */}
-                {project.youtube && (
-                  <motion.div
-                    initial="hidden"
-                    animate={animationState}
-                    variants={statusBadgeVariants}
-                    transition={{ duration: 0.4, delay: 0.55 }}
-                    whileHover={{
-                      scale: 1.1,
-                      transition: {
-                        duration: 0.2,
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 10,
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      window.open(
-                        project.youtube,
-                        "_blank",
-                        "noopener,noreferrer"
-                      );
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Box
-                      sx={{
-                        fontSize: { xs: "0.6875rem", sm: "0.75rem" },
-                        fontWeight: 600,
-                        color: "#dc2626",
-                        backgroundColor: "rgba(220, 38, 38, 0.1)",
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
+                  {project.youtube && (
+                    <motion.button
+                      type="button"
+                      variants={statusBadgeVariants}
+                      transition={{ duration: 0.4, delay: 0.55 }}
+                      whileHover={
+                        reducedMotion
+                          ? undefined
+                          : {
+                              scale: 1.02,
+                              transition: { duration: 0.16, ease: "easeOut" },
+                            }
+                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        window.open(
+                          project.youtube,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
                       }}
+                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-red-400 transition-colors duration-200 hover:border-white/15 sm:text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       YouTube
-                    </Box>
-                  </motion.div>
-                )}
-              </Box>
+                    </motion.button>
+                  )}
+                </div>
 
-              <motion.div
-                whileHover={{
-                  scale: 1.08,
-                  y: -4,
-                  transition: {
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 17,
-                  },
-                }}
-                whileTap={{
-                  scale: 0.95,
-                  y: 0,
-                  transition: { duration: 0.1 },
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  navigate(`/project/${project.id}`);
-                }}
-                data-no-navigate
-                style={{
-                  pointerEvents: "auto",
-                  zIndex: 10,
-                  position: "relative",
-                }}
-              >
-                <Button
-                  variant="contained"
-                  sx={{
-                    bgcolor: "#1d1d1f",
-                    color: "#ffffff",
-                    textTransform: "none",
-                    fontSize: {
-                      xs: "0.875rem",
-                      sm: "0.9rem",
-                      md: "1rem",
-                    },
-                    fontWeight: 500,
-                    px: { xs: 2, sm: 2.5, md: 3.5 },
-                    py: { xs: 1, sm: 1.25, md: 1.75 },
-                    minHeight: { xs: "40px", sm: "44px", md: "48px" },
-                    borderRadius: "8px",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                    "&:hover": {
-                      bgcolor: "#000000",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                    },
+                <motion.div
+                  whileTap={
+                    reducedMotion
+                      ? undefined
+                      : { scale: 0.98, transition: { duration: 0.1 } }
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    navigate(`/project/${project.id}`);
                   }}
+                  data-no-navigate
+                  className="relative z-10"
+                  style={{ pointerEvents: "auto" }}
                 >
-                  View Project
-                </Button>
-              </motion.div>
-            </Box>
-          </motion.div>
-        </Box>
-      </Box>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="min-h-10 rounded-lg border border-white/10 bg-white/5 px-6 py-2 text-sm font-medium text-white/80 shadow-sm transition-all duration-200 ease-out hover:border-white/15 hover:text-white sm:min-h-11 sm:px-8 sm:py-2.5 md:min-h-12 md:text-base focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                  >
+                    View Project
+                  </Button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </GlassSurface>
+        </motion.div>
+      </motion.div>
     );
   },
   (prevProps, nextProps) => {
@@ -672,7 +390,7 @@ const ParallaxProjectItem = memo(
       prevProps.index === nextProps.index &&
       prevProps.isImageLeft === nextProps.isImageLeft
     );
-  }
+  },
 );
 
 const moviePosters = {
@@ -702,8 +420,40 @@ const moviePosters = {
     "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gO9k7t9jSdkkWVG0deMZDpELZGw.jpg",
 };
 
+const movieShowtimes = [
+  { title: "Interstellar", time: "7:00 PM | 9:30 PM" },
+  { title: "The Godfather", time: "6:45 PM | 9:15 PM" },
+  { title: "The Lion King", time: "7:30 PM | 10:00 PM" },
+  { title: "Star Wars", time: "8:00 PM | 10:30 PM" },
+  { title: "A Minecraft Movie", time: "9:00 PM | 11:30 PM" },
+  { title: "The Dark Knight", time: "6:00 PM | 8:45 PM" },
+  { title: "Forrest Gump", time: "7:15 PM | 9:45 PM" },
+  { title: "Jurassic Park", time: "5:30 PM | 8:00 PM" },
+  { title: "Titanic", time: "6:30 PM | 9:44 PM" },
+  { title: "Dumbo (1941)", time: "4:00 PM | 6:00 PM" },
+  { title: "Hurry Up Tomorrow", time: "10:00 PM | 12:00 AM" },
+  { title: "The Idol", time: "11:00 PM | 1:00 AM" },
+];
+
+const movieGenres = [
+  { title: "Interstellar", genre: "Sci-Fi • 2h 49m" },
+  { title: "The Godfather", genre: "Crime • 2h 55m" },
+  { title: "The Lion King", genre: "Animation • 1h 28m" },
+  { title: "Star Wars", genre: "Sci-Fi • 2h 1m" },
+  { title: "A Minecraft Movie", genre: "Adventure • 1h 40m" },
+  { title: "The Dark Knight", genre: "Action • 2h 32m" },
+  { title: "Forrest Gump", genre: "Drama • 2h 22m" },
+  { title: "Jurassic Park", genre: "Adventure • 2h 7m" },
+  { title: "Titanic", genre: "Romance • 3h 14m" },
+  { title: "Dumbo (1941)", genre: "Animation • 1h 4m" },
+  { title: "Hurry Up Tomorrow", genre: "Music • 1h 30m" },
+  { title: "The Idol", genre: "Drama • 1h 50m" },
+];
+
 function Projects() {
-  const scrollToSection = (sectionId) => {
+  const reducedMotion = useReducedMotion();
+
+  const scrollToSection = useCallback((sectionId) => {
     let element = null;
 
     if (sectionId === "hero" || sectionId === "/") {
@@ -723,219 +473,251 @@ function Projects() {
         inline: "nearest",
       });
     }
+  }, []);
+
+  const heroPreviewNavButtonSx = {
+    borderRadius: "6px",
+    border: "1px solid transparent",
+    background: "transparent",
+    color: "rgba(241,245,255,0.95)",
+    textShadow: "0 1px 2px rgba(0,0,0,0.6)",
+    fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
+    px: { xs: 0.35, sm: 0.45, md: 0.55 },
+    py: { xs: 0.15, sm: 0.18, md: 0.2 },
+    cursor: "pointer",
+    fontFamily: "inherit",
+    transition:
+      "transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
+    "&:hover": {
+      transform: "translateY(-1px)",
+      color: "#ffffff",
+      borderColor: "rgba(255,255,255,0.2)",
+      backgroundColor: "rgba(255,255,255,0.1)",
+    },
   };
 
   const portfolioAnimation = (
     <Box
       sx={{
-        height: "100%",
         width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#ffffff",
-        overflow: "hidden",
+        height: "100%",
+        minHeight: { xs: "290px", sm: "230px", md: "250px" },
         position: "relative",
-        minHeight: { xs: "210px", sm: "230px", md: "250px" },
+        overflow: "hidden",
+        background:
+          "linear-gradient(140deg, #010613 0%, #050c3a 46%, #040a2b 100%)",
       }}
     >
-      {/* Hero Section Content - Direct, no browser frame */}
+      <Box sx={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        <HeroBackground animated={!reducedMotion} />
+      </Box>
+
+      <Box sx={{ position: "absolute", inset: 0, zIndex: 10 }}>
+        <Suspense fallback={null}>
+          <Lanyard
+            position={[0, 0, 11]}
+            gravity={reducedMotion ? [0, -18, 0] : [0, -40, 0]}
+            fov={24}
+            groupOffsetX={-1.1}
+            groupOffsetY={4.25}
+            scale={0.88}
+            bandColor="#000000"
+            bandWidth={0.36}
+            introSwing={!reducedMotion}
+          />
+        </Suspense>
+      </Box>
+
       <Box
         sx={{
-          position: "relative",
-          width: { xs: "95%", sm: "90%", md: "85%" },
-          height: "100%",
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: "center",
-          justifyContent: "space-between",
-          overflow: "hidden",
-          background: "#ffffff",
-          p: { xs: 1, sm: 1.5, md: 2 },
-          maxWidth: "100%",
+          position: "absolute",
+          top: { xs: 8, sm: 10, md: 12 },
+          left: 0,
+          right: 0,
+          zIndex: 30,
+          px: { xs: 1.2, sm: 1.4, md: 1.8 },
+          pointerEvents: "none",
         }}
       >
-        {/* Navigation - Absolute positioned at top */}
         <Box
           sx={{
-            position: "absolute",
-            top: { xs: "8px", sm: "10px", md: "12px" },
-            left: { xs: "2px", sm: "2px", md: "4px" },
-            display: "flex",
-            gap: { xs: 1, sm: 1.25, md: 1.5 },
-            zIndex: 10,
-          }}
-        >
-          <Typography
-            component="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollToSection("skills");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              fontSize: { xs: "9px", sm: "9px", md: "9px" },
-              fontWeight: 400,
-              letterSpacing: "-0.01em",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              padding: { xs: "2px 4px", sm: 0 },
-              minHeight: { xs: "24px", sm: "auto" },
-              transition: "opacity 0.2s",
-              "&:hover": {
-                opacity: 0.6,
-              },
-            }}
-          >
-            About
-          </Typography>
-          <Typography
-            component="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollToSection("projects");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              fontSize: { xs: "9px", sm: "9px", md: "9px" },
-              fontWeight: 400,
-              letterSpacing: "-0.01em",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              padding: { xs: "2px 4px", sm: 0 },
-              minHeight: { xs: "24px", sm: "auto" },
-              transition: "opacity 0.2s",
-              "&:hover": {
-                opacity: 0.6,
-              },
-            }}
-          >
-            Projects
-          </Typography>
-          <Typography
-            component="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollToSection("contact");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              fontSize: { xs: "9px", sm: "9px", md: "9px" },
-              fontWeight: 400,
-              letterSpacing: "-0.01em",
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              padding: { xs: "2px 4px", sm: 0 },
-              minHeight: { xs: "24px", sm: "auto" },
-              transition: "opacity 0.2s",
-              "&:hover": {
-                opacity: 0.6,
-              },
-            }}
-          >
-            Contact
-          </Typography>
-        </Box>
-
-        {/* Left Side - Text Content */}
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            pr: 1.5,
-            mt: 3,
-          }}
-        >
-          {/* Heading */}
-          <Typography
-            sx={{
-              fontWeight: 600,
-              fontSize: { xs: "12px", sm: "14px", md: "16px", lg: "18px" },
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              mb: { xs: 0.75, sm: 1 },
-              color: "#1d1d1f",
-            }}
-          >
-            Hi, I'm Taylor Fradella.
-          </Typography>
-
-          {/* Subtitle */}
-          <Typography
-            sx={{
-              color: "#86868b",
-              fontWeight: 400,
-              fontSize: { xs: "8px", sm: "9px", md: "10px" },
-              mb: { xs: 1.5, sm: 2 },
-              lineHeight: 1.4,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Designing and engineering thoughtful digital experiences.
-          </Typography>
-
-          {/* Button */}
-          <Box
-            component="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              scrollToSection("contact");
-            }}
-            sx={{
-              bgcolor: "#e0e0e0",
-              color: "#222",
-              px: { xs: 1, sm: 1.25, md: 1.5 },
-              py: { xs: 0.375, sm: 0.5 },
-              borderRadius: "8px",
-              fontSize: { xs: "9px", sm: "9px", md: "9px" },
-              fontWeight: 500,
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              minHeight: { xs: "28px", sm: "32px" },
-              transition: "background-color 0.2s",
-              "&:hover": {
-                bgcolor: "#d0d0d0",
-              },
-            }}
-          >
-            Get in Touch
-          </Box>
-        </Box>
-
-        {/* Right Side - MacBook */}
-        <Box
-          sx={{
-            flex: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            gap: { xs: 0.7, sm: 0.9, md: 1.2 },
+            pointerEvents: "auto",
           }}
         >
-          <OptimizedImage
-            src="/macbook-frame.png"
-            alt="MacBook"
+          <Typography
             sx={{
-              width: "100%",
-              maxWidth: { xs: "150px", sm: "175px", md: "200px" },
-              height: "auto",
-              objectFit: "contain",
-              filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.06))",
+              color: "#ffffff",
+              fontFamily: HERO_PREVIEW_FONT_FAMILY,
+              fontSize: { xs: "9px", sm: "8px", md: "9px" },
+              fontWeight: 700,
+              letterSpacing: "0.01em",
+              textShadow: "0 1px 2px rgba(0,0,0,0.6)",
+              whiteSpace: "nowrap",
             }}
-          />
+          >
+            TAYLOR FRADELLA
+          </Typography>
+          <Box
+            sx={{
+              ml: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.2, sm: 0.3, md: 0.45 },
+            }}
+          >
+            <Typography
+              component="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToSection("skills");
+              }}
+              sx={heroPreviewNavButtonSx}
+            >
+              Skills
+            </Typography>
+            <Typography
+              component="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToSection("projects");
+              }}
+              sx={heroPreviewNavButtonSx}
+            >
+              Projects
+            </Typography>
+            <Typography
+              component="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToSection("contact");
+              }}
+              sx={heroPreviewNavButtonSx}
+            >
+              Contact
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(241,245,255,0.9)",
+                textShadow: "0 1px 2px rgba(0,0,0,0.6)",
+                fontSize: { xs: "6.8px", sm: "7px", md: "7.5px" },
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                px: { xs: 0.2, sm: 0.3, md: 0.35 },
+                whiteSpace: "nowrap",
+              }}
+            >
+              Reduce Animations
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ position: "absolute", inset: 0, zIndex: 20, pointerEvents: "none" }}>
+        <Box
+          sx={{
+            height: "100%",
+            width: "100%",
+            display: "grid",
+            gridTemplateColumns: { xs: "0.95fr 1.05fr", sm: "0.9fr 1.1fr" },
+            alignContent: "center",
+            alignItems: "center",
+            gap: { xs: 0.55, sm: 1.2, md: 1.6 },
+            px: { xs: 1.2, sm: 1.6, md: 2.1 },
+            pt: 0,
+          }}
+        >
+          <Box sx={{ display: "block" }} />
+          <Box
+            sx={{
+              pointerEvents: "auto",
+              width: "100%",
+              maxWidth: { xs: "140px", sm: "220px", md: "255px" },
+              justifySelf: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              gap: { xs: 0.7, sm: 0.9, md: 1.2 },
+            }}
+          >
+            <Typography
+              component="h3"
+              sx={{
+                fontFamily: HERO_PREVIEW_FONT_FAMILY,
+                fontWeight: 600,
+                fontSize: { xs: "11px", sm: "16px", md: "24px" },
+                lineHeight: { xs: 1.08, sm: 1.08, md: 1.06 },
+                letterSpacing: "-0.02em",
+                color: "#f8fbff",
+                textShadow: "0 2px 8px rgba(0,0,0,0.45)",
+                textAlign: "center",
+              }}
+            >
+              Thoughtful UX.
+              <br />
+              Clean code.
+              <br />
+              Fast apps.
+            </Typography>
+
+            <Typography
+              sx={{
+                width: "100%",
+                maxWidth: { xs: "130px", sm: "180px", md: "230px" },
+                color: "rgba(241,245,255,0.85)",
+                textShadow: "0 1px 4px rgba(0,0,0,0.55)",
+                fontWeight: 400,
+                fontSize: { xs: "6px", sm: "7.5px", md: "9px" },
+                lineHeight: 1.35,
+                textAlign: "center",
+              }}
+            >
+              Designing and engineering profound digital experiences.
+            </Typography>
+
+            <Box
+              component="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToSection("contact");
+              }}
+              sx={{
+                mt: { xs: 0.2, sm: 0.25, md: 0.3 },
+                alignSelf: "center",
+                borderRadius: "999px",
+                border: "1px solid rgba(255,255,255,0.25)",
+                background: "rgba(255,255,255,0.1)",
+                color: "#f6f8ff",
+                px: { xs: 1.2, sm: 1.3, md: 1.6 },
+                py: { xs: 0.32, sm: 0.34, md: 0.42 },
+                minHeight: { xs: "22px", sm: "24px", md: "28px" },
+                fontSize: { xs: "7px", sm: "7.5px", md: "9px" },
+                fontWeight: 600,
+                boxShadow: "0 8px 20px rgba(2,6,23,0.28)",
+                backdropFilter: "blur(10px)",
+                cursor: "pointer",
+                transition:
+                  "transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  borderColor: "rgba(255,255,255,0.35)",
+                  background: "rgba(255,255,255,0.18)",
+                  boxShadow: "0 12px 26px rgba(2,6,23,0.34)",
+                },
+              }}
+            >
+              Get in Touch
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>
@@ -945,42 +727,50 @@ function Projects() {
     <Box
       sx={{
         width: "100%",
-        height: "100%",
-        minHeight: { xs: "210px", sm: "230px", md: 250 },
+        height: { xs: "290px", sm: "100%" },
+        minHeight: { xs: "290px", sm: "230px", md: "250px" },
+        maxHeight: { xs: "290px", sm: "100%" },
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #1a0000 0%, #330000 100%)",
+        background:
+          "linear-gradient(140deg, #060b1a 0%, #0b1328 48%, #090f1f 100%)",
         overflow: "hidden",
         position: "relative",
       }}
     >
-      {/* Website Preview (relative for overlap) */}
+      <ProjectFloatingLines
+        theme={projectFloatingLineThemes.lions}
+        reducedMotion={reducedMotion}
+      />
+      {/* Website Preview */}
       <Box
         sx={{
           position: "relative",
-          width: { xs: "95%", sm: "80%", md: "420px" },
-          maxWidth: { xs: "100%", sm: "500px", md: "600px" },
-          minWidth: { xs: "280px", sm: "320px", md: "320px" },
-          height: { xs: "auto", sm: "280px", md: "340px" },
-          maxHeight: { xs: "400px", sm: "380px", md: "420px" },
-          minHeight: { xs: "210px", sm: "240px", md: "240px" },
-          aspectRatio: { xs: "16/10", sm: "auto" },
-          background: "#000",
-          borderRadius: "16px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+          width: { xs: "100%", sm: "92%", md: "88%" },
+          maxWidth: { xs: "100%", sm: "92%", md: "88%" },
+          minWidth: 0,
+          height: { xs: "100%", sm: "92%", md: "90%" },
+          maxHeight: { xs: "100%", sm: "92%", md: "90%" },
+          minHeight: 0,
+          aspectRatio: "auto",
+          borderRadius: { xs: 0, sm: "10px", md: "12px" },
           overflow: "hidden",
-          border: "1.5px solid rgba(255,0,0,0.25)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          background: "rgba(7,10,18,0.8)",
+          backdropFilter: "blur(8px)",
           display: "flex",
           flexDirection: "column",
           zIndex: 1,
+          mx: "auto",
         }}
       >
         {/* Browser Header */}
         <Box
           sx={{
             height: { xs: "24px", sm: "26px", md: "28px" },
-            background: "#1a0000",
+            background: "rgba(255,255,255,0.04)",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
             display: "flex",
             alignItems: "center",
             padding: { xs: "0 8px", sm: "0 9px", md: "0 10px" },
@@ -995,6 +785,7 @@ function Projects() {
                 height: { xs: "6px", sm: "7px", md: "8px" },
                 borderRadius: "50%",
                 background: color,
+                opacity: 0.9,
               }}
             />
           ))}
@@ -1003,8 +794,9 @@ function Projects() {
               flex: 1,
               height: "13px",
               margin: "0 10px",
-              background: "rgba(255,0,0,0.1)",
-              borderRadius: "3px",
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "999px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1014,7 +806,8 @@ function Projects() {
               variant="caption"
               sx={{
                 fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
-                color: "rgba(255,255,255,0.6)",
+                color: "rgba(241,245,249,0.75)",
+                fontWeight: 500,
               }}
             >
               lionsdencinemas.com
@@ -1022,7 +815,7 @@ function Projects() {
           </Box>
         </Box>
 
-        {/* Website Content with animated scroll */}
+        {/* Website Content */}
         <Box
           sx={{
             height: {
@@ -1035,7 +828,8 @@ function Projects() {
               sm: "10px 8px 8px 8px",
               md: "12px 10px 10px 10px",
             },
-            background: "#000",
+            background:
+              "linear-gradient(180deg, rgba(2,6,23,0.76) 0%, rgba(2,6,23,0.94) 100%)",
             display: "flex",
             flexDirection: "column",
             gap: "10px",
@@ -1044,17 +838,16 @@ function Projects() {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {/* Navigation */}
           <Box
             sx={{
               display: "flex",
-              gap: "12px",
+              gap: "10px",
               padding: {
                 xs: "3px 0 6px 0",
                 sm: "3.5px 0 7px 0",
                 md: "4px 0 8px 0",
               },
-              borderBottom: "1px solid rgba(255,0,0,0.15)",
+              borderBottom: "1px solid rgba(255,255,255,0.12)",
             }}
           >
             {["Home", "Movies", "Showtimes", "About"].map((item, i) => (
@@ -1062,9 +855,9 @@ function Projects() {
                 key={i}
                 sx={{
                   fontSize: { xs: "7.5px", sm: "8.5px", md: "9px" },
-                  color: i === 0 ? "#ff0000" : "rgba(255,255,255,0.7)",
-                  fontWeight: i === 0 ? "bold" : "normal",
-                  letterSpacing: 0.5,
+                  color: i === 0 ? "#fda4af" : "rgba(241,245,249,0.78)",
+                  fontWeight: i === 0 ? 700 : 500,
+                  letterSpacing: 0.2,
                 }}
               >
                 {item}
@@ -1072,16 +865,28 @@ function Projects() {
             ))}
           </Box>
 
-          {/* Featured Movie */}
           <Box
             sx={{
               height: { xs: "32%", sm: "35%", md: "38%" },
-              background: "linear-gradient(45deg, #1a0000, #330000)",
-              borderRadius: { xs: "3px", sm: "4px", md: "5px" },
+              background:
+                "linear-gradient(130deg, rgba(248,113,113,0.2) 0%, rgba(15,23,42,0.28) 100%)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              borderRadius: { xs: "4px", sm: "5px", md: "6px" },
               padding: { xs: "4px 6px", sm: "6px 8px", md: "8px 10px" },
               display: "flex",
               gap: { xs: "6px", sm: "8px", md: "10px" },
               alignItems: "center",
+              animation: "lionsNowShowingBreath 3.8s ease-in-out infinite",
+              "@keyframes lionsNowShowingBreath": {
+                "0%, 100%": {
+                  transform: "translateY(0px)",
+                  borderColor: "rgba(255,255,255,0.14)",
+                },
+                "50%": {
+                  transform: "translateY(-1px)",
+                  borderColor: "rgba(248,113,113,0.35)",
+                },
+              },
             }}
           >
             <Box
@@ -1093,8 +898,7 @@ function Projects() {
                 height: { xs: 50, sm: 56, md: 62 },
                 objectFit: "cover",
                 borderRadius: "4px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-                background: "rgba(255,0,0,0.1)",
+                background: "rgba(15,23,42,0.6)",
                 mr: { xs: 1.5, sm: 1.75, md: 2 },
                 flexShrink: 0,
               }}
@@ -1103,8 +907,8 @@ function Projects() {
               <Typography
                 sx={{
                   fontSize: { xs: "8px", sm: "9.5px", md: "11px" },
-                  color: "#fff",
-                  fontWeight: "bold",
+                  color: "#f8fafc",
+                  fontWeight: 700,
                   marginBottom: "2px",
                   lineHeight: 1.2,
                 }}
@@ -1112,20 +916,34 @@ function Projects() {
               >
                 Dumbo (1941)
               </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: "6.5px", sm: "7px", md: "8px" },
-                  color: "rgba(255,255,255,0.7)",
-                  lineHeight: 1.2,
-                }}
-                noWrap
-              >
-                Now Showing - Disney Classic
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <Box
+                  sx={{
+                    width: { xs: "4px", sm: "4px", md: "5px" },
+                    height: { xs: "4px", sm: "4px", md: "5px" },
+                    borderRadius: "50%",
+                    background: "#34d399",
+                    animation: "lionsNowShowingPulse 1.6s ease-in-out infinite",
+                    "@keyframes lionsNowShowingPulse": {
+                      "0%, 100%": { opacity: 0.45, transform: "scale(0.85)" },
+                      "50%": { opacity: 1, transform: "scale(1.1)" },
+                    },
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: { xs: "6.5px", sm: "7px", md: "8px" },
+                    color: "rgba(241,245,249,0.72)",
+                    lineHeight: 1.2,
+                  }}
+                  noWrap
+                >
+                  Now Showing - Disney Classic
+                </Typography>
+              </Box>
             </Box>
           </Box>
 
-          {/* Animated Scrollable Movie List */}
           <Box
             sx={{
               flex: 1,
@@ -1146,27 +964,14 @@ function Projects() {
                 width: "100%",
               }}
             >
-              {/* Duplicate the movie list for seamless looping */}
-              {[
-                { title: "Interstellar", time: "7:00 PM | 9:30 PM" },
-                { title: "The Godfather", time: "6:45 PM | 9:15 PM" },
-                { title: "The Lion King", time: "7:30 PM | 10:00 PM" },
-                { title: "Star Wars", time: "8:00 PM | 10:30 PM" },
-                { title: "A Minecraft Movie", time: "9:00 PM | 11:30 PM" },
-                { title: "The Dark Knight", time: "6:00 PM | 8:45 PM" },
-                { title: "Forrest Gump", time: "7:15 PM | 9:45 PM" },
-                { title: "Jurassic Park", time: "5:30 PM | 8:00 PM" },
-                { title: "Titanic", time: "6:30 PM | 9:44 PM" },
-                { title: "Dumbo (1941)", time: "4:00 PM | 6:00 PM" },
-                { title: "Hurry Up Tomorrow", time: "10:00 PM | 12:00 AM" },
-                { title: "The Idol", time: "11:00 PM | 1:00 AM" },
-              ].map((movie, i) => (
+              {movieShowtimes.map((movie, i) => (
                 <Box
                   key={i}
                   sx={{
                     minHeight: "28px",
-                    background: "rgba(255,0,0,0.05)",
-                    borderRadius: "3px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "4px",
                     padding: "4px 8px",
                     display: "flex",
                     alignItems: "center",
@@ -1185,8 +990,7 @@ function Projects() {
                       height: 38,
                       objectFit: "cover",
                       borderRadius: "2.5px",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
-                      background: "rgba(255,0,0,0.1)",
+                      background: "rgba(15,23,42,0.6)",
                       mr: 1,
                     }}
                   />
@@ -1194,8 +998,8 @@ function Projects() {
                     <Typography
                       sx={{
                         fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
-                        color: "#fff",
-                        fontWeight: "bold",
+                        color: "#f8fafc",
+                        fontWeight: 700,
                       }}
                     >
                       {movie.title}
@@ -1203,7 +1007,7 @@ function Projects() {
                     <Typography
                       sx={{
                         fontSize: { xs: "6px", sm: "6.5px", md: "7px" },
-                        color: "rgba(255,255,255,0.7)",
+                        color: "rgba(241,245,249,0.72)",
                       }}
                     >
                       {movie.time}
@@ -1211,27 +1015,14 @@ function Projects() {
                   </Box>
                 </Box>
               ))}
-              {/* Repeat for seamless scroll */}
-              {[
-                { title: "Interstellar", time: "7:00 PM | 9:30 PM" },
-                { title: "The Godfather", time: "6:45 PM | 9:15 PM" },
-                { title: "The Lion King", time: "7:30 PM | 10:00 PM" },
-                { title: "Star Wars", time: "8:00 PM | 10:30 PM" },
-                { title: "A Minecraft Movie", time: "9:00 PM | 11:30 PM" },
-                { title: "The Dark Knight", time: "6:00 PM | 8:45 PM" },
-                { title: "Forrest Gump", time: "7:15 PM | 9:45 PM" },
-                { title: "Jurassic Park", time: "5:30 PM | 8:00 PM" },
-                { title: "Titanic", time: "6:30 PM | 9:44 PM" },
-                { title: "Dumbo (1941)", time: "4:00 PM | 6:00 PM" },
-                { title: "Hurry Up Tomorrow", time: "10:00 PM | 12:00 AM" },
-                { title: "The Idol", time: "11:00 PM | 1:00 AM" },
-              ].map((movie, i) => (
+              {movieShowtimes.map((movie, i) => (
                 <Box
                   key={"repeat-" + i}
                   sx={{
                     minHeight: "28px",
-                    background: "rgba(255,0,0,0.05)",
-                    borderRadius: "3px",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "4px",
                     padding: "4px 8px",
                     display: "flex",
                     alignItems: "center",
@@ -1250,8 +1041,7 @@ function Projects() {
                       height: 38,
                       objectFit: "cover",
                       borderRadius: "2.5px",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
-                      background: "rgba(255,0,0,0.1)",
+                      background: "rgba(15,23,42,0.6)",
                       mr: 1,
                     }}
                   />
@@ -1259,8 +1049,8 @@ function Projects() {
                     <Typography
                       sx={{
                         fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
-                        color: "#fff",
-                        fontWeight: "bold",
+                        color: "#f8fafc",
+                        fontWeight: 700,
                       }}
                     >
                       {movie.title}
@@ -1268,7 +1058,7 @@ function Projects() {
                     <Typography
                       sx={{
                         fontSize: { xs: "6px", sm: "6.5px", md: "7px" },
-                        color: "rgba(255,255,255,0.7)",
+                        color: "rgba(241,245,249,0.72)",
                       }}
                     >
                       {movie.time}
@@ -1281,301 +1071,396 @@ function Projects() {
         </Box>
       </Box>
 
-      {/* Mobile App Preview (overlapping right side) */}
+      {/* Mobile App Preview */}
       <Box
         sx={{
           position: "absolute",
-          right: { xs: "8vw", md: "calc(18% - 30px)" },
+          right: { xs: "3vw", sm: "8%", md: "10%" },
           top: { xs: "50%", md: "50%" },
           transform: "translateY(-50%)",
-          width: { xs: "140px", sm: "150px", md: "160px" },
+          width: { xs: "124px", sm: "150px", md: "160px" },
           maxWidth: { xs: "180px", sm: "200px", md: "220px" },
           minWidth: { xs: "100px", sm: "110px" },
           height: { xs: "280px", sm: "300px", md: "340px" },
           maxHeight: { xs: "400px", sm: "380px", md: "420px" },
           minHeight: { xs: "200px", sm: "240px", md: "240px" },
-          background: "#111",
-          borderRadius: "38px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.45)",
-          overflow: "hidden",
-          border: "3.5px solid #222",
-          display: "flex",
-          flexDirection: "column",
           zIndex: 2,
-          pb: "6px",
+          perspective: "1000px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* App Header */}
         <Box
           sx={{
-            height: "38px",
-            background: "linear-gradient(90deg, #1a0000, #330000)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pt: "6px",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: { xs: "9px", sm: "10px", md: "11px" },
-              color: "#fff",
-              fontWeight: "bold",
-              letterSpacing: 1,
-              lineHeight: 1.1,
-            }}
-            noWrap
-          >
-            LIONS DEN CINEMAS
-          </Typography>
-        </Box>
-        {/* App Content - scrollable if needed */}
-        <Box
-          sx={{
-            height: "calc(100% - 38px - 6px)", // header, home indicator
-            pt: "6px",
-            px: "7px",
-            background: "#000",
             position: "relative",
-            overflow: "hidden",
+            width: "100%",
+            height: "100%",
+            borderRadius: { xs: "34px", sm: "36px", md: "40px" },
+            p: { xs: "4px", sm: "4.5px", md: "5px" },
+            background:
+              "linear-gradient(150deg, #161c2b 0%, #0a0f1d 62%, #1c2231 100%)",
+            border: "1px solid rgba(255,255,255,0.24)",
+            transform: "rotate(-0.65deg)",
+            animation: "lionsPhoneFloat 4.6s ease-in-out infinite",
+            "@keyframes lionsPhoneFloat": {
+              "0%, 100%": { transform: "rotate(-0.65deg) translateY(0px)" },
+              "50%": { transform: "rotate(0.15deg) translateY(-3px)" },
+            },
           }}
         >
-          {/* Auto-scrolling Movie List for iPhone */}
+          {/* Side hardware buttons */}
           <Box
-            className="auto-scroll-movie-list"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "7px",
               position: "absolute",
+              left: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+              top: { xs: "22%", sm: "22%", md: "22%" },
+              width: { xs: "2px", sm: "2.5px", md: "3px" },
+              height: { xs: "9%", sm: "9%", md: "9%" },
+              borderRadius: "4px",
+              background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              left: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+              top: { xs: "33%", sm: "33%", md: "33%" },
+              width: { xs: "2px", sm: "2.5px", md: "3px" },
+              height: { xs: "14%", sm: "14%", md: "14%" },
+              borderRadius: "4px",
+              background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              right: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+              top: { xs: "37%", sm: "37%", md: "37%" },
+              width: { xs: "2px", sm: "2.5px", md: "3px" },
+              height: { xs: "20%", sm: "20%", md: "20%" },
+              borderRadius: "4px",
+              background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+            }}
+          />
+
+          <Box
+            sx={{
+              position: "relative",
               width: "100%",
-              animation: "autoScrollIphone 6s linear infinite",
-              "@keyframes autoScrollIphone": {
-                "0%": { top: "0%" },
-                "50%": { top: "-50%" },
-                "100%": { top: "0%" },
-              },
+              height: "100%",
+              borderRadius: { xs: "30px", sm: "32px", md: "36px" },
+              overflow: "hidden",
+              background:
+                "linear-gradient(180deg, rgba(6,11,24,0.94) 0%, rgba(2,6,23,0.98) 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            {[
-              { title: "Interstellar", genre: "Sci-Fi • 2h 49m" },
-              { title: "The Godfather", genre: "Crime • 2h 55m" },
-              { title: "The Lion King", genre: "Animation • 1h 28m" },
-              { title: "Star Wars", genre: "Sci-Fi • 2h 1m" },
-              { title: "A Minecraft Movie", genre: "Adventure • 1h 40m" },
-              { title: "The Dark Knight", genre: "Action • 2h 32m" },
-              { title: "Forrest Gump", genre: "Drama • 2h 22m" },
-              { title: "Jurassic Park", genre: "Adventure • 2h 7m" },
-              { title: "Titanic", genre: "Romance • 3h 14m" },
-              { title: "Dumbo (1941)", genre: "Animation • 1h 4m" },
-              { title: "Hurry Up Tomorrow", genre: "Music • 1h 30m" },
-              { title: "The Idol", genre: "Drama • 1h 50m" },
-            ].map((movie, i) => (
-              <Box
-                key={i}
-                sx={{
-                  minHeight: "38px",
-                  background: "rgba(255,0,0,0.07)",
-                  borderRadius: "7px",
-                  padding: "6px 7px 5px 7px",
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  boxShadow:
-                    i === 0 ? "0 1px 4px rgba(255,0,0,0.04)" : undefined,
-                  gap: "7px",
-                }}
-              >
+            {/* Dynamic island */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: { xs: "7px", sm: "8px", md: "9px" },
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: { xs: "34px", sm: "38px", md: "42px" },
+                height: { xs: "9px", sm: "10px", md: "11px" },
+                borderRadius: "999px",
+                background: "rgba(0,0,0,0.92)",
+                zIndex: 15,
+              }}
+            />
+
+            {/* Status row */}
+            <Box
+              sx={{
+                height: { xs: "22px", sm: "24px", md: "26px" },
+                px: { xs: 1.2, sm: 1.5, md: 1.8 },
+                pt: { xs: "5px", sm: "6px", md: "7px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                color: "rgba(241,245,249,0.9)",
+                fontSize: { xs: "7px", sm: "7.5px", md: "8px" },
+                fontWeight: 700,
+                letterSpacing: 0.2,
+              }}
+            >
+              <Typography sx={{ fontSize: "inherit", fontWeight: "inherit" }}>
+                9:41
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "3px" }}>
                 <Box
-                  component="img"
-                  src={
-                    moviePosters[movie.title] ||
-                    "https://placehold.co/32x44/222/fff?text=No+Image"
-                  }
-                  alt={movie.title + " poster"}
                   sx={{
-                    width: { xs: 22, sm: 24, md: 26 },
-                    height: { xs: 30, sm: 33, md: 36 },
-                    objectFit: "cover",
-                    borderRadius: "2.5px",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.13)",
-                    background: "rgba(255,0,0,0.1)",
+                    width: "9px",
+                    height: "5px",
+                    border: "1px solid rgba(241,245,249,0.8)",
+                    borderRadius: "2px",
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "1px",
+                      left: "1px",
+                      width: "5px",
+                      height: "2px",
+                      background: "rgba(241,245,249,0.9)",
+                      borderRadius: "1px",
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: "2px",
+                    height: "3px",
+                    background: "rgba(241,245,249,0.8)",
+                    borderRadius: "1px",
+                    transform: "translateX(-2px)",
                   }}
                 />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "7px", sm: "7.75px", md: "8.5px" },
-                      color: "#fff",
-                      fontWeight: "bold",
-                      lineHeight: 1.1,
-                    }}
-                    noWrap
-                  >
-                    {movie.title}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "5.5px", sm: "6px", md: "6.5px" },
-                      color: "rgba(255,255,255,0.7)",
-                      lineHeight: 1.1,
-                    }}
-                    noWrap
-                  >
-                    {movie.genre}
-                  </Typography>
-                </Box>
               </Box>
-            ))}
-          </Box>
-        </Box>
-        {/* iPhone Home Indicator */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: { xs: "6px", sm: "7px", md: "8px" },
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: { xs: "18%", sm: "17%", md: "16%" },
-            height: { xs: "1.5px", sm: "1.75px", md: "2px" },
-            background: "#222",
-            borderRadius: "3px",
-            opacity: 0.7,
-            zIndex: 10,
-          }}
-        />
-      </Box>
+            </Box>
 
-      {/* Tech Stack Icons */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: "8%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          gap: "15px",
-        }}
-      >
-        {[
-          { icon: "devicon-react-plain", color: "#61DAFB" },
-          { icon: "devicon-nodejs-plain", color: "#339933" },
-          { icon: "devicon-microsoftsqlserver-plain", color: "#CC2927" },
-        ].map((tech, i) => (
-          <Box
-            key={i}
-            sx={{
-              width: { xs: "24px", sm: "27px", md: "30px" },
-              height: { xs: "24px", sm: "27px", md: "30px" },
-              background: "rgba(0,0,0,0.8)",
-              borderRadius: { xs: "5px", sm: "5.5px", md: "6px" },
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-              animation: `float 3s infinite ease-in-out ${i * 0.2}s`,
-              "@keyframes float": {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-5px)" },
-              },
-            }}
-          >
-            <i
-              className={tech.icon}
-              style={{
-                fontSize: "clamp(16px, 4vw, 20px)",
-                color: tech.color,
+            <Box
+              sx={{
+                height: "calc(100% - 22px)",
+                px: "7px",
+                pb: "9px",
+                background:
+                  "linear-gradient(180deg, rgba(2,6,23,0.82) 0%, rgba(2,6,23,0.98) 100%)",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  height: "26px",
+                  mb: "6px",
+                  background:
+                    "linear-gradient(90deg, rgba(248,113,113,0.24), rgba(30,41,59,0.4))",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
+                    color: "#f8fafc",
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    lineHeight: 1.1,
+                  }}
+                  noWrap
+                >
+                  LIONS DEN CINEMAS
+                </Typography>
+              </Box>
+
+              <Box
+                className="auto-scroll-movie-list"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "7px",
+                  position: "absolute",
+                  left: "7px",
+                  right: "7px",
+                  width: "auto",
+                  animation: "autoScrollIphone 6s linear infinite",
+                  "@keyframes autoScrollIphone": {
+                    "0%": { top: "38px" },
+                    "50%": { top: "-22%" },
+                    "100%": { top: "38px" },
+                  },
+                }}
+              >
+                {movieGenres.map((movie, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      minHeight: "38px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "7px",
+                      padding: "6px 7px 5px 7px",
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      gap: "7px",
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={
+                        moviePosters[movie.title] ||
+                        "https://placehold.co/32x44/222/fff?text=No+Image"
+                      }
+                      alt={movie.title + " poster"}
+                      sx={{
+                        width: { xs: 22, sm: 24, md: 26 },
+                        height: { xs: 30, sm: 33, md: 36 },
+                        objectFit: "cover",
+                        borderRadius: "2.5px",
+                        background: "rgba(15,23,42,0.6)",
+                      }}
+                    />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontSize: { xs: "7px", sm: "7.75px", md: "8.5px" },
+                          color: "#f8fafc",
+                          fontWeight: 700,
+                          lineHeight: 1.1,
+                        }}
+                        noWrap
+                      >
+                        {movie.title}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: { xs: "5.5px", sm: "6px", md: "6.5px" },
+                          color: "rgba(241,245,249,0.72)",
+                          lineHeight: 1.1,
+                        }}
+                        noWrap
+                      >
+                        {movie.genre}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            {/* Home indicator */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: { xs: "6px", sm: "7px", md: "8px" },
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: { xs: "18%", sm: "17%", md: "16%" },
+                height: { xs: "1.5px", sm: "1.75px", md: "2px" },
+                background: "rgba(241,245,249,0.55)",
+                borderRadius: "3px",
+                zIndex: 10,
+              }}
+            />
+
+            {/* Glass sheen */}
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                background:
+                  "linear-gradient(165deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.06) 16%, rgba(255,255,255,0) 35%)",
               }}
             />
           </Box>
-        ))}
+        </Box>
       </Box>
     </Box>
   );
-
   const bloodSugarMonitorAnimation = (
     <Box
       sx={{
         height: "100%",
         width: "100%",
+        minHeight: { xs: "290px", sm: "230px", md: "250px" },
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)",
+        background:
+          "linear-gradient(145deg, #040b1f 0%, #07123a 52%, #061031 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "210px", sm: "230px", md: "250px" },
-        imageRendering: "crisp-edges",
-        WebkitFontSmoothing: "antialiased",
-        MozOsxFontSmoothing: "grayscale",
-        transform: "translateZ(0)",
-        backfaceVisibility: "hidden",
       }}
     >
-      {/* Main Device Display */}
+      <ProjectFloatingLines
+        theme={projectFloatingLineThemes.sweetspot}
+        reducedMotion={reducedMotion}
+      />
       <Box
+        component={motion.div}
+        animate={{ y: [0, -3, 0] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
         sx={{
           position: "relative",
-          width: { xs: "90%", sm: "75%", md: "60%" },
-          height: { xs: "auto", sm: "70%", md: "75%" },
-          maxHeight: { xs: "320px", sm: "360px", md: "450px" },
-          minHeight: { xs: "210px", sm: "240px", md: "350px" },
-          background: "#f3f4f6",
-          borderRadius: { xs: "12px", sm: "13px", md: "15px" },
+          zIndex: 1,
+          width: { xs: "88%", sm: "78%", md: "64%" },
+          minWidth: { xs: "238px", sm: "280px", md: "330px" },
+          maxWidth: { xs: "360px", sm: "430px", md: "500px" },
+          minHeight: { xs: "250px", sm: "228px", md: "240px" },
+          maxHeight: "100%",
+          px: { xs: 1.35, sm: 1.55, md: 1.9 },
+          py: { xs: 1.25, sm: 1.5, md: 1.8 },
+          borderRadius: { xs: "13px", sm: "15px", md: "17px" },
+          border: "1px solid rgba(116,154,255,0.24)",
+          background: "linear-gradient(180deg, #07102a 0%, #050b1f 100%)",
+          boxShadow:
+            "0 22px 56px rgba(2,6,23,0.62), inset 0 1px 0 rgba(255,255,255,0.08)",
           display: "flex",
           flexDirection: "column",
-          padding: { xs: "10px", sm: "12px", md: "15px" },
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-          border: "2px solid #d1d5db",
-          transform: "translateZ(0)",
-          willChange: "auto",
+          gap: { xs: 1, sm: 1.15, md: 1.4 },
         }}
       >
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: { xs: "6px", sm: "8px", md: "10px" },
+            justifyContent: "space-between",
           }}
         >
           <Typography
             sx={{
-              fontSize: { xs: "11px", sm: "12px", md: "14px" },
-              color: "#1f2937",
-              fontWeight: "bold",
+              color: "#e2e8f0",
+              fontSize: { xs: "10px", sm: "11px", md: "13px" },
+              fontWeight: 700,
+              letterSpacing: "-0.01em",
             }}
           >
             SweetSpot
           </Typography>
           <Box
             sx={{
+              borderRadius: "999px",
+              border: "1px solid rgba(148,163,184,0.28)",
+              background: "rgba(15,23,42,0.55)",
+              px: { xs: 0.7, sm: 0.9, md: 1.05 },
+              py: { xs: 0.26, sm: 0.32, md: 0.4 },
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: { xs: 0.45, sm: 0.55, md: 0.65 },
             }}
           >
             <Box
+              component={motion.div}
+              animate={{ opacity: [0.45, 1, 0.45], scale: [0.9, 1.15, 0.9] }}
+              transition={{
+                duration: 1.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               sx={{
-                width: { xs: "6px", sm: "7px", md: "8px" },
-                height: { xs: "6px", sm: "7px", md: "8px" },
+                width: { xs: "5px", sm: "5.5px", md: "6px" },
+                height: { xs: "5px", sm: "5.5px", md: "6px" },
                 borderRadius: "50%",
-                background: "#22c55e",
-                animation: "pulse 2s infinite",
-                "@keyframes pulse": {
-                  "0%": { opacity: 0.5, transform: "scale(0.9)" },
-                  "50%": { opacity: 1, transform: "scale(1.1)" },
-                  "100%": { opacity: 0.5, transform: "scale(0.9)" },
-                },
-                boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
+                background: "#34d399",
+                boxShadow: "0 0 10px rgba(52,211,153,0.75)",
               }}
             />
             <Typography
               sx={{
-                fontSize: { xs: "8px", sm: "9px", md: "10px" },
-                color: "#1f2937",
+                color: "rgba(226,232,240,0.9)",
+                fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                fontWeight: 600,
               }}
             >
               Connected
@@ -1583,71 +1468,89 @@ function Projects() {
           </Box>
         </Box>
 
-        {/* Current Reading with AI Processing */}
         <Box
           sx={{
             display: "flex",
-            alignItems: "baseline",
-            marginBottom: "10px",
-            position: "relative",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <Typography
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
+            <Typography
+              component={motion.span}
+              animate={{ opacity: [0.86, 1, 0.86] }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              sx={{
+                color: "#f8fafc",
+                fontSize: { xs: "38px", sm: "44px", md: "48px" },
+                lineHeight: 0.9,
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+              }}
+            >
+              124
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(226,232,240,0.9)",
+                fontSize: { xs: "18px", sm: "20px", md: "22px" },
+                fontWeight: 600,
+              }}
+            >
+              mg/dL
+            </Typography>
+          </Box>
+          <Box
             sx={{
-              fontSize: { xs: "24px", sm: "28px", md: "32px" },
-              color: "#1f2937",
-              fontWeight: "bold",
-              animation: "fadeInOut 3s infinite",
-              "@keyframes fadeInOut": {
-                "0%, 100%": { opacity: 0.7 },
-                "50%": { opacity: 1 },
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "999px",
+              border: "1px solid rgba(16,185,129,0.45)",
+              background: "rgba(6,95,70,0.2)",
+              px: { xs: 0.75, sm: 0.95, md: 1.1 },
+              py: { xs: 0.32, sm: 0.4, md: 0.48 },
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.45, sm: 0.55, md: 0.7 },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(110deg, transparent 35%, rgba(110,231,183,0.24) 50%, transparent 70%)",
+                transform: "translateX(-120%)",
+                animation: "sweetSpotAiSweep 2.2s linear infinite",
+              },
+              "@keyframes sweetSpotAiSweep": {
+                "0%": { transform: "translateX(-120%)" },
+                "100%": { transform: "translateX(120%)" },
               },
             }}
           >
-            124
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: { xs: "11px", sm: "12px", md: "14px" },
-              color: "#1f2937",
-              marginLeft: "5px",
-            }}
-          >
-            mg/dL
-          </Typography>
-
-          {/* AI Processing Indicator */}
-          <Box
-            sx={{
-              position: "absolute",
-              right: 0,
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "flex",
-              alignItems: "center",
-              gap: { xs: "3px", sm: "4px", md: "5px" },
-            }}
-          >
             <Box
+              component={motion.div}
+              animate={{ opacity: [0.5, 1, 0.5], scale: [0.82, 1.08, 0.82] }}
+              transition={{
+                duration: 1.45,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               sx={{
-                width: { xs: "5px", sm: "6px", md: "7px" },
-                height: { xs: "5px", sm: "6px", md: "7px" },
+                width: { xs: "5px", sm: "5.5px", md: "6px" },
+                height: { xs: "5px", sm: "5.5px", md: "6px" },
                 borderRadius: "50%",
-                background: "#22c55e",
-                animation: "aiPulse 1.5s infinite",
-                "@keyframes aiPulse": {
-                  "0%": { transform: "scale(0.8)", opacity: 0.5 },
-                  "50%": { transform: "scale(1.2)", opacity: 1 },
-                  "100%": { transform: "scale(0.8)", opacity: 0.5 },
-                },
-                boxShadow: "0 0 4px rgba(34, 197, 94, 0.6)",
+                background: "#34d399",
               }}
             />
             <Typography
               sx={{
+                color: "#6ee7b7",
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#22c55e",
-                fontWeight: "600",
+                fontWeight: 700,
               }}
             >
               AI Processing
@@ -1655,262 +1558,190 @@ function Projects() {
           </Box>
         </Box>
 
-        {/* Graph Container */}
         <Box
           sx={{
-            flex: 1,
-            background: "#ffffff",
-            borderRadius: { xs: "8px", sm: "9px", md: "10px" },
-            padding: { xs: "6px", sm: "8px", md: "10px" },
             position: "relative",
+            borderRadius: { xs: "8px", sm: "9px", md: "10px" },
+            border: "1px solid rgba(148,163,184,0.24)",
+            background:
+              "linear-gradient(180deg, rgba(13,23,49,0.78) 0%, rgba(8,15,35,0.88) 100%)",
             overflow: "hidden",
-            border: "2px solid #e5e7eb",
-            imageRendering: "crisp-edges",
-            WebkitFontSmoothing: "antialiased",
-            MozOsxFontSmoothing: "grayscale",
+            minHeight: { xs: "76px", sm: "86px", md: "102px" },
+            px: { xs: 1.05, sm: 1.2, md: 1.4 },
+            py: { xs: 0.9, sm: 1.05, md: 1.2 },
           }}
         >
-          {/* Graph Background Grid */}
           <Box
             sx={{
               position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              padding: { xs: "6px", sm: "8px", md: "10px" },
+              inset: 0,
+              pointerEvents: "none",
+              opacity: 0.42,
+              background:
+                "linear-gradient(transparent 24%, rgba(148,163,184,0.2) 25%, transparent 26%, transparent 49%, rgba(148,163,184,0.2) 50%, transparent 51%, transparent 74%, rgba(148,163,184,0.2) 75%, transparent 76%)",
             }}
-          >
-            {[...Array(5)].map((_, i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: "100%",
-                  height: { xs: "1px", sm: "1.5px", md: "2px" },
-                  background: "#e5e7eb",
-                }}
-              />
-            ))}
-          </Box>
-
-          {/* Y-axis Labels */}
-          <Box
-            sx={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              padding: { xs: "6px 0", sm: "8px 0", md: "10px 0" },
-            }}
-          >
-            {[400, 300, 200, 100, 0].map((value) => (
-              <Typography
-                key={value}
-                sx={{
-                  fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                  color: "#6b7280",
-                  fontWeight: 600,
-                  transform: {
-                    xs: "translateX(-15px)",
-                    sm: "translateX(-18px)",
-                    md: "translateX(-20px)",
-                  },
-                }}
-              >
-                {value}
-              </Typography>
-            ))}
-          </Box>
-
-          {/* Animated Glucose Line */}
+          />
           <svg
             width="100%"
             height="100%"
-            viewBox="0 0 100 100"
+            viewBox="0 0 100 45"
             preserveAspectRatio="none"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              shapeRendering: "geometricPrecision",
-            }}
+            style={{ position: "absolute", inset: 0 }}
           >
-            {/* Target Range Area */}
-            <path
-              d="M0,40 L100,40 L100,60 L0,60 Z"
-              fill="rgba(34, 197, 94, 0.15)"
-              stroke="rgba(34, 197, 94, 0.5)"
-              strokeWidth="1"
-              shapeRendering="crispEdges"
+            <defs>
+              <linearGradient
+                id="sweetspotLineGradientV2"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#2dd4bf" />
+                <stop offset="50%" stopColor="#34d399" />
+                <stop offset="100%" stopColor="#5eead4" />
+              </linearGradient>
+              <linearGradient
+                id="sweetspotAreaGradientV2"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="rgba(52,211,153,0.25)" />
+                <stop offset="100%" stopColor="rgba(52,211,153,0.02)" />
+              </linearGradient>
+              <filter id="sweetspotGlowV2">
+                <feGaussianBlur stdDeviation="1.15" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <motion.path
+              d="M0,34 C11,33 20,34 30,30 C40,26 49,28 58,24 C67,21 76,23 86,22 C92,22 97,21 100,21 L100,45 L0,45 Z"
+              fill="url(#sweetspotAreaGradientV2)"
+              initial={{ opacity: 0.45 }}
+              animate={{ opacity: [0.45, 0.7, 0.45] }}
+              transition={{
+                duration: 3.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             />
 
-            {/* Glucose Line */}
-            <path
-              d="M 0,50 C 10,45 20,55 30,40 C 40,35 50,45 60,30 C 70,35 80,25 90,40 C 95,45 100,40 100,40"
+            <motion.path
+              d="M0,34 C11,33 20,34 30,30 C40,26 49,28 58,24 C67,21 76,23 86,22 C92,22 97,21 100,21"
               fill="none"
-              stroke="#22c55e"
-              strokeWidth="3"
+              stroke="url(#sweetspotLineGradientV2)"
+              strokeWidth="2.1"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeDasharray="none"
-              shapeRendering="geometricPrecision"
-              vectorEffect="non-scaling-stroke"
-              style={{
-                strokeDasharray: "250",
-                strokeDashoffset: "250",
-                animation: "drawLineComplete 3s linear forwards",
+              filter="url(#sweetspotGlowV2)"
+              initial={{ pathLength: 0.2, opacity: 0.82 }}
+              animate={{ pathLength: [0.2, 1, 1], opacity: [0.82, 1, 0.9] }}
+              transition={{
+                duration: 3.8,
+                repeat: Infinity,
+                ease: [0.22, 1, 0.36, 1],
+                times: [0, 0.52, 1],
               }}
             />
 
-            {/* Data Points */}
-            {[0, 20, 40, 60, 80, 100].map((x, i) => {
-              const yPoints = [50, 45, 40, 30, 35, 40];
-              return (
-                <circle
-                  key={i}
-                  cx={`${x}%`}
-                  cy={`${yPoints[i]}%`}
-                  r="3"
-                  fill="#22c55e"
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                  opacity="0"
-                  shapeRendering="geometricPrecision"
-                  style={{
-                    animation: `fadeIn 0.3s ease forwards ${1 + i * 0.3}s`,
-                  }}
-                />
-              );
-            })}
-
-            {/* Moving Point */}
-            <circle
-              cx="0%"
-              cy="50%"
-              r="4"
-              fill="#22c55e"
-              stroke="#ffffff"
-              strokeWidth="2"
-              shapeRendering="geometricPrecision"
-              style={{
-                animation: "moveDot 3s linear forwards",
-              }}
-            />
-
-            <style>
-              {`
-                @keyframes drawLineComplete {
-                  0% {
-                    stroke-dashoffset: 250;
-                  }
-                  100% {
-                    stroke-dashoffset: 0;
-                  }
-                }
-                @keyframes fadeIn {
-                  to {
-                    opacity: 1;
-                  }
-                }
-                @keyframes moveDot {
-                  0% { cx: 0%; cy: 50%; }
-                  20% { cx: 20%; cy: 45%; }
-                  40% { cx: 40%; cy: 40%; }
-                  60% { cx: 60%; cy: 30%; }
-                  80% { cx: 80%; cy: 35%; }
-                  100% { cx: 100%; cy: 40%; }
-                }
-              `}
-            </style>
+            {[
+              { x: 8, y: 34 },
+              { x: 22, y: 33 },
+              { x: 44, y: 27 },
+              { x: 66, y: 22 },
+              { x: 84, y: 22 },
+              { x: 95, y: 21 },
+            ].map((point, index) => (
+              <motion.circle
+                key={`${point.x}-${point.y}`}
+                cx={point.x}
+                cy={point.y}
+                r={index === 4 ? 2.7 : 1.6}
+                fill="#34d399"
+                initial={{ opacity: 0.45 }}
+                animate={{ opacity: [0.45, 1, 0.45] }}
+                transition={{
+                  duration: 2.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: index * 0.16,
+                }}
+              />
+            ))}
           </svg>
         </Box>
 
-        {/* AI Insights Panel */}
         <Box
           sx={{
-            marginTop: { xs: "8px", sm: "10px", md: "12px" },
-            background: "#ffffff",
-            borderRadius: { xs: "6px", sm: "7px", md: "8px" },
-            padding: { xs: "6px", sm: "8px", md: "10px" },
-            position: "relative",
-            overflow: "hidden",
-            border: "2px solid #e5e7eb",
+            borderRadius: { xs: "8px", sm: "9px", md: "10px" },
+            border: "1px solid rgba(148,163,184,0.24)",
+            background:
+              "linear-gradient(180deg, rgba(6,16,39,0.75) 0%, rgba(5,11,28,0.9) 100%)",
+            px: { xs: 1.05, sm: 1.2, md: 1.4 },
+            py: { xs: 0.85, sm: 1, md: 1.1 },
           }}
         >
           <Typography
             component="div"
             sx={{
-              fontSize: { xs: "7px", sm: "8px", md: "10px" },
-              color: "#1f2937",
-              fontWeight: "bold",
-              marginBottom: { xs: "6px", sm: "8px", md: "10px" },
+              color: "#e2e8f0",
+              fontSize: { xs: "8px", sm: "9px", md: "10px" },
+              fontWeight: 700,
               display: "flex",
               alignItems: "center",
-              gap: { xs: "3px", sm: "4px", md: "5px" },
+              gap: 0.55,
+              mb: { xs: 0.45, sm: 0.6, md: 0.75 },
             }}
           >
             <Box
+              component={motion.div}
+              animate={{ opacity: [0.4, 1, 0.4], scale: [0.88, 1.14, 0.88] }}
+              transition={{
+                duration: 1.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               sx={{
-                width: { xs: "5px", sm: "6px", md: "8px" },
-                height: { xs: "5px", sm: "6px", md: "8px" },
+                width: { xs: "5px", sm: "5.5px", md: "6px" },
+                height: { xs: "5px", sm: "5.5px", md: "6px" },
                 borderRadius: "50%",
-                background: "#22c55e",
-                animation: "aiPulse 1.5s infinite",
-                "@keyframes aiPulse": {
-                  "0%": { transform: "scale(0.8)", opacity: 0.5 },
-                  "50%": { transform: "scale(1.2)", opacity: 1 },
-                  "100%": { transform: "scale(0.8)", opacity: 0.5 },
-                },
-                boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
+                background: "#34d399",
               }}
             />
             AI Analysis
           </Typography>
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: { xs: "4px", sm: "5px", md: "6px" },
-            }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.4 }}>
             <Typography
               sx={{
+                color: "rgba(226,232,240,0.86)",
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#374151",
+                fontWeight: 600,
                 fontFamily: "monospace",
-                lineHeight: 1.4,
               }}
             >
-              {">"} Glucose trending stable
+              {">"} Dexcom API stream stable
             </Typography>
             <Typography
               sx={{
+                color: "rgba(226,232,240,0.86)",
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#374151",
+                fontWeight: 600,
                 fontFamily: "monospace",
-                lineHeight: 1.4,
               }}
             >
-              {">"} Consider light exercise
+              {">"} Grok AI: consider light exercise
             </Typography>
             <Typography
               sx={{
+                color: "rgba(226,232,240,0.9)",
                 fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#374151",
+                fontWeight: 700,
                 fontFamily: "monospace",
-                lineHeight: 1.4,
-                animation: "fadeInOut 3s infinite",
-                "@keyframes fadeInOut": {
-                  "0%, 100%": { opacity: 0.7 },
-                  "50%": { opacity: 1 },
-                },
               }}
             >
               {">"} Next reading predicted: 118 mg/dL
@@ -1918,50 +1749,8 @@ function Projects() {
           </Box>
         </Box>
       </Box>
-
-      {/* Floating Grok Icon */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: { xs: "8%", sm: "12%", md: "15%" },
-          right: { xs: "8%", sm: "15%", md: "20%" },
-          animation: "float 3s infinite ease-in-out",
-          "@keyframes float": {
-            "0%, 100%": { transform: "translateY(0)" },
-            "50%": { transform: "translateY(-8px)" },
-          },
-          zIndex: 1,
-        }}
-      >
-        <Box
-          sx={{
-            width: { xs: "28px", sm: "32px", md: "40px" },
-            height: { xs: "28px", sm: "32px", md: "40px" },
-            background: "rgba(17, 17, 17, 0.9)",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-          }}
-        >
-          <Box
-            component="img"
-            src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/grok.png"
-            alt="Grok AI Logo"
-            sx={{
-              width: "70%",
-              height: "70%",
-              objectFit: "contain",
-              maxWidth: "100%",
-            }}
-          />
-        </Box>
-      </Box>
     </Box>
   );
-
   const worklyAnimation = (
     <Box
       sx={{
@@ -1970,507 +1759,520 @@ function Projects() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
+        background:
+          "linear-gradient(140deg, #070d1f 0%, #101a33 50%, #0b1226 100%)",
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: "210px", sm: "230px", md: "250px" },
+        minHeight: { xs: "290px", sm: "230px", md: "250px" },
       }}
     >
-      {/* Mobile Phone Frame */}
+      <ProjectFloatingLines
+        theme={projectFloatingLineThemes.workly}
+        reducedMotion={reducedMotion}
+      />
       <Box
         sx={{
           position: "relative",
-          width: { xs: "130px", sm: "140px", md: "170px" },
-          height: { xs: "260px", sm: "280px", md: "340px" },
-          bgcolor: "#1a1a1a",
-          borderRadius: { xs: "24px", sm: "26px", md: "28px" },
-          padding: { xs: "6px", sm: "7px", md: "8px" },
-          boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          border: { xs: "1.5px solid #2a2a2a", sm: "2px solid #2a2a2a" },
+          width: { xs: "118px", sm: "128px", md: "152px" },
+          height: { xs: "238px", sm: "258px", md: "308px" },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1,
         }}
       >
-        {/* Screen - Gradient background with color */}
+        {/* Side hardware buttons */}
         <Box
           sx={{
+            position: "absolute",
+            left: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+            top: { xs: "22%", sm: "22%", md: "22%" },
+            width: { xs: "2px", sm: "2.5px", md: "3px" },
+            height: { xs: "9%", sm: "9%", md: "9%" },
+            borderRadius: "4px",
+            background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            left: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+            top: { xs: "33%", sm: "33%", md: "33%" },
+            width: { xs: "2px", sm: "2.5px", md: "3px" },
+            height: { xs: "14%", sm: "14%", md: "14%" },
+            borderRadius: "4px",
+            background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            right: { xs: "-3px", sm: "-3.5px", md: "-4px" },
+            top: { xs: "37%", sm: "37%", md: "37%" },
+            width: { xs: "2px", sm: "2.5px", md: "3px" },
+            height: { xs: "20%", sm: "20%", md: "20%" },
+            borderRadius: "4px",
+            background: "linear-gradient(180deg, #4b5563 0%, #111827 100%)",
+          }}
+        />
+
+        {/* iPhone body */}
+        <Box
+          sx={{
+            position: "relative",
             width: "100%",
             height: "100%",
-            borderRadius: { xs: "18px", sm: "20px", md: "22px" },
-            borderTopLeftRadius: { xs: "18px", sm: "20px", md: "22px" },
-            borderTopRightRadius: { xs: "18px", sm: "20px", md: "22px" },
-            borderBottomLeftRadius: { xs: "18px", sm: "20px", md: "22px" },
-            borderBottomRightRadius: { xs: "18px", sm: "20px", md: "22px" },
-            overflow: "hidden",
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
+            borderRadius: { xs: "34px", sm: "36px", md: "42px" },
+            p: { xs: "4px", sm: "4.5px", md: "5px" },
             background:
-              "linear-gradient(135deg, #b3363d 0%, #9d2e35 50%, #c94a52 100%)",
+              "linear-gradient(150deg, #151922 0%, #090b10 60%, #1b1f2a 100%)",
+            border: "1px solid rgba(255,255,255,0.18)",
           }}
         >
-          {/* Status Bar - Different color to avoid double purple */}
           <Box
             sx={{
-              height: { xs: "18px", sm: "19px", md: "20px" },
-              bgcolor: "rgba(255,255,255,0.1)",
-              backdropFilter: "blur(10px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              px: { xs: 1, sm: 1.25, md: 1.5 },
-              pt: { xs: 0.25, sm: 0.375, md: 0.5 },
-              borderTopLeftRadius: "22px",
-              borderTopRightRadius: "22px",
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              borderRadius: { xs: "30px", sm: "32px", md: "38px" },
+              overflow: "hidden",
+              background:
+                "radial-gradient(circle at 24% 10%, #cc4b59 0%, #b33845 35%, #8f2431 62%, #7a1f2b 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            <Typography
-              sx={{
-                fontSize: { xs: "7px", sm: "8px", md: "9px" },
-                color: "#ffffff",
-                fontWeight: 600,
-                letterSpacing: "0.02em",
-              }}
-            >
-              9:41
-            </Typography>
+            {/* Screen gloss */}
             <Box
               sx={{
-                display: "flex",
-                gap: { xs: 0.25, sm: 0.375, md: 0.5 },
-                alignItems: "center",
-              }}
-            >
-              <Box
-                sx={{
-                  width: { xs: "14px", sm: "15px", md: "16px" },
-                  height: { xs: "8px", sm: "8.5px", md: "9px" },
-                  border: "1.5px solid #ffffff",
-                  borderRadius: "3px",
-                  position: "relative",
-                }}
-              >
-                <Box
-                  sx={{
-                    position: "absolute",
-                    left: "1.5px",
-                    top: "1.5px",
-                    width: "65%",
-                    height: "calc(100% - 3px)",
-                    bgcolor: "#ffffff",
-                    borderRadius: "2px",
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-
-          {/* App Content */}
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              pt: { xs: 1, sm: 1.25, md: 1.5 },
-              pb: { xs: 1.5, sm: 1.75, md: 2 },
-              px: { xs: 1.5, sm: 1.75, md: 2 },
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Swipeable Job Card */}
-            <motion.div
-              animate={{
-                x: [0, 12, -12, 0],
-                rotate: [0, 3, -3, 0],
-              }}
-              transition={{
-                duration: 3.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{
                 position: "absolute",
-                width: "88%",
-                height: "70%",
-                top: "8%",
+                inset: 0,
+                pointerEvents: "none",
+                background:
+                  "linear-gradient(165deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 16%, rgba(255,255,255,0) 35%)",
+                zIndex: 25,
+              }}
+            />
+
+            {/* Dynamic island */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: { xs: "7px", sm: "8px", md: "9px" },
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: { xs: "52px", sm: "56px", md: "66px" },
+                height: { xs: "15px", sm: "16px", md: "18px" },
+                borderRadius: "999px",
+                background: "#020204",
+                zIndex: 30,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                px: { xs: 0.75, sm: 0.85, md: 1 },
               }}
             >
               <Box
                 sx={{
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: "#ffffff",
-                  borderRadius: { xs: "12px", sm: "14px", md: "16px" },
-                  boxShadow: "0 12px 32px rgba(0,0,0,0.15)",
-                  p: { xs: 1, sm: 1.25, md: 1.5 },
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
+                  width: { xs: "6px", sm: "6px", md: "7px" },
+                  height: { xs: "6px", sm: "6px", md: "7px" },
+                  borderRadius: "50%",
+                  background: "#0f172a",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                }}
+              />
+              <Box
+                sx={{
+                  width: { xs: "18px", sm: "19px", md: "22px" },
+                  height: { xs: "4px", sm: "4px", md: "5px" },
+                  borderRadius: "999px",
+                  background: "rgba(255,255,255,0.12)",
+                }}
+              />
+            </Box>
+
+            {/* Status bar */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: { xs: "10px", sm: "11px", md: "12px" },
+                left: { xs: "10px", sm: "11px", md: "12px" },
+                right: { xs: "10px", sm: "11px", md: "12px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                zIndex: 20,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: "7px", sm: "8px", md: "9px" },
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  letterSpacing: "0.01em",
                 }}
               >
-                {/* Brown Briefcase Icon - Centered at top */}
+                9:41
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: 0.5, sm: 0.6, md: 0.7 },
+                }}
+              >
                 <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    mb: { xs: 0.5, sm: 0.625, md: 0.75 },
-                    flexShrink: 0,
-                  }}
+                  sx={{ display: "flex", alignItems: "flex-end", gap: "1px" }}
                 >
-                  <Box
-                    sx={{
-                      fontSize: { xs: "18px", sm: "21px", md: "24px" },
-                      filter: "hue-rotate(25deg) saturate(1.2)",
-                    }}
-                  >
-                    💼
-                  </Box>
-                </Box>
-
-                {/* Job Title */}
-                <Typography
-                  sx={{
-                    fontSize: { xs: "10px", sm: "11.5px", md: "13px" },
-                    fontWeight: 700,
-                    color: "#1d1d1f",
-                    mb: { xs: 0.125, sm: 0.2, md: 0.25 },
-                    textAlign: "center",
-                    letterSpacing: "-0.01em",
-                    flexShrink: 0,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Software Engineer
-                </Typography>
-
-                {/* Company Name */}
-                <Typography
-                  sx={{
-                    fontSize: { xs: "8px", sm: "9px", md: "10px" },
-                    color: "#86868b",
-                    mb: { xs: 0.75, sm: 0.875, md: 1 },
-                    textAlign: "center",
-                    fontWeight: 400,
-                    flexShrink: 0,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Tech Company Inc.
-                </Typography>
-
-                {/* Job Details with colored icons */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: { xs: 0.375, sm: 0.5 },
-                    mb: { xs: 0.75, sm: 0.875, md: 1 },
-                    minHeight: 0,
-                    justifyContent: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: { xs: 0.375, sm: 0.5 },
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "8px", sm: "9px", md: "10px" },
-                        filter: "hue-rotate(320deg) saturate(1.3)",
-                      }}
-                    >
-                      📍
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
-                        color: "#4a5568",
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Remote
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "9px", sm: "9.5px", md: "10px" },
-                        filter: "hue-rotate(25deg) saturate(1.2)",
-                      }}
-                    >
-                      💰
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
-                        color: "#4a5568",
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      $80k-$120k
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "9px", sm: "9.5px", md: "10px" },
-                        filter: "hue-rotate(0deg) saturate(1.4)",
-                      }}
-                    >
-                      ⏰
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: { xs: "8px", sm: "8.5px", md: "9px" },
-                        color: "#4a5568",
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Full-time
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Skills Tags - Different colors for each */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: { xs: 0.3, sm: 0.35, md: 0.4 },
-                    flexWrap: "wrap",
-                    justifyContent: "center",
-                    mt: "auto",
-                    flexShrink: 0,
-                    pt: { xs: 0.3, sm: 0.4, md: 0.5 },
-                  }}
-                >
-                  {[
-                    { name: "React", color: "#000000", bg: "#61dafb" },
-                    { name: "Node.js", color: "#ffffff", bg: "#339933" },
-                    { name: "TypeScript", color: "#ffffff", bg: "#3178c6" },
-                  ].map((tag, i) => (
+                  {[40, 60, 80].map((height, i) => (
                     <Box
                       key={i}
                       sx={{
-                        bgcolor: tag.bg,
-                        color: tag.color,
-                        px: { xs: 0.4, sm: 0.5, md: 0.75 },
-                        py: { xs: 0.15, sm: 0.2, md: 0.3 },
-                        borderRadius: { xs: "4px", sm: "5px", md: "6px" },
-                        fontSize: { xs: "5.5px", sm: "6px", md: "8px" },
-                        fontWeight: 600,
-                        letterSpacing: "0.01em",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                        lineHeight: 1.2,
-                        minWidth: { xs: "20px", sm: "auto" },
+                        width: "2px",
+                        height: `${height / 20}px`,
+                        borderRadius: "1px",
+                        background: "#fff",
+                        opacity: 0.95,
                       }}
-                    >
-                      {tag.name}
-                    </Box>
+                    />
                   ))}
                 </Box>
+                <Box
+                  sx={{
+                    width: { xs: "12px", sm: "13px", md: "14px" },
+                    height: { xs: "7px", sm: "7px", md: "8px" },
+                    borderRadius: "2px",
+                    border: "1.2px solid rgba(255,255,255,0.9)",
+                    position: "relative",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      right: "-2.8px",
+                      top: "1.7px",
+                      width: "1.8px",
+                      height: "3px",
+                      borderRadius: "1px",
+                      background: "rgba(255,255,255,0.9)",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      left: "1.2px",
+                      top: "1.2px",
+                      width: "65%",
+                      height: "calc(100% - 2.4px)",
+                      borderRadius: "1px",
+                      background: "#ffffff",
+                    }}
+                  />
+                </Box>
               </Box>
-            </motion.div>
+            </Box>
 
-            {/* Action Buttons - Both Dislike and Like */}
+            {/* App content */}
             <Box
               sx={{
                 position: "absolute",
-                bottom: { xs: "8px", sm: "12px", md: "16px" },
+                inset: 0,
+                pt: { xs: "28px", sm: "30px", md: "36px" },
+                pb: { xs: "14px", sm: "16px", md: "18px" },
+                px: { xs: 1.5, sm: 1.75, md: 2 },
                 display: "flex",
-                gap: { xs: 2, sm: 2.5, md: 3 },
-                alignItems: "center",
                 justifyContent: "center",
-                zIndex: 10,
-                width: "100%",
+                alignItems: "center",
               }}
             >
-              {/* Dislike Button - Red X */}
-              <Box
-                sx={{
-                  width: { xs: "36px", sm: "40px", md: "44px" },
-                  height: { xs: "36px", sm: "40px", md: "44px" },
-                  borderRadius: "50%",
-                  bgcolor: "#b3363d",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 6px 16px rgba(179,54,61,0.4)",
-                  transition: "transform 0.2s ease",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                  },
+              <motion.div
+                animate={{
+                  x: [0, 10, -10, 0],
+                  rotate: [0, 2.4, -2.4, 0],
+                }}
+                transition={{
+                  duration: 3.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                style={{
+                  position: "absolute",
+                  width: "88%",
+                  height: "68%",
+                  top: "13%",
+                  left: "6%",
+                  transformOrigin: "50% 100%",
                 }}
               >
-                <Typography
+                <Box
                   sx={{
-                    fontSize: { xs: "16px", sm: "18px", md: "22px" },
-                    color: "#fff",
-                    fontWeight: 700,
-                    lineHeight: 1,
+                    width: "100%",
+                    height: "100%",
+                    background:
+                      "linear-gradient(180deg, #ffffff 0%, #f7f8fa 100%)",
+                    borderRadius: { xs: "14px", sm: "15px", md: "18px" },
+                    p: { xs: 1, sm: 1.2, md: 1.45 },
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
                   }}
                 >
-                  ✕
-                </Typography>
-              </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      mb: { xs: 0.5, sm: 0.6, md: 0.8 },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: { xs: "20px", sm: "22px", md: "26px" },
+                        height: { xs: "20px", sm: "22px", md: "26px" },
+                        borderRadius: "7px",
+                        background:
+                          "linear-gradient(145deg, #f6e7cb 0%, #f2d6a6 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <BriefcaseBusiness
+                        size={12}
+                        color="#8b5e34"
+                        strokeWidth={2.3}
+                      />
+                    </Box>
+                  </Box>
 
-              {/* Like Button - Green Heart */}
+                  <Typography
+                    sx={{
+                      fontSize: { xs: "10px", sm: "11px", md: "13px" },
+                      fontWeight: 700,
+                      color: "#0f172a",
+                      mb: { xs: 0.125, sm: 0.2, md: 0.3 },
+                      textAlign: "center",
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Software
+                    <br />
+                    Engineer
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontSize: { xs: "7.5px", sm: "8.5px", md: "10px" },
+                      color: "#6b7280",
+                      mb: { xs: 0.75, sm: 0.9, md: 1 },
+                      textAlign: "center",
+                      fontWeight: 500,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Tech Company Inc.
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 0.45, sm: 0.55, md: 0.65 },
+                      justifyContent: "center",
+                    }}
+                  >
+                    {[
+                      {
+                        icon: <MapPin size={10} color="#d946ef" />,
+                        label: "Remote",
+                      },
+                      {
+                        icon: <Banknote size={10} color="#ca8a04" />,
+                        label: "$80k-$120k",
+                      },
+                      {
+                        icon: <Clock3 size={10} color="#f43f5e" />,
+                        label: "Full-time",
+                      },
+                    ].map((item) => (
+                      <Box
+                        key={item.label}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: { xs: 0.45, sm: 0.55, md: 0.7 },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: { xs: "13px", sm: "14px", md: "16px" },
+                            height: { xs: "13px", sm: "14px", md: "16px" },
+                            borderRadius: "999px",
+                            background: "rgba(15,23,42,0.06)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {item.icon}
+                        </Box>
+                        <Typography
+                          sx={{
+                            fontSize: { xs: "7.5px", sm: "8px", md: "9px" },
+                            color: "#334155",
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {item.label}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: { xs: 0.3, sm: 0.35, md: 0.45 },
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                      mt: "auto",
+                      pt: { xs: 0.4, sm: 0.5, md: 0.65 },
+                    }}
+                  >
+                    {[
+                      { name: "React", color: "#0b1220", bg: "#67e8f9" },
+                      { name: "Node.js", color: "#ffffff", bg: "#16a34a" },
+                      { name: "TypeScript", color: "#ffffff", bg: "#2563eb" },
+                    ].map((tag) => (
+                      <Box
+                        key={tag.name}
+                        sx={{
+                          bgcolor: tag.bg,
+                          color: tag.color,
+                          px: { xs: 0.5, sm: 0.6, md: 0.8 },
+                          py: { xs: 0.15, sm: 0.22, md: 0.3 },
+                          borderRadius: { xs: "4px", sm: "5px", md: "6px" },
+                          fontSize: { xs: "5.8px", sm: "6.4px", md: "8px" },
+                          fontWeight: 700,
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {tag.name}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </motion.div>
+
               <Box
                 sx={{
-                  width: { xs: "36px", sm: "40px", md: "44px" },
-                  height: { xs: "36px", sm: "40px", md: "44px" },
-                  borderRadius: "50%",
-                  bgcolor: "#22c55e",
+                  position: "absolute",
+                  bottom: { xs: "12px", sm: "14px", md: "16px" },
+                  left: "50%",
+                  transform: "translateX(-50%)",
                   display: "flex",
+                  gap: { xs: 2, sm: 2.4, md: 2.8 },
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 6px 16px rgba(34,197,94,0.4)",
-                  transition: "transform 0.2s ease",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                  },
+                  zIndex: 20,
                 }}
               >
-                <Typography
+                <Box
                   sx={{
-                    fontSize: { xs: "16px", sm: "18px", md: "22px" },
-                    color: "#fff",
-                    fontWeight: 700,
-                    lineHeight: 1,
+                    width: { xs: "34px", sm: "38px", md: "42px" },
+                    height: { xs: "34px", sm: "38px", md: "42px" },
+                    borderRadius: "50%",
+                    bgcolor: "#ef4444",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  ♥
-                </Typography>
+                  <X size={16} color="#ffffff" strokeWidth={2.6} />
+                </Box>
+
+                <Box
+                  sx={{
+                    width: { xs: "34px", sm: "38px", md: "42px" },
+                    height: { xs: "34px", sm: "38px", md: "42px" },
+                    borderRadius: "50%",
+                    bgcolor: "#22c55e",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Heart
+                    size={16}
+                    color="#ffffff"
+                    fill="#ffffff"
+                    strokeWidth={2}
+                  />
+                </Box>
               </Box>
             </Box>
+
+            {/* Home indicator */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: { xs: "6px", sm: "7px", md: "8px" },
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: { xs: "34px", sm: "36px", md: "42px" },
+                height: { xs: "3px", sm: "3px", md: "4px" },
+                borderRadius: "999px",
+                background: "rgba(255,255,255,0.8)",
+                zIndex: 40,
+              }}
+            />
           </Box>
         </Box>
       </Box>
     </Box>
   );
+  const animationMap = {
+    1: portfolioAnimation,
+    2: lionsTheaterAnimation,
+    3: bloodSugarMonitorAnimation,
+    4: worklyAnimation,
+  };
 
-  // Map animations to projects - Memoized
-  const animationMap = useMemo(
-    () => ({
-      1: portfolioAnimation,
-      2: lionsTheaterAnimation,
-      3: bloodSugarMonitorAnimation,
-      4: worklyAnimation,
-    }),
-    []
-  );
-
-  // Memoize projects array to prevent unnecessary recalculations
-  const projects = useMemo(
-    () =>
-      projectsData.map((project) => ({
-        ...project,
-        animation: animationMap[project.id] || portfolioAnimation,
-      })),
-    [animationMap]
-  );
-
-  const sectionRef = useRef();
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end end"],
-  });
-
-  const buttonOpacity = useTransform(scrollYProgress, [0.7, 0.9], [1, 0]);
-  const buttonY = useTransform(scrollYProgress, [0.7, 0.9], [0, 50]);
+  const projects = projectsSummary.map((project) => ({
+    ...project,
+    animation: animationMap[project.id] || portfolioAnimation,
+  }));
 
   return (
-    <Box
+    <section
       id="projects"
-      ref={sectionRef}
-      sx={{
-        minHeight: "auto",
-        position: "relative",
-        bgcolor: "#ffffff",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        pt: 0,
-        pb: 0,
-        px: 0,
-        contain: "layout style paint",
-        willChange: "scroll-position",
-      }}
+      className="relative flex min-h-auto w-full flex-col items-center justify-center pb-16 pt-6 md:pb-20 md:pt-8 lg:pb-24 lg:pt-10"
+      style={{ contain: "layout style paint", willChange: "scroll-position" }}
     >
-      <Container
-        maxWidth="lg"
-        sx={{
-          width: "100%",
-          px: { xs: 2, sm: 3, md: 4 },
-          "& .MuiContainer-root": {
-            maxWidth: "100% !important",
-          },
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            bgcolor: "#f5f5f7",
-            borderRadius: "18px",
-            p: { xs: 2.5, sm: 3.5, md: 4, lg: 5 },
-            boxShadow: "none",
-            border: "none",
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8">
+        <div className="w-full py-2 sm:py-3 md:py-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            animate={reducedMotion ? { opacity: 1, y: 0 } : undefined}
+            viewport={
+              reducedMotion ? undefined : { once: true, margin: "-100px" }
+            }
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <Typography
-              variant="h2"
-              sx={{
-                fontWeight: 600,
-                fontSize: {
-                  xs: "1.75rem",
-                  sm: "2.25rem",
-                  md: "2.5rem",
-                  lg: "2.75rem",
-                },
-                mb: { xs: 3.5, md: 4.5 },
-                color: "#1d1d1f",
-                textAlign: "left",
-                letterSpacing: "-0.02em",
-                lineHeight: 1.05,
-              }}
-            >
-              Recent Projects
-            </Typography>
+            <div className="mb-8 w-fit md:mb-10">
+              <h2 className="text-left text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-[2rem] lg:text-[2.25rem]">
+                Projects
+              </h2>
+              <div
+                className="mt-2 h-0.5 w-full bg-white/40 rounded-full"
+                aria-hidden
+              />
+            </div>
           </motion.div>
-          {/* Parallax Projects Container */}
-          <Box sx={{ width: "100%", position: "relative" }}>
+          <div className="relative w-full">
             {projects.map((project, idx) => (
               <ParallaxProjectItem
                 key={project.id}
@@ -2479,49 +2281,31 @@ function Projects() {
                 isImageLeft={idx % 2 === 0}
               />
             ))}
-          </Box>
+          </div>
 
-          {/* GitHub projects link button */}
-          <Box
-            component={motion.div}
-            style={{ opacity: buttonOpacity, y: buttonY }}
-            sx={{
-              textAlign: "center",
-              mt: { xs: 4, sm: 5, md: 6 },
-              mb: { xs: 2, md: 2 },
-            }}
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+            whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            animate={reducedMotion ? { opacity: 1, y: 0 } : undefined}
+            viewport={
+              reducedMotion ? undefined : { once: true, margin: "-80px" }
+            }
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="mb-6 mt-10 flex justify-center sm:mt-12 md:mt-14"
           >
-            <Button
-              component={Link}
+            <a
               href="https://github.com/taylfrad"
               target="_blank"
               rel="noopener noreferrer"
-              variant="outlined"
-              color="primary"
-              size="large"
-              startIcon={<GitHubIcon />}
-              sx={{
-                borderRadius: "10px",
-                px: { xs: 3, sm: 3.5, md: 4 },
-                py: { xs: 1.25, sm: 1.5 },
-                borderWidth: "2px",
-                textTransform: "none",
-                fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
-                minHeight: { xs: "44px", sm: "48px", md: "52px" },
-                boxShadow: "0 0 10px rgba(56, 189, 248, 0.1)",
-                "&:hover": {
-                  borderWidth: "2px",
-                  boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
-                  transform: "translateY(-3px)",
-                },
-              }}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/80 shadow-sm transition-all duration-200 ease-out hover:border-white/15 hover:bg-white/10 hover:text-white motion-reduce:transition-none sm:min-h-12 sm:px-8 md:min-h-[52px] md:text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
+              <Github className="h-5 w-5" />
               View More Projects on GitHub
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+            </a>
+          </motion.div>
+        </div>
+      </div>
+    </section>
   );
 }
 

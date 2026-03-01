@@ -1,451 +1,144 @@
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
-import { Box, IconButton } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { motion, AnimatePresence } from "framer-motion";
+import { Suspense, lazy, useCallback, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "./Hero";
-import Skills from "./Skills";
-import Projects from "./Projects";
-import StatementSection from "./StatementSection";
-import Footer from "./Footer";
+import { useTheme } from "@/components/theme-provider";
+
+const Skills = lazy(() => import("./Skills"));
+const Projects = lazy(() => import("./Projects"));
+const Footer = lazy(() => import("./Footer"));
+const ParticlesBackground = lazy(() => import("./ui/particles"));
 
 export default function Home() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const location = useLocation();
+  const { state } = useLocation();
+  const { shouldReduceEffects } = useTheme();
+  const shouldScrollToProjects = Boolean(state?.scrollToProjects);
+  const SCROLL_TO_PROJECTS_FLAG = "scrollToProjectsPending";
 
-  const heroRef = useRef(null);
-  const skillsRef = useRef(null);
-  const projectsRef = useRef(null);
-  const mainScrollRef = useRef(null);
-  const rafIdRef = useRef(null);
-
-  // Force scroll to top on initial mount (page refresh) - VERY AGGRESSIVE
-  // BUT skip if we're navigating back with scrollToProjects
-  useLayoutEffect(() => {
-    // CRITICAL: Don't scroll to top if we're navigating back to projects
-    // This must run AFTER the scroll-to-projects logic, so check state first
-    if (location.state?.scrollToProjects === true) {
-      return; // Exit immediately, don't scroll to top
-    }
-    
-    // Immediately prevent any scroll restoration
-    if (typeof window !== 'undefined') {
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-      }
-      
-      // Remove any hash from URL that might cause scrolling
-      if (window.location.hash) {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-      
-      // Clear any stored scroll position
-      sessionStorage.removeItem('scrollPosition');
-      localStorage.removeItem('scrollPosition');
-    }
-    
-    const scrollToHero = () => {
-      // Get main scroll container
-      const mainContent = mainScrollRef.current || document.querySelector("main");
-      
-      // Force scroll main container to top FIRST (most important)
-      if (mainContent) {
-        // Disable scroll snap temporarily to prevent snapping
-        const originalScrollSnap = mainContent.style.scrollSnapType;
-        mainContent.style.scrollSnapType = 'none';
-        
-        // Force scroll multiple ways - be very aggressive
-        mainContent.scrollTop = 0;
-        mainContent.scrollLeft = 0;
-        mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-        
-        // Also scroll hero into view if available
-        if (heroRef.current) {
-          try {
-            heroRef.current.scrollIntoView({ behavior: "instant", block: "start" });
-          } catch (e) {
-            // Ignore errors
-          }
-        }
-        
-        // Double-check scroll position after a brief moment
-        setTimeout(() => {
-          if (mainContent.scrollTop > 50) {
-            mainContent.scrollTop = 0;
-            mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-          }
-        }, 10);
-        
-        // Re-enable scroll snap after a longer moment (prevent snap on refresh)
-        // Keep it disabled longer to prevent scroll-snap from interfering
-        setTimeout(() => {
-          // Double-check we're still at top before re-enabling
-          if (mainContent.scrollTop < 50) {
-            // Still at top, but wait a bit more to ensure no snap happens
-            setTimeout(() => {
-              if (mainContent.scrollTop < 50) {
-                mainContent.style.scrollSnapType = originalScrollSnap || '';
-              } else {
-                // Something scrolled, force back to top and keep snap disabled
-                mainContent.scrollTop = 0;
-                mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-                setTimeout(() => {
-                  mainContent.style.scrollSnapType = originalScrollSnap || '';
-                }, 1000);
-              }
-            }, 500);
-          } else {
-            // If we're not at top, force scroll again and keep snap disabled longer
-            mainContent.scrollTop = 0;
-            mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-            setTimeout(() => {
-              if (mainContent.scrollTop < 50) {
-                mainContent.style.scrollSnapType = originalScrollSnap || '';
-              } else {
-                // Still not at top, keep trying
-                mainContent.scrollTop = 0;
-                mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-                setTimeout(() => {
-                  mainContent.style.scrollSnapType = originalScrollSnap || '';
-                }, 1000);
-              }
-            }, 500);
-          }
-        }, 1000);
-      }
-      
-      // Force scroll window to top
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.documentElement.scrollTop = 0;
-      document.documentElement.scrollLeft = 0;
-      document.body.scrollTop = 0;
-      document.body.scrollLeft = 0;
-    };
-    
-    // Immediate scroll - run multiple times to ensure it sticks
-    scrollToHero();
-    
-    // Multiple attempts to ensure it sticks (especially important on refresh)
-    // Use requestAnimationFrame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      scrollToHero();
-      requestAnimationFrame(() => {
-        scrollToHero();
-        setTimeout(() => {
-          scrollToHero();
-          setTimeout(scrollToHero, 10);
-          setTimeout(scrollToHero, 50);
-          setTimeout(scrollToHero, 100);
-          setTimeout(scrollToHero, 200);
-          setTimeout(scrollToHero, 300);
-        }, 0);
-      });
-    });
-    
-    // Final check after delays - very aggressive for page refresh
-    setTimeout(() => {
-      scrollToHero();
-      setTimeout(scrollToHero, 100);
-      setTimeout(scrollToHero, 200);
-      setTimeout(scrollToHero, 400);
-      setTimeout(scrollToHero, 600);
-    }, 100);
-    
-    // Prevent any scroll events from changing position for a longer time
-    // BUT only if NOT scrolling to projects
-    if (!location.state?.scrollToProjects) {
-      const preventScroll = (e) => {
-        const mainContent = mainScrollRef.current || document.querySelector("main");
-        if (mainContent && mainContent.scrollTop > 50) {
-          mainContent.scrollTop = 0;
-          mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-        }
-      };
-      
-      const mainContent = mainScrollRef.current || document.querySelector("main");
-      if (mainContent) {
-        mainContent.addEventListener('scroll', preventScroll, { passive: false });
-        // Keep preventing scroll for longer on page refresh
-        setTimeout(() => {
-          mainContent.removeEventListener('scroll', preventScroll);
-        }, 1000);
-      }
-    }
-  }, [location.pathname, location.state]); // Run on pathname change (page refresh) and state change
-
-  // Throttled scroll handler using requestAnimationFrame
-  useEffect(() => {
-    let ticking = false;
-    
-    const handleScroll = () => {
-      if (!ticking) {
-        rafIdRef.current = requestAnimationFrame(() => {
-          const scrollContainer = mainScrollRef.current || document.querySelector("main");
-          let currentScrollPosition = 0;
-          
-          if (scrollContainer) {
-            currentScrollPosition = scrollContainer.scrollTop;
-          } else {
-            currentScrollPosition = window.scrollY || window.pageYOffset;
-          }
-          
-          setShowScrollTop(currentScrollPosition > 200);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    const scrollContainer = mainScrollRef.current || document.querySelector("main");
-    
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    }
-
-    setTimeout(handleScroll, 100);
-
-    return () => {
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, []);
-
-  // Handle scrolling to projects section when navigating back from project detail
-  // Use useLayoutEffect with higher priority to run BEFORE scroll-to-top
-  // This must be defined AFTER the scroll-to-top useLayoutEffect to run first
-  useLayoutEffect(() => {
-    const shouldScrollToProjects = location.state?.scrollToProjects === true;
-    
-    // Early return if not scrolling to projects
-    if (!shouldScrollToProjects) {
+  // Basic scroll-to-section helper
+  const scrollToSection = useCallback((sectionId) => {
+    if (sectionId === "hero" || sectionId === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    
-    // Scroll to projects - use a reliable method
-    const scrollToProjects = () => {
-      const mainContent = mainScrollRef.current || document.querySelector("main");
-      if (mainContent && projectsRef.current) {
-        // Temporarily disable scroll snap for smoother animation
-        const originalScrollSnap = mainContent.style.scrollSnapType;
-        mainContent.style.scrollSnapType = 'none';
-        
-        // Get the projects element
-        const projectsElement = projectsRef.current;
-        
-        // Use scrollIntoView for reliable positioning
-        projectsElement.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "start",
-          inline: "nearest"
-        });
-        
-        // Re-enable scroll snap after animation completes
-        setTimeout(() => {
-          mainContent.style.scrollSnapType = originalScrollSnap || '';
-        }, 1000);
-        
-        return true;
+
+    if (sectionId === "contact" || sectionId === "footer") {
+      const footer = document.getElementById("footer");
+      if (footer) {
+        footer.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-      return false;
-    };
-    
-    // Try immediately, then with delays if refs aren't ready
-    if (!scrollToProjects()) {
-      requestAnimationFrame(() => {
-        if (!scrollToProjects()) {
-          requestAnimationFrame(() => {
-            if (!scrollToProjects()) {
-              setTimeout(() => scrollToProjects(), 200);
-            }
-          });
+      return;
+    }
+
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  // Handle one-time "back to projects" scroll intent.
+  useEffect(() => {
+    let rafId;
+    const hasSessionFlag =
+      typeof window !== "undefined" &&
+      window.sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
+    const shouldScrollNow = shouldScrollToProjects || hasSessionFlag;
+
+    const clearPendingProjectsScroll = () => {
+      if (typeof window !== "undefined") {
+        try {
+          window.sessionStorage.removeItem(SCROLL_TO_PROJECTS_FLAG);
+        } catch {
+          // Ignore storage clear failures.
         }
-      });
-    }
-  }, [location.state]);
 
-  const scrollToSection = useCallback((sectionId) => {
-    let element = null;
-    
-    if (sectionId === "hero" || sectionId === "/") {
-      element = heroRef.current;
-    } else if (sectionId === "skills") {
-      element = skillsRef.current;
-    } else if (sectionId === "projects") {
-      element = projectsRef.current;
-    } else if (sectionId === "contact" || sectionId === "footer") {
-      const footerElement = document.getElementById("footer");
-      if (footerElement) {
-        footerElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        return;
+        const currentHistoryState = window.history.state;
+        const currentUsrState = currentHistoryState?.usr;
+        if (currentUsrState?.scrollToProjects) {
+          const nextUsrState = { ...currentUsrState };
+          delete nextUsrState.scrollToProjects;
+          window.history.replaceState(
+            { ...currentHistoryState, usr: nextUsrState },
+            "",
+            window.location.href,
+          );
+        }
       }
+    };
+
+    if (shouldScrollNow) {
+      let attempts = 0;
+      const maxAttempts = 360;
+
+      const tryScrollToProjects = () => {
+        const el = document.getElementById("projects");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          // Clear pending state/flag only after we actually scrolled.
+          clearPendingProjectsScroll();
+          return;
+        }
+
+        attempts += 1;
+        if (attempts < maxAttempts) {
+          rafId = requestAnimationFrame(tryScrollToProjects);
+          return;
+        }
+
+        // Fallback: clear state if section could not be found in time.
+        clearPendingProjectsScroll();
+      };
+
+      rafId = requestAnimationFrame(tryScrollToProjects);
     }
 
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: "smooth", 
-        block: "start",
-        inline: "nearest"
-      });
-    }
-  }, []);
-
-  const scrollToTop = useCallback(() => {
-    const mainContent = document.querySelector("main");
-
-    if (mainContent) {
-      mainContent.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, []);
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [SCROLL_TO_PROJECTS_FLAG, shouldScrollToProjects]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <Box
-          component="main"
-          ref={mainScrollRef}
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            zIndex: 1,
-            overflowX: "hidden",
-            bgcolor: "#ffffff",
-            scrollSnapType: "y mandatory",
-            overflowY: "auto",
-            height: "100vh",
-            width: "100%",
-            contain: "layout style paint",
-            willChange: "scroll-position",
-            transform: "translateZ(0)",
-            // Prevent scroll restoration on initial load
-            scrollBehavior: "auto",
-          }}
-          onLoad={() => {
-            // Ensure scroll to top when main loads
-            const mainContent = mainScrollRef.current;
-            if (mainContent) {
-              mainContent.scrollTop = 0;
-              mainContent.scrollTo({ top: 0, left: 0, behavior: "instant" });
-            }
-          }}
-        >
-        <Box
-          ref={heroRef}
-          id="hero"
-          sx={{
-            minHeight: "100vh",
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            zIndex: 1,
-            px: 0,
-            bgcolor: "#f5f5f7",
-            scrollSnapAlign: "start",
-            scrollSnapStop: "always",
-          }}
-        >
-          <Hero onNav={scrollToSection} />
-        </Box>
+    <div className="flex min-h-[100svh] flex-col bg-background text-foreground">
+      <main className="flex-1 flex flex-col">
+        <Hero onNav={scrollToSection} />
 
-        <Box
-          ref={skillsRef}
-          id="skills"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "#ffffff",
-            pt: { xs: 2, sm: 3, md: 4 },
-            pb: { xs: 1, sm: 1.5, md: 2 },
-            px: 0,
-            scrollSnapAlign: "start",
-            scrollSnapStop: "always",
-          }}
-        >
-          <Skills />
-        </Box>
-
-        <Box
-          ref={projectsRef}
-          id="projects"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "#ffffff",
-            pt: { xs: 1, sm: 1.5, md: 2 },
-            pb: { xs: 2, sm: 3, md: 4 },
-            px: 0,
-            scrollSnapAlign: "start",
-            scrollSnapStop: "always",
-          }}
-        >
-          <Projects />
-        </Box>
-
-        <StatementSection />
-      </Box>
-
-      <Footer />
-
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 25,
-            }}
-            style={{
-              position: "fixed",
-              bottom: 40,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 3000,
-            }}
-            className="scroll-to-top-button"
-          >
-            <motion.div
-              whileHover={{ scale: 1.1, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        {/* Post-Hero: Particles background (everywhere except Hero). */}
+        <div className="relative flex flex-col flex-1 min-h-[100svh]">
+          <div className="absolute inset-0 z-0">
+            <Suspense
+              fallback={
+                <div className="absolute inset-0 bg-gradient-to-b from-[#36454f] via-[#070b47] to-black" />
+              }
             >
-              <IconButton
-                onClick={scrollToTop}
-                sx={{
-                  bgcolor: "#ffffff",
-                  color: "#1d1d1f",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  borderRadius: "50%",
-                  width: { xs: 44, sm: 46, md: 48 },
-                  height: { xs: 44, sm: 46, md: 48 },
-                  "&:hover": {
-                    bgcolor: "#f5f5f7",
-                    color: "#0071e3",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                  },
-                }}
-                aria-label="Scroll to top"
-              >
-                <KeyboardArrowUpIcon fontSize="large" />
-              </IconButton>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </Box>
+              {shouldReduceEffects ? (
+                <div className="absolute inset-0 bg-gradient-to-b from-[#36454f] via-[#070b47] to-black" />
+              ) : (
+                <ParticlesBackground
+                  className="absolute inset-0"
+                  quantity={130}
+                  staticity={42}
+                  ease={52}
+                  size={0.8}
+                  color="#dbe8ff"
+                  maxDpr={1.3}
+                  targetFps={40}
+                />
+              )}
+            </Suspense>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#36454f]/16 via-[#070b47]/22 to-black/30" />
+          </div>
+          <div className="relative z-10 flex flex-col">
+            <Suspense fallback={<div className="h-40" />}>
+              <Skills />
+            </Suspense>
+            <Suspense fallback={<div className="h-40" />}>
+              <Projects />
+            </Suspense>
+            <Suspense fallback={<div className="h-40" />}>
+              <Footer />
+            </Suspense>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

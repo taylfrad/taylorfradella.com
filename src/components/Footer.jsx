@@ -1,27 +1,12 @@
-import { Box, Typography, Link, IconButton } from "@mui/material";
-import { keyframes } from "@mui/system";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { motion } from "framer-motion";
+import { ChevronUp, FileText, Github, Linkedin } from "lucide-react";
 import { useInView } from "react-intersection-observer";
-import { useState, useEffect } from "react";
-
-const bounceAnimation = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-`;
 
 const Footer = () => {
-  const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const [ref, inView] = useInView({
     threshold: 0.1,
-    triggerOnce: false,
+    triggerOnce: true,
   });
-
-  useEffect(() => {
-    if (inView) {
-      setHasBeenVisible(true);
-    }
-  }, [inView]);
 
   const scrollToTop = () => {
     const heroSection = document.getElementById("hero");
@@ -51,284 +36,127 @@ const Footer = () => {
     if (scrollableParent) {
       const targetScrollTop = heroSection.offsetTop - fixedHeaderHeight;
       const scrollToPosition = Math.max(0, targetScrollTop);
-      scrollableParent.scrollTo({ top: scrollToPosition, behavior: "smooth" });
+      scrollableParent.scrollTo({
+        top: scrollToPosition,
+        behavior: "smooth",
+      });
     } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  return (
-    <>
-      <Box
-        ref={ref}
-        id="footer"
-        component="footer"
-        sx={{
-          bgcolor: "#f5f5f7",
-          width: "100vw",
-          px: 0,
-          py: { xs: 3, md: 4 },
-          m: 0,
-          border: 0,
-          boxShadow: "none",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          pb: { xs: 7, md: 3 },
-        }}
-      >
-        {/* Scroll to top button positioned in footer's bottom-right */}
-        <IconButton
-          onClick={scrollToTop}
-          disableRipple
-          sx={{
-            position: "absolute",
-            bottom: { xs: 1, md: 24 },
-            left: "unset",
-            right: { xs: 0, md: 80 },
-            transform: "none",
-            color: "#6b7280",
-            backgroundColor: "transparent",
-            zIndex: 10,
-            padding: 0,
-            cursor: "pointer",
-            boxShadow: "none",
-            transition: "transform 0.2s ease-in-out",
-            animation: `${bounceAnimation} 1.5s infinite ease-in-out`,
-            "&:hover": {
-              color: "#444",
-              backgroundColor: "transparent",
-              boxShadow: "none",
-            },
-            "&:active": {
-              backgroundColor: "transparent",
-              boxShadow: "none",
-            },
-          }}
-          aria-label="Scroll to top"
-        >
-          <KeyboardArrowUpIcon sx={{ fontSize: { xs: "2.5rem", sm: "3rem", md: "3.5rem" } }} />
-        </IconButton>
+  const footerLinkClass =
+    "rounded-md border border-transparent px-1.5 py-1 text-foreground/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-foreground hover:shadow-[0_8px_18px_rgba(2,6,23,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none";
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{ width: "100%" }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: 1200,
-              mx: "auto",
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              justifyContent: { xs: "center", md: "space-between" },
-              alignItems: { xs: "center", md: "flex-start" },
-              gap: { xs: 3, sm: 4, md: 0 },
-              px: { xs: 2, sm: 3, md: 6 },
-              mb: { xs: 1, md: 1 },
-            }}
+  return (
+    <footer
+      ref={ref}
+      id="footer"
+      className="relative flex w-full flex-col border-t border-border/45 bg-background/35 px-0 py-10 text-foreground shadow-[0_-10px_36px_rgba(0,0,0,0.24)] backdrop-blur-2xl md:py-12"
+    >
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className="absolute bottom-4 right-4 z-10 flex h-10 w-10 items-center justify-center p-0 text-muted-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none sm:bottom-6 sm:right-6 sm:h-11 sm:w-11 md:right-20 md:h-12 md:w-12"
+        aria-label="Scroll to top"
+      >
+        <ChevronUp className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
+      </button>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-x-8 gap-y-8 px-4 sm:px-6 md:grid-cols-3 md:gap-y-0 md:px-8"
+      >
+        <div className="flex flex-col items-center text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Contact me
+          </p>
+          <a
+            href="mailto:taylor.fradella@selu.edu"
+            className={`mt-2 break-all text-sm font-semibold sm:break-normal md:text-base ${footerLinkClass}`}
           >
-            {/* Contact Me */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-            >
-              <Box
-                sx={{
-                  flex: 1,
-                  minWidth: { xs: "auto", sm: 200, md: 220 },
-                  flexBasis: 0,
-                  mb: { xs: 2, sm: 2, md: 0 },
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                }}
-              >
-            <Typography
-              variant="subtitle2"
-              sx={{
-                color: "#6b7280",
-                textTransform: "uppercase",
-                letterSpacing: 2,
-                fontSize: { xs: "0.875rem", sm: "0.9rem", md: "0.95rem" },
-                mb: { xs: 1, sm: 1.2 },
-                fontWeight: 700,
-                textAlign: "center",
-              }}
-            >
-              Contact Me
-            </Typography>
-            <Typography
-              sx={{
-                color: "#222",
-                fontWeight: 600,
-                fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
-                mb: 0.5,
-                wordBreak: "break-word",
-              }}
-            >
-              taylor.fradella@selu.edu
-            </Typography>
-              </Box>
-            </motion.div>
-            {/* Let's Connect */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            >
-              <Box
-                sx={{
-                  flex: 1,
-                  minWidth: { xs: "auto", sm: 200, md: 220 },
-                  flexBasis: 0,
-                  mb: { xs: 2, sm: 2, md: 0 },
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                }}
-              >
-            <Typography
-              variant="subtitle2"
-              sx={{
-                color: "#6b7280",
-                textTransform: "uppercase",
-                letterSpacing: 2,
-                fontSize: { xs: "0.875rem", sm: "0.9rem", md: "0.95rem" },
-                mb: { xs: 1, sm: 1.2 },
-                fontWeight: 700,
-                textAlign: "center",
-              }}
-            >
-              Let's Connect
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                gap: { xs: 1, sm: 1.25, md: 1.5 },
-                alignItems: "center",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                mt: 0.5,
-              }}
-            >
-              <Link
+            taylor.fradella@selu.edu
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center text-center md:items-center md:text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Let&apos;s connect
+          </p>
+          <ul
+            className="footer-social-icons mt-2 text-sm md:text-base"
+            aria-label="Footer social links"
+          >
+            <li>
+              <a
                 href="https://www.linkedin.com/in/taylorfradella/"
                 target="_blank"
                 rel="noopener noreferrer"
-                sx={{
-                  color: "#444",
-                  fontWeight: 600,
-                  fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
-                  textDecoration: "none",
-                  minHeight: { xs: "32px", sm: "auto" },
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                aria-label="LinkedIn"
+                className={footerLinkClass}
               >
-                LinkedIn
-              </Link>
-              <Typography sx={{ color: "#6b7280", fontWeight: 400 }}>
-                |
-              </Typography>
-              <Link
+                <span className="footer-social-icon-wrap">
+                  <span className="icon">
+                    <Linkedin className="h-3 w-3" strokeWidth={2} />
+                  </span>
+                </span>
+                <span>LinkedIn</span>
+              </a>
+            </li>
+            <li>
+              <a
                 href="https://docs.google.com/document/d/1m9vus2XiZgg8Ket0AMkIP9sJzNuEmZF-qncZdzFydjA/edit?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
-                sx={{
-                  color: "#444",
-                  fontWeight: 600,
-                  fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
-                  textDecoration: "none",
-                  minHeight: { xs: "32px", sm: "auto" },
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                aria-label="Resume"
+                className={footerLinkClass}
               >
-                Resume
-              </Link>
-              <Typography sx={{ color: "#6b7280", fontWeight: 400 }}>
-                |
-              </Typography>
-              <Link
+                <span className="footer-social-icon-wrap">
+                  <span className="icon">
+                    <FileText className="h-3.5 w-3.5" strokeWidth={2} />
+                  </span>
+                </span>
+                <span>Resume</span>
+              </a>
+            </li>
+            <li>
+              <a
                 href="https://github.com/taylfrad"
                 target="_blank"
                 rel="noopener noreferrer"
-                sx={{
-                  color: "#444",
-                  fontWeight: 600,
-                  fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
-                  textDecoration: "none",
-                  minHeight: { xs: "32px", sm: "auto" },
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                aria-label="GitHub"
+                className={footerLinkClass}
               >
-                GitHub
-              </Link>
-            </Box>
-              </Box>
-            </motion.div>
-            {/* Copyright */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView || hasBeenVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            >
-              <Box
-                sx={{
-                  flex: 1,
-                  minWidth: { xs: "auto", sm: 200, md: 220 },
-                  flexBasis: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                }}
-              >
-            <Typography
-              variant="subtitle2"
-              sx={{
-                color: "#6b7280",
-                textTransform: "uppercase",
-                letterSpacing: 2,
-                fontSize: { xs: "0.875rem", sm: "0.9rem", md: "0.95rem" },
-                mb: { xs: 1, sm: 1.2 },
-                fontWeight: 700,
-                textAlign: "center",
-              }}
-            >
-              ©{new Date().getFullYear()} Taylor Fradella
-            </Typography>
-            <Typography
-              sx={{
-                color: "#444",
-                fontWeight: 600,
-                fontSize: { xs: "0.9rem", sm: "0.95rem", md: "1rem" },
-              }}
-            >
-              Made with an{" "}
-              <span role="img" aria-label="lightbulb">
-                💡
-              </span>{" "}
-              &{" "}
-              <span role="img" aria-label="laptop">
-                💻
-              </span>
-            </Typography>
-              </Box>
-            </motion.div>
-          </Box>
-        </motion.div>
-      </Box>
-    </>
+                <span className="footer-social-icon-wrap">
+                  <span className="icon">
+                    <Github className="h-3 w-3" strokeWidth={2} />
+                  </span>
+                </span>
+                <span>GitHub</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div className="flex flex-col items-center text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            &copy;{new Date().getFullYear()} Taylor Fradella
+          </p>
+          <p className="mt-2 text-sm text-foreground/90">
+            Made with{" "}
+            <span role="img" aria-label="computer">
+              💻
+            </span>{" "}
+            &{" "}
+            <span role="img" aria-label="red heart">
+              ❤️
+            </span>
+          </p>
+        </div>
+      </motion.div>
+    </footer>
   );
 };
 

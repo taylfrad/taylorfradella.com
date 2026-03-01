@@ -1,362 +1,272 @@
-import { Box, Typography, Container, Button, IconButton } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import LiquidMetalBackground from "./LiquidMetalBackground";
-import OptimizedImage from "./OptimizedImage";
+import { ChevronDown, Menu, X } from "lucide-react";
+
+import { ModeToggle } from "@/components/mode-toggle";
+import { useTheme } from "@/components/theme-provider";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import HeroBackground from "./backgrounds/HeroBackground";
+
+const Lanyard = lazy(() => import("./Lanyard"));
+
+const nameFontFamily = "font_shi8d64tg, sans-serif";
+const navButtonClass =
+  "rounded-md border border-transparent px-2 py-1 text-foreground/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-foreground hover:shadow-[0_8px_18px_rgba(2,6,23,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none";
+const mobileMenuItemClass =
+  "w-full rounded-md px-3 py-2 text-left text-sm font-medium text-foreground/95 transition-colors duration-200 hover:bg-white/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35";
 
 export default function Hero({ onNav }) {
-  // Navigation click handler
+  const { shouldReduceEffects } = useTheme();
+  const isCompactHero = useMediaQuery("(max-width: 767px)");
+  const [showHeroEffects, setShowHeroEffects] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef(null);
+  const menuPanelRef = useRef(null);
+
   const handleNavClick = (sectionId) => {
-    if (onNav) {
-      onNav(sectionId);
-    }
+    if (onNav) onNav(sectionId);
+  };
+  const handleMenuNavClick = (sectionId) => {
+    setIsMenuOpen(false);
+    handleNavClick(sectionId);
   };
 
+  useEffect(() => {
+    if (shouldReduceEffects) {
+      setShowHeroEffects(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const enableEffects = () => {
+      if (!cancelled) setShowHeroEffects(true);
+    };
+
+    if (
+      typeof window !== "undefined" &&
+      typeof window.requestIdleCallback === "function"
+    ) {
+      const idleId = window.requestIdleCallback(enableEffects, {
+        timeout: 1200,
+      });
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback(idleId);
+      };
+    }
+
+    const timeoutId = window.setTimeout(enableEffects, 350);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [shouldReduceEffects]);
+
+  useEffect(() => {
+    if (!isCompactHero) setIsMenuOpen(false);
+  }, [isCompactHero]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (menuPanelRef.current?.contains(target)) return;
+      if (menuButtonRef.current?.contains(target)) return;
+      setIsMenuOpen(false);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        minHeight: "100vh",
-        position: "relative",
-        bgcolor: "#f5f5f7",
-        display: "flex",
-        flexDirection: "column",
-        px: 0,
-        py: 0,
-        overflow: "hidden",
-        // 120fps optimizations
-        transform: "translateZ(0)",
-        willChange: "auto",
-        contain: "layout style paint",
-      }}
+    <section
+      id="hero"
+      className="relative flex min-h-[100svh] w-full flex-col overflow-hidden text-foreground"
     >
-      {/* Dynamic Liquid Metal Background */}
-      <LiquidMetalBackground />
-      {/* Main Content - Two Column Layout */}
-      <Container
-        maxWidth="lg"
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          alignItems: "center",
-          justifyContent: { xs: "center", md: "space-between" },
-          gap: { xs: 3, sm: 4, md: 6 },
-          width: "100%",
-          px: { xs: 2, sm: 3, md: 4 },
-          py: { xs: 0, sm: 0, md: 0 },
-          pt: { xs: 16, sm: 14, md: 0 },
-          pb: { xs: 8, sm: 6, md: 0 },
-          position: "relative",
-          zIndex: 1,
-        }}
+      <HeroBackground animated={showHeroEffects} />
+
+      <header
+        className="pointer-events-none absolute inset-x-0 top-4 z-30 px-4 sm:top-6 sm:px-6 md:px-10"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        {/* Left Side - Text Content */}
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: { xs: "center", md: "flex-start" },
-            justifyContent: { xs: "center", md: "flex-start" },
-            textAlign: { xs: "center", md: "left" },
-            maxWidth: { xs: "100%", md: "50%" },
-            width: "100%",
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            style={{ willChange: "auto" }}
-          >
-            <Typography
-              variant="h1"
-              component="h1"
-              sx={{
-                fontWeight: 600,
-                fontSize: { xs: "2.25rem", sm: "3rem", md: "4rem", lg: "5rem" },
-                lineHeight: 1.05,
-                letterSpacing: "-0.03em",
-                mb: 2,
-                color: "#1d1d1f",
-              }}
+        <div className="mx-auto w-full max-w-7xl">
+          <div className="pointer-events-auto flex w-full flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-4">
+            <span
+              className="text-xs font-semibold tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] sm:text-sm md:text-base"
+              style={{ fontFamily: nameFontFamily }}
             >
-              Hi, I'm Taylor Fradella.
-            </Typography>
-          </motion.div>
+              TAYLOR FRADELLA
+            </span>
+            {isCompactHero ? (
+              <div className="relative ml-auto pointer-events-auto">
+                <button
+                  ref={menuButtonRef}
+                  type="button"
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={isMenuOpen}
+                  aria-controls="hero-mobile-menu"
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-transparent text-foreground/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-foreground hover:shadow-[0_8px_18px_rgba(2,6,23,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none"
+                >
+                  {isMenuOpen ? (
+                    <X className="h-4 w-4" aria-hidden />
+                  ) : (
+                    <Menu className="h-4 w-4" aria-hidden />
+                  )}
+                </button>
+                {isMenuOpen ? (
+                  <div
+                    id="hero-mobile-menu"
+                    ref={menuPanelRef}
+                    role="menu"
+                    className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-white/15 bg-black/55 p-2 shadow-[0_16px_32px_rgba(2,6,23,0.45)] backdrop-blur-xl"
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => handleMenuNavClick("skills")}
+                      className={mobileMenuItemClass}
+                    >
+                      Skills
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => handleMenuNavClick("projects")}
+                      className={mobileMenuItemClass}
+                    >
+                      Projects
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => handleMenuNavClick("contact")}
+                      className={mobileMenuItemClass}
+                    >
+                      Contact
+                    </button>
+                    <div className="mt-1 border-t border-white/10 pt-1.5">
+                      <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-foreground/60">
+                        Effects
+                      </p>
+                      <ModeToggle />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <nav className="ml-auto flex w-full flex-wrap items-center justify-end gap-1.5 text-xs font-medium tracking-tight text-foreground/95 sm:w-auto sm:flex-nowrap sm:gap-3 sm:text-sm md:gap-6 md:text-base">
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("skills")}
+                  className={navButtonClass}
+                >
+                  Skills
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("projects")}
+                  className={navButtonClass}
+                >
+                  Projects
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick("contact")}
+                  className={navButtonClass}
+                >
+                  Contact
+                </button>
+                <ModeToggle />
+              </nav>
+            )}
+          </div>
+        </div>
+      </header>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-            style={{ willChange: "auto" }}
-          >
-            <Typography
-              variant="h4"
-              component="h2"
-              sx={{
-                color: "#1d1d1f",
-                fontWeight: 500,
-                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem", lg: "1.625rem" },
-                mb: 4,
-                lineHeight: 1.47059,
-                letterSpacing: "-0.016em",
-                textShadow: "0 1px 3px rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.06)",
-                position: "relative",
-                zIndex: 2,
-              }}
-            >
-              Designing and engineering thoughtful digital experiences.
-            </Typography>
-          </motion.div>
+      <div className="absolute inset-0 z-10">
+        {showHeroEffects || shouldReduceEffects ? (
+          <Suspense fallback={null}>
+            <Lanyard
+              position={[0, 0, 11]}
+              gravity={shouldReduceEffects ? [0, -18, 0] : [0, -40, 0]}
+              fov={24}
+              groupOffsetX={isCompactHero ? 0 : -1.1}
+              groupOffsetY={isCompactHero ? 5 : 4.25}
+              scale={isCompactHero ? 0.72 : 0.88}
+              bandColor="#000000"
+              bandWidth={0.36}
+              introSwing={!shouldReduceEffects}
+            />
+          </Suspense>
+        ) : null}
+      </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{ willChange: "auto" }}
-          >
-            <Button
-              variant="contained"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onNav) {
-                  onNav("contact");
-                }
-              }}
-              sx={{
-                bgcolor: "#e0e0e0",
-                color: "#222",
-                textTransform: "none",
-                fontSize: { xs: "0.9rem", md: "1rem" },
-                fontWeight: 500,
-                px: { xs: 2.5, md: 3.5 },
-                py: { xs: 1.25, md: 1.75 },
-                borderRadius: "8px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #d0d0d0",
-                "&:hover": {
-                  bgcolor: "#d0d0d0",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                },
-              }}
-            >
-              Get in Touch
-            </Button>
-          </motion.div>
-        </Box>
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 content-start items-start px-4 pt-[54svh] sm:px-8 sm:pt-[50svh] md:grid-cols-2 md:content-center md:items-center md:gap-8 md:pt-0">
+          <div className="pointer-events-auto w-full max-w-xl self-center justify-self-center md:col-start-2 md:justify-self-center">
+            <div className="flex w-full flex-col items-center gap-5 text-center">
+              <h1
+                className="text-balance text-4xl font-semibold leading-tight tracking-tight text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:text-5xl md:text-6xl lg:text-7xl flex w-full flex-col items-center text-center"
+                style={{ fontFamily: nameFontFamily }}
+              >
+                <>
+                  <span className="block w-full text-center">
+                    Thoughtful UX.
+                  </span>
+                  <span className="block w-full text-center">Clean code.</span>
+                  <span className="block w-full text-center">Fast apps.</span>
+                </>
+              </h1>
+              <p className="w-full max-w-xl text-center text-base text-foreground/85 drop-shadow-[0_1px_4px_rgba(0,0,0,0.55)] sm:text-lg">
+                Designing and engineering profound digital experiences.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleNavClick("contact")}
+                className={`mt-1 inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur-md shadow-[0_8px_20px_rgba(2,6,23,0.28)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/18 hover:shadow-[0_12px_26px_rgba(2,6,23,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none sm:px-6 sm:py-3 sm:text-base ${
+                  isCompactHero ? "self-center" : ""
+                }`}
+              >
+                Get in Touch
+              </button>
+            </div>
+          </div>
+          <div className="hidden md:block" aria-hidden />
+        </div>
+      </div>
 
-        {/* Right Side - MacBook Mockup */}
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            maxWidth: { xs: "100%", md: "50%" },
-            mt: { xs: 2, sm: 3, md: 0 },
-            width: "100%",
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
-            style={{ 
-              width: "100%", 
-              maxWidth: "1000px",
-              willChange: "auto",
-            }}
-          >
-            {/* Device Mockup - Screen Inside Frame */}
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* Device Frame Image */}
-              <OptimizedImage
-                src="/macbook-frame.png"
-                alt="MacBook Pro"
-                priority={true}
-                sx={{
-                  width: "100%",
-                  height: "auto",
-                  maxHeight: { xs: "350px", sm: "500px", md: "750px" },
-                  maxWidth: { xs: "100%", sm: "95%", md: "100%" },
-                  display: "block",
-                  objectFit: "contain",
-                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.04))",
-                  zIndex: 2,
-                  position: "relative",
-                  willChange: "auto",
-                  transform: "translateZ(0)",
-                  backfaceVisibility: "hidden",
-                }}
-              />
-
-            </Box>
-          </motion.div>
-        </Box>
-      </Container>
-
-      {/* Navigation - Top Left - Only visible on hero page */}
-      <Box
-        component="nav"
-        sx={{
-          position: "absolute",
-          top: { xs: "12px", sm: "16px", md: "24px" },
-          left: { xs: "12px", sm: "24px", md: "48px" },
-          display: "flex",
-          gap: { xs: 1.5, sm: 2.5, md: 4 },
-          zIndex: 10,
-          margin: 0,
-          padding: 0,
-          flexWrap: { xs: "wrap", sm: "nowrap" },
-        }}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center sm:bottom-6"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        <motion.button
+          type="button"
+          onClick={() => handleNavClick("skills")}
+          className="pointer-events-auto inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-muted-foreground shadow-sm backdrop-blur-md transition hover:text-foreground"
+          animate={shouldReduceEffects ? undefined : { y: [0, 8, 0] }}
+          transition={
+            shouldReduceEffects
+              ? undefined
+              : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+          }
+          aria-label="Scroll down to skills"
         >
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick("skills");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              textTransform: "none",
-              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              px: { xs: 1.25, sm: 1.75, md: 2.5 },
-              py: { xs: 0.625, sm: 0.875, md: 1.25 },
-              minHeight: { xs: "40px", sm: "44px", md: "52px" },
-              transition: "opacity 0.2s ease",
-              "&:hover": {
-                opacity: 0.6,
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            About
-          </Button>
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick("projects");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              textTransform: "none",
-              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              px: { xs: 1.25, sm: 1.75, md: 2.5 },
-              py: { xs: 0.625, sm: 0.875, md: 1.25 },
-              minHeight: { xs: "40px", sm: "44px", md: "52px" },
-              transition: "opacity 0.2s ease",
-              "&:hover": {
-                opacity: 0.6,
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            Projects
-          </Button>
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick("contact");
-            }}
-            sx={{
-              color: "#1d1d1f",
-              textTransform: "none",
-              fontSize: { xs: "0.9375rem", sm: "1.0625rem", md: "1.25rem" },
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              px: { xs: 1.25, sm: 1.75, md: 2.5 },
-              py: { xs: 0.625, sm: 0.875, md: 1.25 },
-              minHeight: { xs: "40px", sm: "44px", md: "52px" },
-              transition: "opacity 0.2s ease",
-              "&:hover": {
-                opacity: 0.6,
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            Contact
-          </Button>
-        </motion.div>
-      </Box>
-
-      {/* Bouncing Down Arrow - Only visible on hero page */}
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: { xs: 3, sm: 4, md: 5 },
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 10,
-          margin: 0,
-        }}
-      >
-        <motion.div
-          animate={{
-            y: [0, 8, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          style={{
-            willChange: "transform",
-            transform: "translateZ(0)",
-          }}
-        >
-          <IconButton
-            onClick={() => {
-              if (onNav) {
-                onNav("skills");
-              }
-            }}
-            sx={{
-              color: "#1d1d1f",
-              opacity: 0.6,
-              "&:hover": {
-                opacity: 1,
-                bgcolor: "rgba(0,0,0,0.05)",
-              },
-            }}
-            aria-label="Scroll down"
-          >
-            <KeyboardArrowDownIcon sx={{ fontSize: { xs: "36px", md: "40px" } }} />
-          </IconButton>
-        </motion.div>
-      </Box>
-    </Box>
+          <ChevronDown className="h-4 w-4" />
+        </motion.button>
+      </div>
+    </section>
   );
 }

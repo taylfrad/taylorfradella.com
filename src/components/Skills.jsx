@@ -1,203 +1,139 @@
-import {
-  Container,
-  Typography,
-  Grid,
-  Box,
-  Paper,
-} from "@mui/material";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
-import { motion } from "framer-motion";
-import { useState, useEffect, useMemo, memo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Cloud, Code2, Gauge, Layers3 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import GlassSurface from "@/components/surfaces/GlassSurface";
+import useIntersectionObserver from "@/hooks/useIntersectionObserver";
+
+const capabilityCards = [
+  {
+    key: "ui_perf",
+    icon: Code2,
+    title: "UI Engineering",
+    subtitle:
+      "Polished, responsive interfaces with motion, accessibility, and real-world performance discipline.",
+    pills: ["React", "TypeScript", "JavaScript", "Accessibility"],
+  },
+  {
+    key: "fullstack",
+    icon: Layers3,
+    title: "Full-Stack Delivery",
+    subtitle: "APIs, data modeling, and production-ready features end-to-end.",
+    pills: ["Node.js", "SQL", "REST APIs"],
+  },
+  {
+    key: "quality",
+    icon: Gauge,
+    title: "Quality & Maintainability",
+    subtitle:
+      "Clean code, consistent standards, and UX polish that holds up over time.",
+    pills: ["ESLint", "Prettier", "Testing", "Git Actions"],
+  },
+  {
+    key: "tooling",
+    icon: Cloud,
+    title: "Tooling & Cloud",
+    subtitle: "Clean workflows, automation, and practical cloud usage.",
+    pills: ["CI/CD", "Git", "Azure"],
+  },
+];
+
+const cardsContainerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+const cardRevealVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
+  },
+};
 
 export default function Skills() {
-  const [containerRef, isVisible] = useIntersectionObserver({
-    threshold: 0.2,
-  });
+  const [containerRef, isVisible] = useIntersectionObserver({ threshold: 0.2 });
   const [hasBeenVisible, setHasBeenVisible] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (isVisible) {
-      setHasBeenVisible(true);
-    }
+    if (isVisible) setHasBeenVisible(true);
   }, [isVisible]);
 
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: { staggerChildren: 0.15 },
-    },
-  };
+  return (
+    <section
+      id="skills"
+      ref={containerRef}
+      className="relative flex w-full flex-col items-center justify-center px-0 pb-6 pt-4 md:pb-8 md:pt-6 lg:pb-10 lg:pt-8"
+    >
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8">
+        <div className="w-fit">
+          <h2 className="text-left text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Skills
+          </h2>
+          <div className="mt-2 h-0.5 w-full bg-white/40 rounded-full" aria-hidden />
+        </div>
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.7, ease: "easeOut" },
-    },
-  };
+        <motion.div
+          variants={cardsContainerVariants}
+          initial="hidden"
+          animate={isVisible || hasBeenVisible ? "visible" : "hidden"}
+          className="mt-8 grid auto-rows-fr grid-cols-1 items-stretch gap-4 md:grid-cols-2 lg:grid-cols-4"
+        >
+          {capabilityCards.map((card) => (
+            <motion.div
+              key={card.key}
+              variants={cardRevealVariants}
+              whileHover={
+                reducedMotion
+                  ? undefined
+                  : { y: -2, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } }
+              }
+              className="h-full"
+            >
+              <GlassSurface
+                variant="card"
+                className="h-full min-h-[250px] border-white/10 bg-background/20 p-4 backdrop-blur-2xl transition-colors duration-200 ease-out hover:bg-background/28 sm:p-5"
+              >
+                <CapabilityCardInner card={card} />
+              </GlassSurface>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
-  // Main skill categories matching the mock design - Memoized
-  const skillCategories = useMemo(() => [
-    {
-      title: "Web Development",
-      icon: "devicon-react-plain colored",
-      description: "React, Node.js, TypeScript, JavaScript",
-    },
-    {
-      title: "Full-Stack Solutions",
-      icon: "devicon-nodejs-plain colored",
-      description: "React, Node.js, SQL, REST APIs",
-    },
-    {
-      title: "Cloud & Tools",
-      icon: "devicon-github-plain colored",
-      description: "Azure, Git, VS Code, CI/CD",
-    },
-  ], []);
+function CapabilityCardInner({ card }) {
+  const Icon = card.icon;
 
   return (
-    <Box
-      ref={containerRef}
-      sx={{
-        width: "100%",
-        position: "relative",
-        bgcolor: "#ffffff",
-        color: "text.primary",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        pt: 0,
-        pb: 0,
-        px: 0,
-      }}
-    >
-      <Container 
-        maxWidth="lg" 
-        sx={{ 
-          width: "100%", 
-          px: { xs: 2, sm: 3, md: 4 },
-          "& .MuiContainer-root": {
-            maxWidth: "100% !important",
-          },
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            bgcolor: "#f5f5f7",
-            borderRadius: "18px",
-            p: { xs: 2.5, sm: 3.5, md: 4, lg: 5 },
-            boxShadow: "none",
-            border: "none",
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 600,
-              fontSize: { xs: "1.75rem", sm: "2.25rem", md: "2.5rem", lg: "2.75rem" },
-              mb: { xs: 3.5, md: 4.5 },
-              color: "#1d1d1f",
-              textAlign: "left",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.05,
-            }}
-          >
-            My Skills
-          </Typography>
+    <div className="flex h-full flex-col">
+      <div>
+        <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-background/30">
+          <Icon className="h-5 w-5 text-foreground/80" />
+        </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={isVisible || hasBeenVisible ? "visible" : "hidden"}
+        <h3 className="text-sm font-semibold tracking-tight text-foreground md:text-base">
+          {card.title}
+        </h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          {card.subtitle}
+        </p>
+      </div>
+
+      <div className="mt-auto flex flex-wrap justify-center gap-2 pt-4">
+        {card.pills.map((pill) => (
+          <span
+            key={pill}
+            className="rounded-full border border-border/70 bg-background/35 px-3 py-1.5 text-[12.5px] text-foreground/80 transition-colors duration-200 hover:border-border hover:text-foreground"
           >
-            <Grid 
-              container 
-              spacing={4}
-              sx={{ 
-                margin: 0, 
-                width: "100%",
-              }}
-            >
-              {skillCategories.map((category, index) => (
-                <Grid size={{ xs: 12, md: 4 }} key={index}>
-                  <motion.div variants={itemVariants}>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: { xs: 3, md: 4 },
-                        borderRadius: "16px",
-                        bgcolor: "#ffffff",
-                        border: "none",
-                        height: "100%",
-                        minHeight: { xs: "260px", sm: "280px", md: "320px" },
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        textAlign: "center",
-                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                        boxShadow: "none",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          mb: 1.5,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <i
-                          className={category.icon}
-                          style={{
-                            fontSize: "clamp(36px, 8vw, 48px)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 600,
-                          mb: 1,
-                          color: "#1d1d1f",
-                          fontSize: { xs: "1.1875rem", md: "1.375rem" },
-                          letterSpacing: "-0.01em",
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {category.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#86868b",
-                          fontSize: { xs: "0.9375rem", md: "1rem" },
-                          lineHeight: 1.47059,
-                          letterSpacing: "-0.01em",
-                        }}
-                      >
-                        {category.description}
-                      </Typography>
-                    </Paper>
-                  </motion.div>
-                </Grid>
-              ))}
-            </Grid>
-          </motion.div>
-        </Paper>
-      </Container>
-    </Box>
+            {pill}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }

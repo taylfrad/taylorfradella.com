@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 98%;
+    --foreground: 222 22% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 22% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 22% 8%;
+    --primary: 211 100% 46%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 222 22% 12%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 10% 38%;
+    --accent: 220 14% 90%;
+    --accent-foreground: 222 22% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 14% 82%;
+    --input: 220 14% 82%;
+    --ring: 211 100% 50%;
+    --radius: 1rem;
+    --scrollbar-size: 8px;
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: #0b1523;
+    --scrollbar-thumb-hover: #13233a;
+  }
+
+  .dark {
+    --background: 220 21% 7%;
+    --foreground: 210 25% 96%;
+    --card: 220 20% 10%;
+    --card-foreground: 210 25% 96%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 210 25% 96%;
+    --primary: 210 100% 62%;
+    --primary-foreground: 220 21% 9%;
+    --secondary: 220 16% 14%;
+    --secondary-foreground: 210 25% 96%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 220 13% 70%;
+    --accent: 220 16% 14%;
+    --accent-foreground: 210 25% 96%;
+    --destructive: 0 63% 42%;
+    --destructive-foreground: 210 25% 96%;
+    --border: 220 14% 22%;
+    --input: 220 14% 22%;
+    --ring: 210 100% 70%;
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: #0b1523;
+    --scrollbar-thumb-hover: #13233a;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    width: 100%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    scrollbar-gutter: stable;
+  }
+
+  html.is-scrolling {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  body {
+    min-height: 100svh;
+    min-width: 320px;
+    overflow-x: hidden;
+    font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue",
+      Helvetica, Arial, sans-serif;
+    letter-spacing: -0.01em;
+    @apply bg-background text-foreground;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 999px;
+  }
+
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  html.is-scrolling::-webkit-scrollbar-thumb,
+  html.is-scrolling body::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+  }
+
+  html.is-scrolling::-webkit-scrollbar-thumb:hover,
+  html.is-scrolling body::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+
+  html::-webkit-scrollbar-button,
+  body::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  @supports (min-height: 100dvh) {
+    body,
+    #root {
+      min-height: 100dvh;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    @apply border-border;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .glass-base {
+    @apply rounded-2xl border border-border/60 shadow-lg shadow-black/20;
+  }
+
+  .glass-nav {
+    @apply bg-background/45 backdrop-blur-lg;
+  }
+
+  .glass-card {
+    @apply bg-card/50 backdrop-blur-xl;
+  }
+
+  .glass-panel {
+    @apply bg-card/55 backdrop-blur-xl;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.footer-social-icons {
+  display: flex;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-social-icons li {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-social-icons li:not(:last-child)::after {
+  content: "|";
+  margin-left: 8px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}
+
+.footer-social-icons li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: hsl(var(--foreground) / 0.95);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-social-icons li a:hover {
+  color: hsl(var(--foreground));
+}
+
+.footer-social-icons li a .footer-social-icon-wrap {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid hsl(var(--border));
+  flex-shrink: 0;
+}
+
+.footer-social-icons li a .footer-social-icon-wrap .icon {
+  position: relative;
+  transition: 0.5s;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-social-icons li a:hover .footer-social-icon-wrap .icon {
+  color: #fff;
+  transform: rotateY(360deg);
+}
+
+.footer-social-icons li a .footer-social-icon-wrap::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: 0.5s;
+  z-index: 2;
+}
+
+.footer-social-icons li a:hover .footer-social-icon-wrap::before {
+  top: 0;
+}
+
+.footer-social-icons li:nth-child(1) a .footer-social-icon-wrap::before {
+  background: #3b5999;
+}
+
+.footer-social-icons li:nth-child(2) a .footer-social-icon-wrap::before {
+  background: #5a6c7d;
+}
+
+.footer-social-icons li:nth-child(3) a .footer-social-icon-wrap::before {
+  background: #24292e;
+}
+
+@media (max-width: 640px) {
+  .footer-social-icons {
+    gap: 6px;
+  }
+
+  .footer-social-icons li:not(:last-child)::after {
+    content: none;
+  }
+}
