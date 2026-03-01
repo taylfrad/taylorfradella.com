@@ -1,46 +1,96 @@
 # taylorfradella.com
 
-Portfolio site built with Vite + React 18 + React Router.
+Personal portfolio built with React + Vite, featuring a shader-based hero background, a physics-driven 3D lanyard, animated project previews, and a project detail experience.
 
-## Stack
+## Tech Stack
 
 - React 18
-- React Router 6
-- Tailwind CSS + shadcn/ui primitives
-- `liquid-glass-react` for selective glass surfaces
-- `ogl` for the Balatro hero shader
+- Vite
+- React Router 6 (`BrowserRouter`)
+- Tailwind CSS (with CSS variables)
+- Framer Motion
+- Three.js + React Three Fiber + Drei + Rapier (lanyard/3D interactions)
+- OGL (hero shader background)
+- Lucide icons
+- shadcn-style primitives (`Button`, `Slot`, shared `sx` wrappers)
 
-## Theme
+## Current App Structure
 
-- CSS-variable theming with `.dark` overrides in `src/styles/globals.css`
-- Default theme is `dark` on first load
-- User theme choice is persisted in `localStorage`
-- Theme/effects controls are in the navbar (`ModeToggle`)
+- Route `/`:
+  - `Hero`
+  - `Skills`
+  - `Projects`
+  - `Footer`
+- Route `/project/:id`:
+  - `ProjectDetail`
+  - Uses the same particle treatment as post-hero sections
+  - Supports screenshot carousel/lightbox and rich project metadata
 
-## Effects and Accessibility
+Entrypoints:
 
-- Glass is applied selectively (hero navbar/panel, cards) via `GlassSurface`
-- `GlassSurface` auto-falls back to `GlassFallback` when reduced effects are active
-- `prefers-reduced-motion` is respected
-- "Reduce Effects" can be toggled from the appearance menu
+- [src/main.jsx](/c:/Users/taylo/source/repos/taylorfradella.com/src/main.jsx)
+- [src/App.jsx](/c:/Users/taylo/source/repos/taylorfradella.com/src/App.jsx)
 
-## Hero Background
+## Visual / Motion System
 
-- Balatro shader is loaded only for the hero page path (`/`) through lazy imports
-- `HeroBackground` uses `React.lazy` + `Suspense` with a static gradient fallback
-- If reduced motion/effects is enabled, Balatro is not mounted
+- Theme is fixed to dark mode.
+- Effects can be reduced using `ModeToggle`.
+- `ThemeProvider` combines:
+  - OS `prefers-reduced-motion`
+  - User-controlled `reduce-effects` toggle (persisted in `localStorage`)
+- Hero background:
+  - `HeroBackground` lazy-loads `Balatro` (OGL)
+  - falls back to static gradients
+  - disables heavy effects when reduced effects are active
+- Selective glass styling is done with local surface components:
+  - `GlassSurface`
+  - `GlassFallback`
 
-## GitHub Pages Routing
+## 3D / Animated Components
 
-This project uses `BrowserRouter` with a static SPA fallback file.
+- `Lanyard` is a procedural + physics-driven 3D component used in Hero and project preview contexts.
+- `Projects` includes animated preview cards for:
+  - Personal Portfolio
+  - Lions Den Cinemas
+  - SweetSpot
+  - Workly
+- `ProjectDetail` supports:
+  - image optimization wrapper (`OptimizedImage`)
+  - swipe/keyboard-enabled carousels
+  - fullscreen lightbox behavior
 
-- `npm run build` creates `dist/index.html`
-- `npm run postbuild` runs `scripts/copy-404.js` to copy `index.html` to `dist/404.html`
-- GitHub Pages serves `404.html` for unknown paths, allowing React Router to rehydrate and route client-side
+## Routing Notes
+
+The app uses `BrowserRouter` and includes a GitHub Pages SPA fallback:
+
+- `npm run build` outputs `dist/index.html`
+- `npm run postbuild` runs [scripts/copy-404.js](/c:/Users/taylo/source/repos/taylorfradella.com/scripts/copy-404.js)
+- `dist/404.html` is a copy of `index.html` for SPA route rehydration on GitHub Pages
 
 ## Scripts
 
-- `npm run dev`
-- `npm run lint`
-- `npm run build`
-- `npm run deploy`
+- `npm run dev` - start local dev server
+- `npm run build` - production build
+- `npm run preview` - preview local build
+- `npm run preview:prod` - build + preview on port `4173`
+- `npm run lint` - ESLint checks
+- `npm run optimize-images` - convert PNG assets to WebP via Sharp
+- `npm run deploy` - publish `dist` to GitHub Pages (`gh-pages`)
+
+## Local Development
+
+1. Install dependencies:
+   `npm install`
+2. Start dev server:
+   `npm run dev`
+3. Open:
+   `http://localhost:5173`
+
+## Build and Deploy
+
+1. Build:
+   `npm run build`
+2. Deploy to GitHub Pages:
+   `npm run deploy`
+
+The `homepage` field in [package.json](/c:/Users/taylo/source/repos/taylorfradella.com/package.json) is configured for `https://taylorfradella.com`.

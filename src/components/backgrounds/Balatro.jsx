@@ -114,21 +114,21 @@ const fragmentShader = `
 `;
 
 export default function Balatro({
-  spinRotation = -2.0,
-  spinSpeed = 7.0,
+  spinRotation = 0,
+  spinSpeed = 3,
   offset = [0.0, 0.0],
-  color1 = "#DE443B",
-  color2 = "#006BB4",
-  color3 = "#162325",
-  contrast = 3.5,
+  color1 = "#0e1116",
+  color2 = "#0c2d35",
+  color3 = "#290c4e",
+  contrast = 4.5,
   lighting = 0.4,
-  spinAmount = 0.25,
-  pixelFilter = 745.0,
+  spinAmount = 0.3,
+  pixelFilter = 2000,
   spinEase = 1.0,
   isRotate = false,
   mouseInteraction = false,
   active = true,
-  maxDpr = 1.2,
+  maxDpr = 1.3,
   targetFps = 60,
 }) {
   const containerRef = useRef(null);
@@ -187,7 +187,8 @@ export default function Balatro({
       const width = Math.max(1, Math.floor(nextWidth));
       const height = Math.max(1, Math.floor(nextHeight));
       const dpr = Math.min(window.devicePixelRatio || 1, adaptiveMaxDpr);
-      if (width === lastWidth && height === lastHeight && dpr === lastDpr) return;
+      if (width === lastWidth && height === lastHeight && dpr === lastDpr)
+        return;
 
       lastWidth = width;
       lastHeight = height;
@@ -287,7 +288,9 @@ export default function Balatro({
     }
 
     if (mouseInteraction) {
-      container.addEventListener("mousemove", handleMouseMove, { passive: true });
+      container.addEventListener("mousemove", handleMouseMove, {
+        passive: true,
+      });
     }
     if (typeof ResizeObserver === "function") {
       resizeObserver = new ResizeObserver((entries) => {
@@ -299,7 +302,9 @@ export default function Balatro({
     } else {
       const handleResize = () => queueResize();
       window.addEventListener("resize", handleResize, { passive: true });
-      resizeObserver = { disconnect: () => window.removeEventListener("resize", handleResize) };
+      resizeObserver = {
+        disconnect: () => window.removeEventListener("resize", handleResize),
+      };
       queueResize();
     }
 
