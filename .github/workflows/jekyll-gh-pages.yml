@@ -1,39 +1,52 @@
-name: Test and Deploy Report to Pages
+name: Deploy React Site to GitHub Pages
 
 on:
   push:
-    branches:
-      - main # or your default branch
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  run-tests:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # Example: Run Node.js tests and generate an HTML report
-      - name: Setup Node.js
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests and generate report
-        run: npm test -- --coverageReporters=html # Command to run tests and create an HTML report
+          node-version: 20
+          cache: "npm"
 
-      # Upload the artifact (e.g., the 'coverage' folder)
-      - name: Upload Pages artifact
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure SWC Linux binding
+        run: npm install @swc/core@latest --platform=linux --arch=x64 --no-save
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: coverage # The directory containing your HTML report
+          path: ./dist
 
-  deploy-report:
-    needs: run-tests # Only run if tests pass and artifact is uploaded
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write # Required to deploy to Pages
-      id-token: write # Required by the deploy-pages action
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
