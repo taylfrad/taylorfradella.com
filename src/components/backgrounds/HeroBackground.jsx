@@ -26,8 +26,10 @@ export default function HeroBackground({ animated = true }) {
             mouseInteraction={false}
             pixelFilter={2000}
             color1="#0e1116"
-            color2="#0c2d35"
+            color2="#0A3A4A"
             color3="#052146"
+            maxDpr={1.1}
+            targetFps={36}
           />
         </Suspense>
       ) : (

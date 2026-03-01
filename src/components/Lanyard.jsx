@@ -918,8 +918,6 @@ function Band({
   const desktopStrapClipEndpointDrop = 0.37;
   const mobileClipAttachBiasY = -0.018;
   const desktopClipAttachBiasY = -0.012;
-  const mobileDragSensitivity = 0.78;
-  const mobileDragFollowRate = 12;
   const fallbackBandPoints = useMemo(
     () => [
       new THREE.Vector3(0, 0, 0),
@@ -1355,6 +1353,37 @@ function Band({
     }
   }, [hovered, dragged]);
 
+  useEffect(() => {
+    if (!isMobile || !dragged) return undefined;
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const htmlElement = document.documentElement;
+    const bodyElement = document.body;
+    const previousHtmlOverscroll = htmlElement.style.overscrollBehaviorY;
+    const previousBodyOverscroll = bodyElement.style.overscrollBehaviorY;
+
+    htmlElement.style.overscrollBehaviorY = "none";
+    bodyElement.style.overscrollBehaviorY = "none";
+
+    const preventTouchScroll = (event) => {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("touchmove", preventTouchScroll, {
+      passive: false,
+    });
+
+    return () => {
+      window.removeEventListener("touchmove", preventTouchScroll);
+      htmlElement.style.overscrollBehaviorY = previousHtmlOverscroll;
+      bodyElement.style.overscrollBehaviorY = previousBodyOverscroll;
+    };
+  }, [dragged, isMobile]);
+
   useFrame((state, delta) => {
     if (dragged) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
@@ -1365,30 +1394,11 @@ function Band({
       const targetY = vec.y - dragged.y;
       const targetZ = vec.z - dragged.z;
 
-      if (!isMobile) {
-        card.current?.setNextKinematicTranslation({
-          x: targetX,
-          y: targetY,
-          z: targetZ,
-        });
-      } else {
-        const currentPos = card.current?.translation();
-        if (isFiniteVectorLike(currentPos)) {
-          const followAlpha =
-            1 - Math.exp(-delta * mobileDragFollowRate * mobileDragSensitivity);
-          card.current?.setNextKinematicTranslation({
-            x: THREE.MathUtils.lerp(currentPos.x, targetX, followAlpha),
-            y: THREE.MathUtils.lerp(currentPos.y, targetY, followAlpha),
-            z: THREE.MathUtils.lerp(currentPos.z, targetZ, followAlpha),
-          });
-        } else {
-          card.current?.setNextKinematicTranslation({
-            x: targetX,
-            y: targetY,
-            z: targetZ,
-          });
-        }
-      }
+      card.current?.setNextKinematicTranslation({
+        x: targetX,
+        y: targetY,
+        z: targetZ,
+      });
     }
 
     if (
@@ -1607,6 +1617,14 @@ function Band({
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={(e) => {
+              e.stopPropagation();
+              if (e.target.hasPointerCapture(e.pointerId)) {
+                e.target.releasePointerCapture(e.pointerId);
+              }
+              drag(false);
+            }}
+            onPointerCancel={(e) => {
+              e.stopPropagation();
               if (e.target.hasPointerCapture(e.pointerId)) {
                 e.target.releasePointerCapture(e.pointerId);
               }
@@ -1614,6 +1632,7 @@ function Band({
             }}
             onPointerDown={(e) => {
               if (!card.current) return;
+              e.stopPropagation();
               completeIntro();
               e.target.setPointerCapture(e.pointerId);
               drag(
