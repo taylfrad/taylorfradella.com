@@ -1,13 +1,14 @@
 // This file contains the extended project data including timeline, tools, and detailed information
 // Animations are handled separately in Projects.jsx and merged at runtime
+import { ACCENT_DEFAULT, ACCENT_WORKLY } from "@/constants";
 
 export const projectsData = [
   {
     id: 1,
-    image: "/images/portfolio.png",
-    role: "PERSONAL PROJECT",
+    image: null, // TODO: add public/images/portfolio.png
+    role: "UI ENGINEER · PERSONAL",
     title: "Personal Portfolio Website",
-    accentColor: "#0071e3",
+    accentColor: ACCENT_DEFAULT,
     tags: ["React", "Framer Motion", "Three.js"],
     description:
       "A modern portfolio featuring liquid glass UI surfaces, a physics-driven lanyard hero, and responsive motion tuned for desktop and mobile.",
@@ -32,28 +33,34 @@ export const projectsData = [
     ],
     timeline: [
       {
-        phase: "Planning & Design",
-        date: "Week 1-2",
+        phase: "Foundation & Design System",
+        date: "Initial phase",
         description:
-          "Initial design mockups, component architecture planning, and technology stack selection.",
+          "Defined the visual direction, component architecture, and core technology stack for a scalable portfolio foundation.",
       },
       {
-        phase: "Development",
-        date: "Week 3-6",
+        phase: "Core Build",
+        date: "Early build",
         description:
-          "Core component development, animation implementation, and responsive layout creation.",
+          "Built primary pages, reusable UI components, responsive layouts, and initial motion interactions.",
       },
       {
-        phase: "Refinement",
-        date: "Week 7-8",
+        phase: "Performance & UX Refinement",
+        date: "Post-launch improvements",
         description:
-          "Performance optimization, cross-browser testing, and user experience improvements.",
+          "Optimized animation behavior, improved readability, refined interactions, and tuned cross-device performance.",
       },
       {
-        phase: "Launch",
-        date: "Week 9",
+        phase: "Launch & Maintenance",
+        date: "Live",
         description:
-          "Final deployment, domain configuration, and continuous monitoring for improvements.",
+          "Deployed to production with continuous monitoring and regular quality updates.",
+      },
+      {
+        phase: "Ongoing Development",
+        date: "Current",
+        description:
+          "Actively updated with new project content, visual polish, accessibility improvements, and incremental feature enhancements.",
       },
     ],
     keyFeatures: [
@@ -70,8 +77,8 @@ export const projectsData = [
   },
   {
     id: 2,
-    image: "/images/lionsden.png",
-    role: "SCHOOL PROJECT",
+    image: null, // TODO: add public/images/lionsden.png
+    role: "FULL-STACK DEVELOPER",
     title: "Lions Den Cinemas Website and Mobile App",
     accentColor: "#c20000",
     tags: ["React Native", "Node.js", "SQL", "GitHub"],
@@ -135,8 +142,8 @@ export const projectsData = [
   },
   {
     id: 3,
-    image: "/images/bloodsugar.png",
-    role: "SCHOOL PROJECT",
+    image: null, // TODO: add public/images/bloodsugar.png
+    role: "IOT & AI DEVELOPER",
     title: "SweetSpot",
     accentColor: "#22c55e",
     tags: ["Python", "Raspberry Pi", "Dexcom API", "AI"],
@@ -198,10 +205,10 @@ export const projectsData = [
   },
   {
     id: 4,
-    image: "/images/workly.png",
-    role: "SCHOOL PROJECT",
+    image: "/images/workly/workly1.png",
+    role: "MOBILE APP DEVELOPER",
     title: "Workly",
-    accentColor: "#b3363d",
+    accentColor: ACCENT_WORKLY,
     tags: ["Flutter", "Dart", "Firebase", "Mobile", "GitHub"],
     description:
       "A mobile job search app with a Tinder-like swipe interface, AI-powered matching, and cover letter generation built with Flutter and Firebase.",
@@ -209,8 +216,7 @@ export const projectsData = [
       "Workly revolutionizes the job search experience by combining an intuitive, gamified interface with powerful AI-driven features. Built with Flutter for true cross-platform compatibility, the app provides a native experience on iOS, Android, and web platforms. The core interaction model uses a Tinder-like swipe interface, allowing job seekers to quickly browse opportunities by swiping right on interesting positions or left to pass, making the traditionally tedious job search process fast, engaging, and enjoyable. The app features sophisticated AI-powered job matching that analyzes user qualifications, skills, experience, and preferences to calculate a matching score for each job opportunity. This intelligent matching system helps users focus on positions that align with their career goals and qualifications. One of Workly's standout features is the AI cover letter generator, which creates personalized cover letters tailored to specific job postings, saving users significant time while ensuring each application is customized and relevant. The backend infrastructure, built entirely on Firebase, leverages Cloud Firestore for real-time data synchronization, ensuring job listings, user profiles, and application statuses update instantly across all devices. Firebase Authentication provides secure user account management, while Firebase Cloud Functions handle server-side logic for job matching algorithms and AI processing. The app includes comprehensive user profile management, allowing job seekers to upload resumes, specify skills, set preferences, and track their application history. The Provider state management pattern ensures efficient data flow and reactive UI updates throughout the application. Workly demonstrates expertise in cross-platform mobile development, Firebase backend services, AI integration, and creating engaging user experiences that solve real-world problems.",
     status: "Completed",
     github: "https://github.com/maheessh/workly",
-    userManual:
-      "https://docs.google.com/document/d/1eN3uJ95lJXLpBifNI5JMCebmE7JUGJv6pLzEhB7lIt8/edit?usp=sharing",
+    userManual: "/docs/workly-user-manual.pdf",
     screenshots: [
       "/images/workly/workly1.png",
       "/images/workly/workly2.png",

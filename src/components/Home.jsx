@@ -1,144 +1,198 @@
-import { Suspense, lazy, useCallback, useEffect } from "react";
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "./Hero";
-import { useTheme } from "@/components/theme-provider";
+import { ChevronUpIcon } from "@/components/ui/chevron-up";
+import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
+import { scrollToSection } from "@/lib/navigation";
 
 const Skills = lazy(() => import("./Skills"));
 const Projects = lazy(() => import("./Projects"));
+const About = lazy(() => import("./About"));
 const Footer = lazy(() => import("./Footer"));
-const ParticlesBackground = lazy(() => import("./ui/particles"));
+
+function HomeSections() {
+  return (
+    <div className="relative flex min-h-[100svh] flex-1 flex-col">
+      <div className="post-hero-content relative flex flex-col">
+        {/* Always-mounted anchors so scroll works even while sections lazy-load */}
+        <div id="skills" className="h-0 w-0" aria-hidden />
+        <Suspense fallback={<div className="h-40" />}>
+          <Skills />
+        </Suspense>
+        <div id="projects" className="h-0 w-0" aria-hidden />
+        <Suspense fallback={<div className="h-40" />}>
+          <Projects />
+        </Suspense>
+        <div id="about" className="h-0 w-0" aria-hidden />
+        <Suspense fallback={<div className="h-40" />}>
+          <About />
+        </Suspense>
+        <div id="footer" className="h-0 w-0" aria-hidden />
+        <Suspense fallback={<div className="h-40" />}>
+          <Footer />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { state } = useLocation();
-  const { shouldReduceEffects } = useTheme();
   const shouldScrollToProjects = Boolean(state?.scrollToProjects);
-  const SCROLL_TO_PROJECTS_FLAG = "scrollToProjectsPending";
 
-  // Basic scroll-to-section helper
-  const scrollToSection = useCallback((sectionId) => {
-    if (sectionId === "hero" || sectionId === "/") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+  // If we're returning from a project detail view and immediately scrolling
+  // back down to Projects, consider the hero "ready" up front.
+  const initialHeroReady = Boolean(
+    state?.from === "projects" ||
+      state?.restore ||
+      shouldScrollToProjects,
+  );
+
+  const heroReadySetRef = useRef(initialHeroReady);
+
+  const handleHeroReady = useCallback(() => {
+    if (heroReadySetRef.current) return;
+    heroReadySetRef.current = true;
+  }, []);
+
+  const clearPendingProjectsScroll = useCallback(() => {
+    try {
+      sessionStorage.removeItem(SCROLL_TO_PROJECTS_FLAG);
+    } catch {
+      // ignore
     }
-
-    if (sectionId === "contact" || sectionId === "footer") {
-      const footer = document.getElementById("footer");
-      if (footer) {
-        footer.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      return;
-    }
-
-    const el = document.getElementById(sectionId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const s = window.history.state;
+    if (s?.scrollToProjects) {
+      window.history.replaceState(
+        { ...s, scrollToProjects: false },
+        "",
+        window.location.href,
+      );
     }
   }, []);
 
-  // Handle one-time "back to projects" scroll intent.
-  useEffect(() => {
-    let rafId;
-    const hasSessionFlag =
-      typeof window !== "undefined" &&
-      window.sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
-    const shouldScrollNow = shouldScrollToProjects || hasSessionFlag;
-
-    const clearPendingProjectsScroll = () => {
-      if (typeof window !== "undefined") {
-        try {
-          window.sessionStorage.removeItem(SCROLL_TO_PROJECTS_FLAG);
-        } catch {
-          // Ignore storage clear failures.
-        }
-
-        const currentHistoryState = window.history.state;
-        const currentUsrState = currentHistoryState?.usr;
-        if (currentUsrState?.scrollToProjects) {
-          const nextUsrState = { ...currentUsrState };
-          delete nextUsrState.scrollToProjects;
-          window.history.replaceState(
-            { ...currentHistoryState, usr: nextUsrState },
-            "",
-            window.location.href,
-          );
-        }
-      }
-    };
-
-    if (shouldScrollNow) {
-      let attempts = 0;
-      const maxAttempts = 360;
-
-      const tryScrollToProjects = () => {
+  // Synchronously jump scroll before the first paint so the incoming slide
+  // animation starts at the correct position. If scrollY was saved when the
+  // user clicked "View Project", restore to that exact position so the
+  // specific project card is in view. Otherwise fall back to #projects anchor.
+  const layoutScrollHandledRef = useRef(false);
+  useLayoutEffect(() => {
+    const hasSessionFlag = sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
+    if (shouldScrollToProjects || hasSessionFlag) {
+      const savedY = state?.scrollY;
+      if (savedY != null) {
+        window.scrollTo({ top: savedY, left: 0, behavior: "instant" });
+      } else {
         const el = document.getElementById("projects");
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-          // Clear pending state/flag only after we actually scrolled.
-          clearPendingProjectsScroll();
-          return;
-        }
+        if (el) el.scrollIntoView({ behavior: "instant", block: "start" });
+      }
+      layoutScrollHandledRef.current = true;
+      clearPendingProjectsScroll();
+      if (!heroReadySetRef.current) {
+        heroReadySetRef.current = true;
+      }
+    }
+  // Intentionally empty — must run exactly once before first paint so the
+  // incoming slide animation starts at the correct scroll position.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        attempts += 1;
-        if (attempts < maxAttempts) {
-          rafId = requestAnimationFrame(tryScrollToProjects);
-          return;
-        }
+  // Fallback: fires when useLayoutEffect couldn't find #projects (e.g. the
+  // anchor hadn't committed yet). Uses a MutationObserver instead of the old
+  // RAF polling loop (up to 360 frames) — event-driven, no busy-waiting.
+  useEffect(() => {
+    if (layoutScrollHandledRef.current) return;
 
-        // Fallback: clear state if section could not be found in time.
-        clearPendingProjectsScroll();
-      };
+    const hasSessionFlag = sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
 
-      rafId = requestAnimationFrame(tryScrollToProjects);
+    if (!heroReadySetRef.current && (shouldScrollToProjects || hasSessionFlag)) {
+      heroReadySetRef.current = true;
     }
 
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [SCROLL_TO_PROJECTS_FLAG, shouldScrollToProjects]);
+    if (!(shouldScrollToProjects || hasSessionFlag)) return;
+
+    const savedY = state?.scrollY;
+    if (savedY != null) {
+      window.scrollTo({ top: savedY, left: 0, behavior: "instant" });
+      clearPendingProjectsScroll();
+      return;
+    }
+
+    // The #projects anchor is outside Suspense, so it's almost always in the
+    // DOM by the time this effect runs. Try synchronously first.
+    const el = document.getElementById("projects");
+    if (el) {
+      el.scrollIntoView({ behavior: "instant", block: "start" });
+      clearPendingProjectsScroll();
+      return;
+    }
+
+    // Unlikely fallback: watch for the element to appear.
+    const observer = new MutationObserver(() => {
+      const target = document.getElementById("projects");
+      if (target) {
+        observer.disconnect();
+        target.scrollIntoView({ behavior: "instant", block: "start" });
+        clearPendingProjectsScroll();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [shouldScrollToProjects, clearPendingProjectsScroll, state]);
+
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const sentinelRef = useRef(null);
+
+  // IntersectionObserver on a sentinel at ~90vh — fires once on cross,
+  // replacing a per-frame scroll listener that called setState on every tick.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowBackToTop(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
-    <div className="flex min-h-[100svh] flex-col bg-background text-foreground">
-      <main className="flex-1 flex flex-col">
-        <Hero onNav={scrollToSection} />
+    <div className="flex min-h-[100svh] flex-col text-ink-1">
+      <a href="#main-content" className="skip-nav">
+        Skip to main content
+      </a>
+      {/* Sentinel for back-to-top IntersectionObserver — when this scrolls
+          out of view (~90vh from top), the back-to-top button appears. */}
+      <div ref={sentinelRef} className="pointer-events-none absolute left-0 top-[90vh] h-px w-px" aria-hidden />
+      <main id="main-content" className="relative z-10 flex flex-1 flex-col">
+        <Hero
+          onNav={scrollToSection}
+          onHeroReady={handleHeroReady}
+          initialHeroReady={initialHeroReady}
+        />
 
-        {/* Post-Hero: Particles background (everywhere except Hero). */}
-        <div className="relative flex flex-col flex-1 min-h-[100svh]">
-          <div className="absolute inset-0 z-0">
-            <Suspense
-              fallback={
-                <div className="absolute inset-0 bg-gradient-to-b from-[#36454f] via-[#070b47] to-black" />
-              }
-            >
-              {shouldReduceEffects ? (
-                <div className="absolute inset-0 bg-gradient-to-b from-[#36454f] via-[#070b47] to-black" />
-              ) : (
-                <ParticlesBackground
-                  className="absolute inset-0"
-                  quantity={130}
-                  staticity={42}
-                  ease={52}
-                  size={0.8}
-                  color="#dbe8ff"
-                  maxDpr={1.3}
-                  targetFps={40}
-                />
-              )}
-            </Suspense>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#36454f]/16 via-[#070b47]/22 to-black/30" />
-          </div>
-          <div className="relative z-10 flex flex-col">
-            <Suspense fallback={<div className="h-40" />}>
-              <Skills />
-            </Suspense>
-            <Suspense fallback={<div className="h-40" />}>
-              <Projects />
-            </Suspense>
-            <Suspense fallback={<div className="h-40" />}>
-              <Footer />
-            </Suspense>
-          </div>
-        </div>
+        <HomeSections />
       </main>
+
+      <button
+        type="button"
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-50 inline-flex items-center justify-center p-2 text-[var(--text-tertiary)] transition-all duration-300 ease-out hover:text-[var(--text-primary)] md:bottom-8 md:right-8 ${
+          showBackToTop
+            ? "translate-x-0 opacity-100"
+            : "translate-x-16 opacity-0 pointer-events-none"
+        }`}
+        aria-label="Back to top"
+        title="Back to top"
+      >
+        <ChevronUpIcon size={36} />
+      </button>
     </div>
   );
 }

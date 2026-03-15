@@ -1,161 +1,132 @@
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronUp, FileText, Github, Linkedin } from "lucide-react";
-import { useInView } from "react-intersection-observer";
+import useReducedMotion from "@/hooks/useReducedMotion";
+import PdfModal from "@/components/ui/PdfModal";
+import useScrollMotion from "@/hooks/useScrollMotion";
+import { FileTextIcon } from "@/components/ui/file-text";
+import { GithubIcon } from "@/components/ui/github";
+import { LinkedinIcon } from "@/components/ui/linkedin";
+import { DiscordIcon } from "@/components/ui/discord";
+
+const iconSize = 17;
+
+const RESUME_PDF = "/docs/TaylorFradellaResume.pdf";
 
 const Footer = () => {
-  const [ref, inView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
+  const reducedMotion = useReducedMotion();
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const sectionRef = useRef(null);
+  const linkedinIconRef = useRef(null);
+  const fileTextIconRef = useRef(null);
+  const githubIconRef = useRef(null);
+  const discordIconRef = useRef(null);
+  const scrollMotion = useScrollMotion(sectionRef, {
+    y: [12, 0],
+    offset: ["start 0.9", "end 0.3"],
   });
-
-  const scrollToTop = () => {
-    const heroSection = document.getElementById("hero");
-    const fixedHeaderHeight = 80;
-
-    if (!heroSection) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    const findScrollableParent = (element) => {
-      let parent = element.parentElement;
-      while (parent) {
-        const overflowY = window.getComputedStyle(parent).overflowY;
-        const isScrollable = overflowY !== "visible" && overflowY !== "hidden";
-
-        if (isScrollable && parent.scrollHeight > parent.clientHeight) {
-          return parent;
-        }
-        parent = parent.parentElement;
-      }
-      return null;
-    };
-
-    const scrollableParent = findScrollableParent(heroSection);
-
-    if (scrollableParent) {
-      const targetScrollTop = heroSection.offsetTop - fixedHeaderHeight;
-      const scrollToPosition = Math.max(0, targetScrollTop);
-      scrollableParent.scrollTo({
-        top: scrollToPosition,
-        behavior: "smooth",
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const footerLinkClass =
-    "rounded-md border border-transparent px-1.5 py-1 text-foreground/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-foreground hover:shadow-[0_8px_18px_rgba(2,6,23,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none";
 
   return (
     <footer
-      ref={ref}
-      id="footer"
-      className="relative flex w-full flex-col border-t border-border/45 bg-background/35 px-0 py-10 text-foreground shadow-[0_-10px_36px_rgba(0,0,0,0.24)] backdrop-blur-2xl md:py-12"
+      ref={sectionRef}
+      aria-label="Contact and social links"
+      className="relative w-full px-4 pb-20 pt-14 sm:px-6 sm:pt-16 md:px-8 md:pb-28 md:pt-20"
+      style={{ backgroundColor: "var(--bg-secondary)" }}
     >
-      <button
-        type="button"
-        onClick={scrollToTop}
-        className="absolute bottom-4 right-4 z-10 flex h-10 w-10 items-center justify-center p-0 text-muted-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 motion-reduce:transform-none sm:bottom-6 sm:right-6 sm:h-11 sm:w-11 md:right-20 md:h-12 md:w-12"
-        aria-label="Scroll to top"
-      >
-        <ChevronUp className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
-      </button>
-
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-x-8 gap-y-8 px-4 sm:px-6 md:grid-cols-3 md:gap-y-0 md:px-8"
+        className="mx-auto flex w-full max-w-5xl flex-col items-center"
+        style={{ y: scrollMotion.y }}
       >
-        <div className="flex flex-col items-center text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Contact me
-          </p>
-          <a
-            href="mailto:taylor.fradella@selu.edu"
-            className={`mt-2 break-all text-sm font-semibold sm:break-normal md:text-base ${footerLinkClass}`}
-          >
-            taylor.fradella@selu.edu
-          </a>
-        </div>
+        {/* ── Overline ───────────────────────────────────────────────── */}
+        <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.3em] text-[var(--text-tertiary)]">
+          Let&apos;s Connect
+        </p>
 
-        <div className="flex flex-col items-center text-center md:items-center md:text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Let&apos;s connect
-          </p>
-          <ul
-            className="footer-social-icons mt-2 text-sm md:text-base"
-            aria-label="Footer social links"
-          >
+        {/* ── Social links ─────────────────────────────────────────── */}
+        <div>
+          <ul className="footer-social-icons" aria-label="Footer social links">
             <li>
               <a
                 href="https://www.linkedin.com/in/taylorfradella/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className={footerLinkClass}
+                target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+                onMouseEnter={() => !reducedMotion && linkedinIconRef.current?.startAnimation?.()}
+                onMouseLeave={() => !reducedMotion && linkedinIconRef.current?.stopAnimation?.()}
               >
-                <span className="footer-social-icon-wrap">
-                  <span className="icon">
-                    <Linkedin className="h-3 w-3" strokeWidth={2} />
-                  </span>
+                <span className="footer-social-icon-wrap icon">
+                  <LinkedinIcon ref={linkedinIconRef} size={iconSize} />
                 </span>
-                <span>LinkedIn</span>
+                <span className="footer-social-label text-[14px] font-medium">LinkedIn</span>
               </a>
             </li>
             <li>
-              <a
-                href="https://docs.google.com/document/d/1m9vus2XiZgg8Ket0AMkIP9sJzNuEmZF-qncZdzFydjA/edit?usp=sharing"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => setResumeOpen(true)}
                 aria-label="Resume"
-                className={footerLinkClass}
+                style={{ cursor: "pointer", font: "inherit" }}
+                onMouseEnter={() => !reducedMotion && fileTextIconRef.current?.startAnimation?.()}
+                onMouseLeave={() => !reducedMotion && fileTextIconRef.current?.stopAnimation?.()}
               >
-                <span className="footer-social-icon-wrap">
-                  <span className="icon">
-                    <FileText className="h-3.5 w-3.5" strokeWidth={2} />
-                  </span>
+                <span className="footer-social-icon-wrap icon">
+                  <FileTextIcon ref={fileTextIconRef} size={iconSize} />
                 </span>
-                <span>Resume</span>
-              </a>
+                <span className="footer-social-label text-[14px] font-medium">Resume</span>
+              </button>
             </li>
             <li>
               <a
                 href="https://github.com/taylfrad"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className={footerLinkClass}
+                target="_blank" rel="noopener noreferrer" aria-label="GitHub"
+                onMouseEnter={() => !reducedMotion && githubIconRef.current?.startAnimation?.()}
+                onMouseLeave={() => !reducedMotion && githubIconRef.current?.stopAnimation?.()}
               >
-                <span className="footer-social-icon-wrap">
-                  <span className="icon">
-                    <Github className="h-3 w-3" strokeWidth={2} />
-                  </span>
+                <span className="footer-social-icon-wrap icon">
+                  <GithubIcon ref={githubIconRef} size={iconSize} />
                 </span>
-                <span>GitHub</span>
+                <span className="footer-social-label text-[14px] font-medium">Github</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://discord.com/users/248950708559151104"
+                target="_blank" rel="noopener noreferrer" aria-label="Discord"
+                onMouseEnter={() => !reducedMotion && discordIconRef.current?.startAnimation?.()}
+                onMouseLeave={() => !reducedMotion && discordIconRef.current?.stopAnimation?.()}
+              >
+                <span className="footer-social-icon-wrap icon">
+                  <DiscordIcon ref={discordIconRef} size={iconSize} />
+                </span>
+                <span className="footer-social-label text-[14px] font-medium">Discord</span>
               </a>
             </li>
           </ul>
         </div>
 
-        <div className="flex flex-col items-center text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            &copy;{new Date().getFullYear()} Taylor Fradella
-          </p>
-          <p className="mt-2 text-sm text-foreground/90">
-            Made with{" "}
-            <span role="img" aria-label="computer">
-              💻
-            </span>{" "}
-            &{" "}
-            <span role="img" aria-label="red heart">
-              ❤️
-            </span>
-          </p>
+        {/* ── Divider + bottom strip ───────────────────────────────── */}
+        <div className="mt-6 w-full max-w-md">
+          <div className="mx-auto h-px w-full bg-[var(--border-color)] opacity-50" aria-hidden />
+          <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-0">
+            <a
+              href="mailto:taylor.fradella@selu.edu"
+              className="text-[14px] font-medium text-[var(--footer-link)] transition-colors duration-200 hover:text-[var(--footer-link-hover)]"
+            >
+              taylor.fradella@selu.edu
+            </a>
+            <span className="hidden h-3 w-px bg-[var(--border-color)] opacity-50 sm:mx-5 sm:block" aria-hidden />
+            <p className="text-[13px] text-[var(--text-tertiary)]">
+              &copy;{new Date().getFullYear()} Taylor Fradella
+            </p>
+          </div>
         </div>
       </motion.div>
+
+      {/* ── Resume modal ───────────────────────────────────────────── */}
+      <PdfModal
+        open={resumeOpen}
+        onClose={() => setResumeOpen(false)}
+        src={RESUME_PDF}
+        title="Resume"
+        preload
+      />
     </footer>
   );
 };

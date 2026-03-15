@@ -1,45 +1,209 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useRef, lazy, Suspense, Component, useCallback, useMemo, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ScrollToTop from "./components/ScrollToTop";
+import HeroShell from "./components/HeroShell";
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="grid min-h-[100svh] place-items-center" style={{ background: "var(--bg-primary)" }}>
+          <div className="text-center">
+            <p className="mb-4 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Something went wrong</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-lg px-4 py-2 text-sm font-medium"
+              style={{ background: "var(--text-tertiary)", color: "var(--bg-primary)" }}
+            >
+              Reload page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const Home = lazy(() => import("./components/Home"));
 const ProjectDetail = lazy(() => import("./components/ProjectDetail"));
 
+// Page transitions — direction via custom prop.
+//
+// Forward (dir=1):  slide from right, simultaneous (mode="sync")
+//   Entering page slides in from 100%. Exiting page fades in place
+//   (only one element moves → less visual noise, easier compositing).
+//
+// Backward (dir=-1): slide from left, sequential (mode="wait")
+//   mode="wait" ensures Home mounts + scrolls before animating in.
+//   Enter from -30% (not -100%) so the page reaches the visible area
+//   quickly — closer to iOS back-navigation distance.
+//   Opacity fade-in is safe (wait mode = no overlap = no crossfade flash).
+//
+// Uses tweens with smooth ease curves (not springs). Springs start at
+// peak velocity on frame 1 which reads as a "snap." Tweens provide
+// controlled acceleration → deceleration that feels cinematic.
+const EASE = [0.4, 0, 0.2, 1];        // moderate accel, long smooth decel
+const EASE_ACCEL = [0.4, 0, 1, 1];    // accelerating out
+
+const pageVariants = {
+  initial: (dir) => ({
+    // Forward: full slide from right edge. Backward: short slide from left.
+    x: dir > 0 ? "100%" : "-30%",
+    // Backward enter fades in (safe — wait mode means no overlap)
+    ...(dir < 0 && { opacity: 0 }),
+  }),
+  animate: (dir) => ({
+    x: "0%",
+    opacity: 1,
+    transition: {
+      x: { duration: dir > 0 ? 0.42 : 0.35, ease: EASE },
+      opacity: dir < 0
+        ? { duration: 0.3, ease: EASE }
+        : { duration: 0 },
+    },
+  }),
+  exit: (dir) => (dir > 0
+    // Forward exit: fade in place — entering page slides over on top
+    ? {
+        opacity: 0,
+        transition: { opacity: { duration: 0.28, ease: "easeOut" } },
+      }
+    // Backward exit: fast fade + directional hint
+    : {
+        x: "20%",
+        opacity: 0,
+        transition: {
+          x: { duration: 0.15, ease: EASE_ACCEL },
+          opacity: { duration: 0.13, ease: "easeOut" },
+        },
+      }
+  ),
+};
+
+// Memoized fallback components — prevents recreation on parent re-render
+const ProjectFallback = memo(function ProjectFallback() {
+  return (
+    <div className="min-h-[100svh] w-full grid place-items-center" style={{ background: "var(--bg-primary)" }}>
+      <div className="text-sm" style={{ color: "var(--text-secondary)" }}>Loading…</div>
+    </div>
+  );
+});
+
+// Prefetch hero chunks as soon as app mounts (home route) for faster hero load
+function useHeroPrefetch() {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname === "/" || location.pathname === "") {
+      import("./components/backgrounds/HeroBackground");
+      import("./components/backgrounds/Balatro");
+      import("./components/Lanyard");
+    }
+  }, [location.pathname]);
+}
+
 function AppContent() {
   const location = useLocation();
-  
-  // Hide project route in URL by replacing with "/" after React Router has processed it
+  const prevPathRef = useRef(location.pathname);
+  const isInitialLoad = useRef(true);
+  useHeroPrefetch();
+
+  // Memoized direction — compute only when pathname changes
+  const direction = useMemo(
+    () => (location.pathname.startsWith("/project/") ? 1 : -1),
+    [location.pathname],
+  );
+
+  useEffect(() => {
+    isInitialLoad.current = false;
+    prevPathRef.current = location.pathname;
+  }, [location.pathname]);
+
+  // Hide project route in URL after React Router processes it
   useEffect(() => {
     if (location.pathname.startsWith("/project/")) {
       const rafId = requestAnimationFrame(() => {
         window.history.replaceState(
           { ...window.history.state, pathname: location.pathname },
           "",
-          "/"
+          "/",
         );
       });
-
       return () => cancelAnimationFrame(rafId);
     }
-
     return undefined;
   }, [location.pathname]);
+
+  // Memoized exit handler — AnimatePresence receives stable reference
+  const handleExitComplete = useCallback(() => {
+    if (location.pathname.startsWith("/project/")) {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, [location.pathname]);
+
+  const isForward = direction > 0;
+
+  // Memoize fallback to prevent recreation
+  const fallback = useMemo(
+    () =>
+      location.pathname === "/" || location.pathname === "" ? (
+        <HeroShell />
+      ) : (
+        <ProjectFallback />
+      ),
+    [location.pathname],
+  );
 
   return (
     <>
       <ScrollToTop />
-      <Suspense
-        fallback={
-          <div className="min-h-[100svh] w-full bg-background text-foreground grid place-items-center">
-            <div className="text-sm text-muted-foreground">Loading…</div>
-          </div>
-        }
-      >
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/project/:id" element={<ProjectDetail />} />
-        </Routes>
-      </Suspense>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", overflowX: "clip", background: "var(--bg-secondary)" }}>
+        <AnimatePresence
+          initial={false}
+          custom={direction}
+          mode={isForward ? "sync" : "wait"}
+          onExitComplete={handleExitComplete}
+        >
+          <motion.div
+            key={location.pathname}
+            custom={direction}
+            initial={isInitialLoad.current ? false : "initial"}
+            animate="animate"
+            exit="exit"
+            variants={pageVariants}
+            style={{
+              gridRow: "1 / -1",
+              gridColumn: "1 / -1",
+              minHeight: "100svh",
+              background: "var(--bg-secondary)",
+              // Flash-frame fix: in wait mode (backward), Framer Motion takes
+              // 1-3 frames to apply the initial variant after React mounts the
+              // DOM element. Without this, the page flashes at its natural
+              // position (x=0, opacity=1) before jumping to the initial state.
+              // Inline opacity=0 hides it instantly; Framer's animate variant
+              // (opacity:1) overrides this once the animation starts.
+              ...(!isInitialLoad.current && direction < 0 && { opacity: 0 }),
+            }}
+          >
+            <ErrorBoundary>
+              <Suspense fallback={fallback}>
+                <Routes location={location}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/project/:id" element={<ProjectDetail />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </>
   );
 }

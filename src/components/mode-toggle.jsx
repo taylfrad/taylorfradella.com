@@ -1,23 +1,72 @@
-import { Sparkles } from "lucide-react";
-
+import { useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { SunIcon } from "@/components/ui/sun-icon";
+import { MoonIcon } from "@/components/ui/moon-icon";
 import { useTheme } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
 
 export function ModeToggle() {
-  const { reduceEffects, setReduceEffects } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
+  const sunRef = useRef(null);
+  const moonRef = useRef(null);
+
+  const handleClick = () => {
+    setTheme(isDark ? "light" : "dark");
+    if (isDark) {
+      sunRef.current?.startAnimation();
+    } else {
+      moonRef.current?.startAnimation();
+    }
+  };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
-      size="sm"
-      onClick={() => setReduceEffects(!reduceEffects)}
-      aria-pressed={reduceEffects}
-      aria-label={reduceEffects ? "Enable animations" : "Reduce animations"}
-      className="h-9 rounded-full border border-transparent px-2 text-foreground/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-foreground hover:shadow-[0_8px_18px_rgba(2,6,23,0.35)] focus-visible:ring-white/35 motion-reduce:transform-none sm:px-2.5"
+      onClick={handleClick}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="floating-nav-btn group relative inline-flex h-9 items-center justify-center px-2 text-ink-1 transition-colors duration-200 ease-out hover:text-ink-1 motion-reduce:transition-none sm:px-2.5"
     >
-      <Sparkles className="h-4 w-4 sm:mr-1.5" />
-      <span className="hidden text-xs sm:inline sm:text-sm">Reduce Animations</span>
-    </Button>
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.span
+            key="sun"
+            initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="inline-flex"
+          >
+            <SunIcon ref={sunRef} size={16} />
+          </motion.span>
+        ) : (
+          <motion.span
+            key="moon"
+            initial={{ opacity: 0, rotate: 45, scale: 0.8 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: -45, scale: 0.8 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="inline-flex"
+          >
+            <MoonIcon ref={moonRef} size={16} />
+          </motion.span>
+        )}
+      </AnimatePresence>
+      <span className="sr-only">
+        {isDark ? "Switch to light mode" : "Switch to dark mode"}
+      </span>
+
+      {/* Liquid Glass Tooltip */}
+      <span
+        className="glass-tooltip pointer-events-none absolute left-1/2 top-full z-50 mt-2.5 -translate-x-1/2 whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        aria-hidden
+      >
+        <span className="glass-tooltip__surface">
+          <span className="glass-tooltip__highlight" />
+          <span className="glass-tooltip__text">
+            {isDark ? "Light mode" : "Dark mode"}
+          </span>
+        </span>
+      </span>
+    </button>
   );
 }
