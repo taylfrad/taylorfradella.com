@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const preloadedImageHrefs = new Set();
 
@@ -11,8 +11,9 @@ function ensureImagePreload(href, type) {
   if (!href || typeof document === "undefined") return;
   if (preloadedImageHrefs.has(href)) return;
 
-  const existing = document.head.querySelector(
-    `link[rel="preload"][as="image"][href="${href}"]`
+  const links = document.head.querySelectorAll('link[rel="preload"][as="image"]');
+  const existing = Array.from(links).find(
+    (el) => el.getAttribute("href") === href
   );
 
   if (existing) {
@@ -37,23 +38,31 @@ function ensureImagePreload(href, type) {
  * @param {boolean} priority - If true, preloads the image
  * @param {string} className - Additional CSS class
  */
-export default function OptimizedImage({ 
-  src, 
-  alt, 
-  sx = {}, 
+export default function OptimizedImage({
+  src,
+  alt,
+  sx = {},
   priority = false,
   className = "",
-  ...props 
+  width,
+  height,
+  ...props
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const imgRef = useRef(null);
   const webpSrc = useMemo(() => toWebpSrc(src), [src]);
   const fallbackSrc = src;
 
-  // Reset local loading state when source changes.
+  // Reset local loading state when source changes, then check if already loaded
+  // (handles cached images where onLoad fires before React attaches the handler).
   useEffect(() => {
     setIsLoaded(false);
     setError(false);
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setIsLoaded(true);
+    }
   }, [src]);
 
   // Preload image if priority.
@@ -65,14 +74,14 @@ export default function OptimizedImage({
     }
   }, [priority, webpSrc, fallbackSrc]);
 
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     setIsLoaded(true);
-  };
+  }, []);
 
-  const handleError = () => {
+  const handleError = useCallback(() => {
     setError(true);
-    setIsLoaded(true); // Show fallback even on error
-  };
+    setIsLoaded(true);
+  }, []);
 
   return (
     <div
@@ -83,7 +92,7 @@ export default function OptimizedImage({
         <div
           className="absolute inset-0 z-0 opacity-50"
           style={{
-            backgroundColor: "#f5f5f7",
+            backgroundColor: "var(--bg-secondary)",
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d0d0d0' fill-opacity='0.4'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0v-2h20V2H0V0h22v20h-2zm-2 2v20H0v-2h18V22z'/%3E%3C/g%3E%3C/svg%3E")`,
             filter: "blur(10px)",
           }}
@@ -94,8 +103,11 @@ export default function OptimizedImage({
           <source srcSet={webpSrc} type="image/webp" />
         )}
         <img
+          ref={imgRef}
           src={error ? fallbackSrc : webpSrc || fallbackSrc}
           alt={alt}
+          width={width}
+          height={height}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? "eager" : "lazy"}

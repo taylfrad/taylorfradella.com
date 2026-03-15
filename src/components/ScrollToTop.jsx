@@ -1,23 +1,24 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
 
 export default function ScrollToTop() {
   const { pathname, state } = useLocation();
   const shouldScrollToProjects = Boolean(state?.scrollToProjects);
-  const SCROLL_TO_PROJECTS_FLAG = "scrollToProjectsPending";
 
   useEffect(() => {
+    // Project-page scroll is deferred to AnimatePresence.onExitComplete so the
+    // home page doesn't snap to the hero mid-exit-animation.
+    if (pathname.startsWith("/project/")) return;
+
     const hasSessionFlag =
       typeof window !== "undefined" &&
-      window.sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
-
-    // If we're returning to "/" with scrollToProjects, Home handles the scroll.
+      sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
     if (pathname === "/" && (shouldScrollToProjects || hasSessionFlag)) {
       return;
     }
-
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [SCROLL_TO_PROJECTS_FLAG, pathname, shouldScrollToProjects]);
+  }, [pathname, shouldScrollToProjects]);
 
   return null;
 }
