@@ -1,0 +1,489 @@
+@layer base {
+  :root {
+    /* Light theme – slightly frosted neutral */
+    --glass-tint-rgb: 247 250 255;
+    --glass-border-rgb: 0 0 0;
+    --glass-specular-rgb: 255 255 255;
+    --glass-inner-shadow-rgb: 0 0 0;
+
+    --glass-saturate: 1.35;
+    --glass-brightness: 1.02;
+
+    /* Approx. 6–10% white fill */
+    --glass-regular-fill-alpha: 0.08;
+    --glass-clear-fill-alpha: 0.07;
+    --glass-tinted-fill-alpha: 0.1;
+    --glass-regular-fill-alpha-hover: 0.1;
+    --glass-clear-fill-alpha-hover: 0.09;
+    --glass-tinted-fill-alpha-hover: 0.12;
+
+    --glass-regular-blur: 22px;
+    --glass-clear-blur: 18px;
+    --glass-tinted-blur: 24px;
+    --glass-regular-blur-active: 18px;
+    --glass-clear-blur-active: 14px;
+    --glass-tinted-blur-active: 19px;
+
+    /* 10–16% white-equivalent borders */
+    --glass-regular-border-alpha: 0.12;
+    --glass-clear-border-alpha: 0.1;
+    --glass-tinted-border-alpha: 0.14;
+    --glass-regular-border-alpha-hover: 0.16;
+    --glass-clear-border-alpha-hover: 0.14;
+    --glass-tinted-border-alpha-hover: 0.16;
+
+    --glass-specular-alpha: 0.10;
+    --glass-inner-bottom-alpha: 0.14;
+    --glass-noise-alpha: 0.10;
+
+    --glass-shadow-rest:
+      0 1px 3px rgba(0, 0, 0, 0.08),
+      0 8px 24px var(--glass-shadow),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
+    --glass-shadow-active:
+      0 1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 12px var(--glass-shadow);
+    --glass-hover-glow: none;
+    --glass-focus-ring:
+      0 0 0 3px color-mix(in srgb, var(--accent-brand) 70%, transparent);
+
+    --glass-radius-card: 22px;
+    --glass-radius-sheet: 24px;
+    --glass-radius-control: 15px;
+
+    --glass-text-shadow: none;
+
+    --glass-btn-primary-fill-alpha: 0.72;
+    --glass-btn-primary-fill-alpha-hover: 0.77;
+    --glass-btn-primary-border-alpha: 0.12;
+    --glass-btn-primary-border-alpha-hover: 0.14;
+    --glass-btn-primary-blur: 20px;
+    --glass-btn-primary-blur-active: 16px;
+
+    --glass-btn-secondary-fill-alpha: 0.6;
+    --glass-btn-secondary-fill-alpha-hover: 0.65;
+    --glass-btn-secondary-border-alpha: 0.1;
+    --glass-btn-secondary-border-alpha-hover: 0.14;
+    --glass-btn-secondary-blur: 18px;
+    --glass-btn-secondary-blur-active: 14px;
+
+    --glass-btn-ghost-fill-alpha: 0;
+    --glass-btn-ghost-fill-alpha-hover: 0.58;
+    --glass-btn-ghost-border-alpha: 0.1;
+    --glass-btn-ghost-border-alpha-hover: 0.14;
+    --glass-btn-ghost-blur: 0px;
+    --glass-btn-ghost-blur-hover: 12px;
+    --glass-btn-ghost-blur-active: 10px;
+
+    --glass-btn-disabled-opacity: 0.5;
+  }
+
+  .dark {
+    /* Dark navy-tinted glass aligned with bg tokens; hairline border (dimmer) */
+    --glass-tint-rgb: 10 18 36;
+    --glass-border-rgb: 140 160 190;
+    --glass-specular-rgb: 255 255 255;
+    --glass-inner-shadow-rgb: 0 0 0;
+
+    --glass-saturate: 1.25;
+    --glass-brightness: 0.94;
+
+    /* 6–10% white-equivalent fill in dark mode */
+    --glass-regular-fill-alpha: 0.08;
+    --glass-clear-fill-alpha: 0.07;
+    --glass-tinted-fill-alpha: 0.1;
+    --glass-regular-fill-alpha-hover: 0.1;
+    --glass-clear-fill-alpha-hover: 0.09;
+    --glass-tinted-fill-alpha-hover: 0.12;
+
+    --glass-regular-blur: 20px;
+    --glass-clear-blur: 18px;
+    --glass-tinted-blur: 22px;
+    --glass-regular-blur-active: 17px;
+    --glass-clear-blur-active: 15px;
+    --glass-tinted-blur-active: 19px;
+
+    --glass-regular-border-alpha: 0.12;
+    --glass-clear-border-alpha: 0.1;
+    --glass-tinted-border-alpha: 0.14;
+    --glass-regular-border-alpha-hover: 0.16;
+    --glass-clear-border-alpha-hover: 0.14;
+    --glass-tinted-border-alpha-hover: 0.16;
+
+    --glass-specular-alpha: 0.10;
+    --glass-inner-bottom-alpha: 0.14;
+    --glass-noise-alpha: 0.12;
+
+    --glass-shadow-rest:
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      0 8px 24px var(--glass-shadow),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    --glass-shadow-active:
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      0 4px 12px var(--glass-shadow);
+    --glass-hover-glow:
+      0 0 24px color-mix(in srgb, var(--accent-brand) 30%, transparent);
+    --glass-focus-ring:
+      0 0 0 3px color-mix(in srgb, var(--accent-brand) 70%, transparent);
+
+    --glass-text-shadow: none;
+
+    /* Button-specific glass alphas stay within 6–10% range on top of tint */
+    --glass-btn-primary-fill-alpha: 0.12;
+    --glass-btn-primary-fill-alpha-hover: 0.14;
+    --glass-btn-primary-border-alpha: 0.18;
+    --glass-btn-primary-border-alpha-hover: 0.18;
+    --glass-btn-primary-blur: 18px;
+    --glass-btn-primary-blur-active: 16px;
+
+    --glass-btn-secondary-fill-alpha: 0.08;
+    --glass-btn-secondary-fill-alpha-hover: 0.1;
+    --glass-btn-secondary-border-alpha: 0.14;
+    --glass-btn-secondary-border-alpha-hover: 0.18;
+    --glass-btn-secondary-blur: 18px;
+    --glass-btn-secondary-blur-active: 15px;
+
+    --glass-btn-ghost-fill-alpha: 0;
+    --glass-btn-ghost-fill-alpha-hover: 0.045;
+    --glass-btn-ghost-border-alpha: 0.1;
+    --glass-btn-ghost-border-alpha-hover: 0.14;
+    --glass-btn-ghost-blur: 0px;
+    --glass-btn-ghost-blur-hover: 12px;
+    --glass-btn-ghost-blur-active: 10px;
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :root {
+      --glass-regular-fill-alpha: 0.16;
+      --glass-clear-fill-alpha: 0.14;
+      --glass-tinted-fill-alpha: 0.18;
+      --glass-regular-fill-alpha-hover: 0.18;
+      --glass-clear-fill-alpha-hover: 0.16;
+      --glass-tinted-fill-alpha-hover: 0.2;
+
+      --glass-regular-blur: 16px;
+      --glass-clear-blur: 14px;
+      --glass-tinted-blur: 16px;
+      --glass-regular-blur-active: 13px;
+      --glass-clear-blur-active: 11px;
+      --glass-tinted-blur-active: 13px;
+    }
+
+    .dark {
+      --glass-regular-fill-alpha: 0.16;
+      --glass-clear-fill-alpha: 0.14;
+      --glass-tinted-fill-alpha: 0.18;
+      --glass-regular-fill-alpha-hover: 0.18;
+      --glass-clear-fill-alpha-hover: 0.16;
+      --glass-tinted-fill-alpha-hover: 0.2;
+
+      --glass-regular-blur: 16px;
+      --glass-clear-blur: 14px;
+      --glass-tinted-blur: 16px;
+      --glass-regular-blur-active: 13px;
+      --glass-clear-blur-active: 11px;
+      --glass-tinted-blur-active: 13px;
+    }
+  }
+
+  html.reduce-effects {
+    --glass-regular-fill-alpha: 0.16;
+    --glass-clear-fill-alpha: 0.14;
+    --glass-tinted-fill-alpha: 0.18;
+    --glass-regular-fill-alpha-hover: 0.18;
+    --glass-clear-fill-alpha-hover: 0.16;
+    --glass-tinted-fill-alpha-hover: 0.2;
+
+    --glass-regular-blur: 16px;
+    --glass-clear-blur: 14px;
+    --glass-tinted-blur: 16px;
+    --glass-regular-blur-active: 13px;
+    --glass-clear-blur-active: 11px;
+    --glass-tinted-blur-active: 13px;
+  }
+}
+
+@layer components {
+  .glass-surface {
+    --glass-fill-alpha: var(--glass-regular-fill-alpha);
+    --glass-fill-alpha-hover: var(--glass-regular-fill-alpha-hover);
+    --glass-blur: var(--glass-regular-blur);
+    --glass-blur-active: var(--glass-regular-blur-active);
+    --glass-border-alpha: var(--glass-regular-border-alpha);
+    --glass-border-alpha-hover: var(--glass-regular-border-alpha-hover);
+    --glass-radius: var(--glass-radius-card);
+    --glass-shadow: var(--glass-shadow-rest);
+    position: relative;
+    isolation: isolate;
+    contain: paint;
+    overflow: hidden;
+    border-radius: var(--glass-radius);
+    border: 1px solid rgb(var(--glass-border-rgb) / var(--glass-border-alpha));
+    background-color: rgb(var(--glass-tint-rgb) / var(--glass-fill-alpha));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate))
+      brightness(var(--glass-brightness));
+    -webkit-backdrop-filter: blur(var(--glass-blur))
+      saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+    box-shadow: var(--glass-shadow);
+    text-shadow: var(--glass-text-shadow);
+  }
+
+  .glass-surface > .glass-surface__fill,
+  .glass-surface > .glass-surface__highlight,
+  .glass-surface > .glass-surface__border {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .glass-surface > .glass-surface__fill {
+    z-index: 0;
+    background:
+      linear-gradient(
+        160deg,
+        rgb(0 0 0 / 0.10) 0%,
+        rgb(0 0 0 / 0.04) 35%,
+        transparent 62%
+      ),
+      linear-gradient(
+        10deg,
+        transparent 0%,
+        rgb(0 0 0 / 0.08) 100%
+      );
+    mix-blend-mode: normal;
+  }
+
+  .glass-surface > .glass-surface__highlight {
+    z-index: 0;
+    background: radial-gradient(
+      ellipse 120% 80% at 20% 15%,
+      rgb(var(--glass-specular-rgb) / var(--glass-specular-alpha)) 0%,
+      transparent 50%
+    );
+  }
+
+  .glass-surface--interactive > .glass-surface__highlight {
+    opacity: 0;
+    transition: opacity 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .glass-surface--interactive:hover > .glass-surface__highlight,
+  .glass-surface--interactive:focus-visible > .glass-surface__highlight {
+    opacity: 1;
+  }
+
+  /* No blue tint on hover; same neutral top-left specular as default or none */
+  .dark .glass-surface--interactive:hover > .glass-surface__highlight,
+  .dark .glass-surface--interactive:focus-visible > .glass-surface__highlight {
+    background: radial-gradient(
+      ellipse 120% 80% at 20% 15%,
+      rgb(var(--glass-specular-rgb) / 0.1) 0%,
+      transparent 50%
+    );
+  }
+
+  .glass-surface > .glass-surface__border {
+    z-index: 0;
+    box-shadow:
+      inset 0 -1px 0
+        rgb(var(--glass-inner-shadow-rgb) / var(--glass-inner-bottom-alpha));
+    border: none;
+  }
+
+  .glass-surface > :not(.glass-surface__fill):not(.glass-surface__highlight):not(.glass-surface__border) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .glass-surface--regular {
+    --glass-fill-alpha: var(--glass-regular-fill-alpha);
+    --glass-fill-alpha-hover: var(--glass-regular-fill-alpha-hover);
+    --glass-blur: var(--glass-regular-blur);
+    --glass-blur-active: var(--glass-regular-blur-active);
+    --glass-border-alpha: var(--glass-regular-border-alpha);
+    --glass-border-alpha-hover: var(--glass-regular-border-alpha-hover);
+    --glass-radius: var(--glass-radius-card);
+  }
+
+  .glass-surface--clear {
+    --glass-fill-alpha: var(--glass-clear-fill-alpha);
+    --glass-fill-alpha-hover: var(--glass-clear-fill-alpha-hover);
+    --glass-blur: var(--glass-clear-blur);
+    --glass-blur-active: var(--glass-clear-blur-active);
+    --glass-border-alpha: var(--glass-clear-border-alpha);
+    --glass-border-alpha-hover: var(--glass-clear-border-alpha-hover);
+    --glass-radius: var(--glass-radius-control);
+  }
+
+  /* Full-width sections: reduce blur to lower paint cost (no layout change). */
+  .glass-surface--full-width {
+    --glass-blur: 8px;
+    --glass-blur-active: 6px;
+  }
+
+  /* Liquid glass cards: no backdrop blur (perf), no top-left highlight. */
+  .glass-surface--card {
+    --glass-blur: 12px;
+    --glass-blur-active: 10px;
+    --glass-radius: 26px;
+    --glass-card-border-alpha: 0.2;
+  }
+  .glass-surface--card {
+    border-color: rgb(var(--glass-border-rgb) / var(--glass-card-border-alpha, var(--glass-border-alpha)));
+  }
+  /* No top-left highlight on cards, full-width (footer), or any glass in post-hero/project-detail. */
+  .glass-surface--card > .glass-surface__highlight,
+  .glass-surface--full-width > .glass-surface__highlight {
+    background: none;
+    opacity: 0;
+  }
+
+  /* Pills/badges: no backdrop-filter for lower paint cost. */
+  .glass-surface--flat {
+    --glass-blur: 0px;
+    --glass-blur-active: 0px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-surface--tinted,
+  .glass-surface[data-force-tinted="true"] {
+    --glass-fill-alpha: var(--glass-tinted-fill-alpha);
+    --glass-fill-alpha-hover: var(--glass-tinted-fill-alpha-hover);
+    --glass-blur: var(--glass-tinted-blur);
+    --glass-blur-active: var(--glass-tinted-blur-active);
+    --glass-border-alpha: var(--glass-tinted-border-alpha);
+    --glass-border-alpha-hover: var(--glass-tinted-border-alpha-hover);
+    --glass-radius: var(--glass-radius-sheet);
+  }
+
+  .glass-surface--interactive {
+    transition:
+      border-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      box-shadow 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .glass-surface--interactive:hover {
+    background-color: rgb(var(--glass-tint-rgb) / var(--glass-fill-alpha-hover));
+    border-color: rgb(var(--glass-border-rgb) / var(--glass-border-alpha-hover));
+    box-shadow: var(--glass-shadow-rest);
+  }
+
+  .glass-surface--interactive:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: var(--glass-shadow-active);
+  }
+
+  .glass-surface--interactive:focus-visible {
+    outline: none;
+    box-shadow: var(--glass-focus-ring), var(--glass-shadow);
+  }
+
+  .glass-btn {
+    --glass-btn-fill-alpha: var(--glass-btn-secondary-fill-alpha);
+    --glass-btn-fill-alpha-hover: var(--glass-btn-secondary-fill-alpha-hover);
+    --glass-btn-border-alpha: var(--glass-btn-secondary-border-alpha);
+    --glass-btn-border-alpha-hover: var(--glass-btn-secondary-border-alpha-hover);
+    --glass-btn-blur: var(--glass-btn-secondary-blur);
+    --glass-btn-blur-hover: var(--glass-btn-secondary-blur);
+    --glass-btn-blur-active: var(--glass-btn-secondary-blur-active);
+    position: relative;
+    isolation: isolate;
+    contain: paint;
+    overflow: hidden;
+    border: 1px solid rgb(var(--glass-border-rgb) / var(--glass-btn-border-alpha));
+    background-color: rgb(var(--glass-tint-rgb) / var(--glass-btn-fill-alpha));
+    backdrop-filter: blur(var(--glass-btn-blur))
+      saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+    -webkit-backdrop-filter: blur(var(--glass-btn-blur))
+      saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+    box-shadow: var(--glass-shadow-rest);
+    color: hsl(var(--foreground));
+    text-shadow: var(--glass-text-shadow);
+    transition:
+      border-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      box-shadow 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .glass-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: none;
+    opacity: 0;
+    transition: opacity 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .glass-btn:hover {
+    background-color: rgb(var(--glass-tint-rgb) / var(--glass-btn-fill-alpha-hover));
+    border-color: rgb(var(--glass-border-rgb) / var(--glass-btn-border-alpha-hover));
+    backdrop-filter: blur(var(--glass-btn-blur-hover))
+      saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+    -webkit-backdrop-filter: blur(var(--glass-btn-blur-hover))
+      saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+    box-shadow: var(--glass-shadow-rest);
+  }
+
+  .glass-btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: var(--glass-shadow-active);
+  }
+
+  .glass-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--glass-focus-ring), var(--glass-shadow-rest);
+  }
+
+  .glass-btn:disabled,
+  .glass-btn[aria-disabled="true"] {
+    opacity: var(--glass-btn-disabled-opacity);
+    box-shadow: none;
+  }
+
+  .glass-btn--primary {
+    --glass-btn-fill-alpha: var(--glass-btn-primary-fill-alpha);
+    --glass-btn-fill-alpha-hover: var(--glass-btn-primary-fill-alpha-hover);
+    --glass-btn-border-alpha: var(--glass-btn-primary-border-alpha);
+    --glass-btn-border-alpha-hover: var(--glass-btn-primary-border-alpha-hover);
+    --glass-btn-blur: var(--glass-btn-primary-blur);
+    --glass-btn-blur-hover: var(--glass-btn-primary-blur);
+    --glass-btn-blur-active: var(--glass-btn-primary-blur-active);
+  }
+
+  .glass-btn--secondary {
+    --glass-btn-fill-alpha: var(--glass-btn-secondary-fill-alpha);
+    --glass-btn-fill-alpha-hover: var(--glass-btn-secondary-fill-alpha-hover);
+    --glass-btn-border-alpha: var(--glass-btn-secondary-border-alpha);
+    --glass-btn-border-alpha-hover: var(--glass-btn-secondary-border-alpha-hover);
+    --glass-btn-blur: var(--glass-btn-secondary-blur);
+    --glass-btn-blur-hover: var(--glass-btn-secondary-blur);
+    --glass-btn-blur-active: var(--glass-btn-secondary-blur-active);
+  }
+
+  .glass-btn--ghost {
+    --glass-btn-fill-alpha: var(--glass-btn-ghost-fill-alpha);
+    --glass-btn-fill-alpha-hover: var(--glass-btn-ghost-fill-alpha-hover);
+    --glass-btn-border-alpha: var(--glass-btn-ghost-border-alpha);
+    --glass-btn-border-alpha-hover: var(--glass-btn-ghost-border-alpha-hover);
+    --glass-btn-blur: var(--glass-btn-ghost-blur);
+    --glass-btn-blur-hover: var(--glass-btn-ghost-blur-hover);
+    --glass-btn-blur-active: var(--glass-btn-ghost-blur-active);
+  }
+
+  .glass-modal-backdrop {
+    background-color: rgb(6 10 18 / 0.72);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  }
+
+  .dark .glass-modal-backdrop {
+    background-color: rgb(2 6 16 / 0.74);
+  }
+}

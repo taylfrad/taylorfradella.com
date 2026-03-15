@@ -11,7 +11,16 @@ const BREAKPOINTS = {
   xl: 1536,
 };
 
+// Cache window.innerWidth at module level so renders never trigger a forced reflow.
+// Updated lazily on resize via a passive listener.
+let _cachedWidth = typeof window !== "undefined" ? window.innerWidth : BREAKPOINTS.md;
+if (typeof window !== "undefined") {
+  window.addEventListener("resize", () => { _cachedWidth = window.innerWidth; }, { passive: true });
+}
+
 const BREAKPOINT_KEYS = Object.keys(BREAKPOINTS);
+// O(1) lookup instead of O(n) array scan per key
+const BREAKPOINT_KEY_SET = new Set(BREAKPOINT_KEYS);
 
 function isObject(value) {
   return value && typeof value === "object" && !Array.isArray(value);
@@ -20,8 +29,11 @@ function isObject(value) {
 function isResponsiveValue(value) {
   if (!isObject(value)) return false;
   const keys = Object.keys(value);
-  return keys.length > 0 && keys.every((key) => BREAKPOINT_KEYS.includes(key));
+  return keys.length > 0 && keys.every((key) => BREAKPOINT_KEY_SET.has(key));
 }
+
+// O(1) Set lookup instead of recreating array and scanning per sxToStyle call
+const SPACING_KEYS = new Set(["p", "pt", "pr", "pb", "pl", "px", "py", "m", "mt", "mr", "mb", "ml", "mx", "my"]);
 
 function spacingValue(value) {
   if (typeof value === "number") {
@@ -116,9 +128,7 @@ function sxToStyle(sx, width) {
       continue;
     }
 
-    if (
-      ["p", "pt", "pr", "pb", "pl", "px", "py", "m", "mt", "mr", "mb", "ml", "mx", "my"].includes(key)
-    ) {
+    if (SPACING_KEYS.has(key)) {
       applySpacing(style, key, value);
       continue;
     }
@@ -138,7 +148,7 @@ export const Box = forwardRef(function Box(
   { component = "div", sx, style, className, ...props },
   ref
 ) {
-  const width = typeof window === "undefined" ? BREAKPOINTS.md : window.innerWidth;
+  const width = _cachedWidth;
   const resolvedStyle = sxToStyle(sx, width);
   const Comp = component;
 
@@ -167,7 +177,7 @@ export const Typography = forwardRef(function Typography(
   { component = "p", variant = "body1", sx, style, className, noWrap = false, ...props },
   ref
 ) {
-  const width = typeof window === "undefined" ? BREAKPOINTS.md : window.innerWidth;
+  const width = _cachedWidth;
   const resolvedStyle = sxToStyle(sx, width);
   const noWrapStyle = noWrap
     ? {
@@ -192,7 +202,7 @@ export const IconButton = forwardRef(function IconButton(
   { component = "button", sx, style, className, type, ...props },
   ref
 ) {
-  const width = typeof window === "undefined" ? BREAKPOINTS.md : window.innerWidth;
+  const width = _cachedWidth;
   const resolvedStyle = sxToStyle(sx, width);
   const Comp = component;
 
@@ -200,7 +210,7 @@ export const IconButton = forwardRef(function IconButton(
     <Comp
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex items-center justify-center rounded-md transition-colors",
         className
       )}
       style={{ ...resolvedStyle, ...style }}
@@ -240,12 +250,11 @@ export function Dialog({ open, onClose, sx, children }) {
   if (!open || typeof document === "undefined") return null;
 
   const paperStyles = sx?.["& .MuiDialog-paper"] || {};
-  const width = window.innerWidth;
-  const resolvedPaperStyle = sxToStyle(paperStyles, width);
+  const resolvedPaperStyle = sxToStyle(paperStyles, _cachedWidth);
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/95"
+      className="glass-modal-backdrop fixed inset-0 z-[1200] flex items-center justify-center"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose?.(event);

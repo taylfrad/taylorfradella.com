@@ -1,3 +1,5 @@
+@import "./glass-tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,12 +28,74 @@
     --radius: 1rem;
     --scrollbar-size: 8px;
     --scrollbar-track: transparent;
-    --scrollbar-thumb: #0b1523;
-    --scrollbar-thumb-hover: #13233a;
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+
+    /* Hero + bokeh: deep dark blue/black, desaturated teal & muted blue highlights */
+    --bg: #0F172A;
+    --bg-2: #0A0F18;
+    --bg-mid: #0C1324;
+    --text: #FFFFFF;
+    --muted-ink: rgba(209, 213, 219, 0.9);
+    --hairline: rgba(255, 255, 255, 0.1);
+
+    --glass-fill: rgba(255, 255, 255, 0.07);
+    --glass-fill-strong: rgba(255, 255, 255, 0.11);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-highlight: rgba(255, 255, 255, 0.2);
+    --glass-shadow: rgba(0, 0, 0, 0.35);
+
+    --accent-brand: #4A8EB7;
+    --accent-cyan: #2C6F85;
+    --accent-violet: #5B8FB8;
+    --accent-pink: #6B9BB8;
+
+    /* Glow tokens: desaturated teal / muted blue for fluid hero & bokeh */
+    --g1: rgba(44, 111, 133, 0.22);
+    --g2: rgba(74, 142, 183, 0.2);
+    --g3: rgba(42, 100, 130, 0.24);
+    --g4: rgba(255, 255, 255, 0.08);
+
+    /* Aliases so existing usage keeps working */
+    --bg-0: var(--bg);
+    --bg-1: var(--bg-mid);
+    --bg-2: var(--bg-2);
+
+    /* Theme-aware ink tokens — light mode = dark text */
+    --text-1: #1d1d1f;
+    --text-2: #6e6e73;
+    --text-3: #86868b;
+
+    --accent-2: var(--accent-cyan);
+
+    /* Optional project accents (chips/dividers only) */
+    --p-blue: var(--accent-brand);
+    --p-red: #ff4d6d;
+    --p-green: #34d399;
+    --p-violet: var(--accent-violet);
+
+    /* ─── Apple Design Tokens — Light ─────────────────────────────────── */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f7;
+    --bg-footer: #f5f5f7;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #6e6e73;
+    --link-color: #0066cc;
+    --link-hover: #0077ed;
+    --footer-text: #6e6e73;
+    --footer-link: #424245;
+    --footer-link-hover: #1d1d1f;
+    --border-color: #d2d2d7;
+    --card-bg: #ffffff;
+    --card-border: #e8e8ed;
+    --nav-bg: rgba(251, 251, 253, 0.8);
+    --overlay-bg: rgba(0, 0, 0, 0.5);
   }
 
   .dark {
-    --background: 220 21% 7%;
+    /* Dark navy base tuned to bg-0/bg-1/bg-2 */
+    --background: 222 40% 5%;
     --foreground: 210 25% 96%;
     --card: 220 20% 10%;
     --card-foreground: 210 25% 96%;
@@ -51,8 +115,31 @@
     --input: 220 14% 22%;
     --ring: 210 100% 70%;
     --scrollbar-track: transparent;
-    --scrollbar-thumb: #0b1523;
-    --scrollbar-thumb-hover: #13233a;
+    --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+
+    /* Theme-aware ink tokens — dark mode = light text */
+    --text-1: #f5f5f7;
+    --text-2: #a1a1a6;
+    --text-3: #86868b;
+
+    /* ─── Apple Design Tokens — Dark ──────────────────────────────────── */
+    --bg-primary: #000000;
+    --bg-secondary: #1d1d1f;
+    --bg-footer: #1d1d1f;
+    --text-primary: #f5f5f7;
+    --text-secondary: #a1a1a6;
+    --text-tertiary: #a1a1a6;
+    --link-color: #2997ff;
+    --link-hover: #4eb8ff;
+    --footer-text: #a1a1a6;
+    --footer-link: #a1a1a6;
+    --footer-link-hover: #f5f5f7;
+    --border-color: #424245;
+    --card-bg: #1d1d1f;
+    --card-border: #424245;
+    --nav-bg: rgba(29, 29, 31, 0.8);
+    --overlay-bg: rgba(0, 0, 0, 0.6);
   }
 
   html,
@@ -63,7 +150,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    position: relative;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -78,13 +165,75 @@
   }
 
   body {
+    position: relative;
     min-height: 100svh;
     min-width: 320px;
     overflow-x: hidden;
-    font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue",
-      Helvetica, Arial, sans-serif;
+    font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    letter-spacing: 0;
+    line-height: 1.5;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  /* Apple typography hierarchy */
+  h1 {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    color: var(--text-primary);
+  }
+
+  h2 {
+    font-weight: 600;
     letter-spacing: -0.01em;
-    @apply bg-background text-foreground;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--text-primary);
+  }
+
+  h4, h5, h6 {
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  p, li {
+    color: var(--text-secondary);
+  }
+
+  a {
+    color: var(--link-color);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+  }
+
+  small, figcaption {
+    color: var(--text-tertiary);
+  }
+
+  code, pre {
+    font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
+  }
+
+  strong, b {
+    font-weight: 600;
+  }
+
+  hr {
+    border-color: var(--border-color);
+    border-width: 0.5px;
   }
 
   html::-webkit-scrollbar,
@@ -105,6 +254,7 @@
     border-radius: 999px;
     border: 2px solid transparent;
     background-clip: padding-box;
+    transition: background 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   html.is-scrolling::-webkit-scrollbar-thumb,
@@ -137,27 +287,51 @@
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    outline: 2px solid var(--accent-brand);
+    outline-offset: 2px;
+    box-shadow: none;
   }
 }
 
-@layer utilities {
-  .glass-base {
-    @apply rounded-2xl border border-border/60 shadow-lg shadow-black/20;
-  }
-
-  .glass-nav {
-    @apply bg-background/45 backdrop-blur-lg;
-  }
-
-  .glass-card {
-    @apply bg-card/50 backdrop-blur-xl;
-  }
-
-  .glass-panel {
-    @apply bg-card/55 backdrop-blur-xl;
-  }
+/* ─── Hero dark scope ─────────────────────────────────────────────────────────
+ * The hero always sits over a dark background (shader/bokeh).
+ * Force dark-theme tokens within .hero-content so text/glass remain legible
+ * regardless of the page-level light/dark theme.
+ */
+.hero-content {
+  --text-1: #FFFFFF;
+  --text-2: rgba(209, 213, 219, 0.9);
+  --text-3: rgba(209, 213, 219, 0.65);
+  --foreground: 210 25% 96%;
+  --muted-foreground: 220 13% 70%;
+  --glass-tint-rgb: 10 18 36;
+  --glass-border-rgb: 140 160 190;
+  --glass-specular-rgb: 255 255 255;
+  --glass-inner-shadow-rgb: 0 0 0;
+  --glass-saturate: 1.25;
+  --glass-brightness: 0.94;
+  --border: 220 14% 22%;
 }
+
+/* ─── Theme transition ────────────────────────────────────────────────────────
+ * Applied temporarily by ThemeProvider during theme switch for smooth crossfade.
+ */
+html.theme-transition,
+html.theme-transition .glass-surface,
+html.theme-transition .glass-btn,
+html.theme-transition [class*="bg-"],
+html.theme-transition [class*="text-"],
+html.theme-transition [class*="border-"],
+html.theme-transition button,
+html.theme-transition a,
+html.theme-transition section,
+html.theme-transition header,
+html.theme-transition footer,
+html.theme-transition nav {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease !important;
+  transition-delay: 0s !important;
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -168,12 +342,13 @@
   }
 }
 
+/* ─── Footer social icons ─────────────────────────────────────────────────── */
 .footer-social-icons {
   display: flex;
   list-style: none;
-  margin: 0.5rem 0 0;
+  margin: 0;
   padding: 0;
-  gap: 8px;
+  gap: 0.25rem;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
@@ -185,90 +360,576 @@
   align-items: center;
 }
 
-.footer-social-icons li:not(:last-child)::after {
-  content: "|";
-  margin-left: 8px;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-}
-
-.footer-social-icons li a {
+.footer-social-icons li a,
+.footer-social-icons li button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: hsl(var(--foreground) / 0.95);
+  gap: 0.5rem;
+  color: var(--footer-link);
   text-decoration: none;
-  transition: color 0.2s;
+  padding: 10px 16px 10px 12px;
+  border-radius: 9999px;
+  border: none;
+  background-color: transparent;
+  transition:
+    color 0.25s cubic-bezier(0.25, 0.1, 0.25, 1),
+    background-color 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.footer-social-icons li a:hover {
-  color: hsl(var(--foreground));
+.footer-social-icons li a:hover,
+.footer-social-icons li button:hover {
+  color: var(--footer-link-hover);
+  transform: translateY(-2px);
 }
 
-.footer-social-icons li a .footer-social-icon-wrap {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+.footer-social-icons li a:hover .footer-social-label,
+.footer-social-icons li button:hover .footer-social-label {
+  font-weight: 700;
+}
+
+.floating-nav-btn {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Liquid Glass Tooltip — Apple-style pill tooltip */
+/* Uses inherited --glass-* tokens so it adapts to both page theme
+   and local scope overrides (e.g. .hero-content dark scope). */
+.glass-tooltip__surface {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 980px;
+  padding: 6px 14px;
+  border: 1px solid rgb(var(--glass-border-rgb) / var(--glass-regular-border-alpha));
+  background-color: rgb(var(--glass-tint-rgb) / 0.6);
+  backdrop-filter: blur(var(--glass-regular-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  -webkit-backdrop-filter: blur(var(--glass-regular-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    inset 0 0.5px 0 rgb(var(--glass-specular-rgb) / var(--glass-specular-alpha));
+}
+
+.glass-tooltip__highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 80% at 20% 15%,
+    rgb(var(--glass-specular-rgb) / calc(var(--glass-specular-alpha) * 0.7)) 0%,
+    transparent 50%
+  );
+}
+
+.glass-tooltip__text {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text-1, var(--text-primary, hsl(var(--foreground))));
+}
+
+.footer-social-icons li a .footer-social-icon-wrap,
+.footer-social-icons li button .footer-social-icon-wrap {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  background-color: transparent;
+  color: var(--footer-link);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
   position: relative;
   overflow: hidden;
-  border: 2px solid hsl(var(--border));
   flex-shrink: 0;
+  transition: color 0.2s;
 }
 
-.footer-social-icons li a .footer-social-icon-wrap .icon {
+.footer-social-icons li a:hover .footer-social-icon-wrap,
+.footer-social-icons li button:hover .footer-social-icon-wrap {
+  color: var(--footer-link-hover);
+}
+
+.footer-social-icons li a .footer-social-icon-wrap .icon,
+.footer-social-icons li button .footer-social-icon-wrap .icon {
   position: relative;
-  transition: 0.5s;
   z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.footer-social-icons li a:hover .footer-social-icon-wrap .icon {
-  color: #fff;
-  transform: rotateY(360deg);
+/* On small screens, drop labels and show icon-only pills */
+@media (max-width: 479px) {
+  .footer-social-icons li a,
+.footer-social-icons li button {
+    padding: 7px;
+    gap: 0;
+  }
+
+  .footer-social-icons li a .footer-social-label,
+  .footer-social-icons li button .footer-social-label {
+    display: none;
+  }
 }
 
-.footer-social-icons li a .footer-social-icon-wrap::before {
-  content: "";
+.bokeh-field {
+  pointer-events: none;
+}
+
+/* Hero: no backdrop-filter for 60fps (nav/menu/buttons over animated bg) */
+.hero-content .glass-surface,
+.hero-content .glass-btn {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.hero-content .glass-surface,
+.hero-content .glass-btn {
+  background-color: rgb(var(--glass-tint-rgb) / 0.14);
+}
+
+/* Get in Touch: hero glass control (CLEAR) */
+.hero-content .hero-cta-btn {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: rgba(248, 250, 252, 0.98);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.hero-content .hero-cta-btn > .glass-surface__fill {
+  opacity: 0.55;
+}
+.hero-content .hero-cta-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 6px 20px rgba(74, 142, 183, 0.15);
+}
+.hero-content .hero-cta-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 3px 10px rgba(74, 142, 183, 0.1);
+  transition-duration: 120ms;
+}
+
+/* Mobile dropdown — frosted glass panel */
+.hero-mobile-dropdown {
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.hero-mobile-dropdown__item {
+  color: rgba(248, 250, 252, 0.98);
+  text-align: center;
+  background: transparent;
+}
+.hero-mobile-dropdown__item:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Chevron bounce: CSS-only so hero avoids Framer every frame */
+@keyframes hero-chevron-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+.hero-chevron {
+  animation: hero-chevron-bounce 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-chevron {
+    animation: none;
+  }
+}
+
+/* Section spacing: consistent vertical rhythm between content sections */
+.post-hero-content > .h-0 + * {
+  padding-top: 1rem;
+}
+@media (min-width: 768px) {
+  .post-hero-content > .h-0 + * {
+    padding-top: 2rem;
+  }
+}
+
+/* Post-hero liquid-glass tokens — adaptive to light/dark.
+   Dark mode uses white-alpha overlays on dark backgrounds.
+   Light mode uses dark-alpha overlays on light backgrounds. */
+:root {
+  --liquid-glass-fill: rgba(0, 0, 0, 0.04);
+  --liquid-glass-border: rgba(0, 0, 0, 0.08);
+  --liquid-glass-ring: rgba(0, 0, 0, 0.03);
+  --liquid-glass-shadow-a: rgba(0, 0, 0, 0.04);
+  --liquid-glass-shadow-b: rgba(0, 0, 0, 0.08);
+}
+.dark {
+  --liquid-glass-fill: rgba(255, 255, 255, 0.10);
+  --liquid-glass-border: rgba(255, 255, 255, 0.18);
+  --liquid-glass-ring: rgba(255, 255, 255, 0.05);
+  --liquid-glass-shadow-a: rgba(0, 0, 0, 0.08);
+  --liquid-glass-shadow-b: rgba(0, 0, 0, 0.12);
+}
+
+/* Post-hero & project detail: no backdrop-filter for 60fps; liquid glass look
+   on all surfaces, buttons, footer. Rules are identical so they share selectors. */
+.post-hero-content .glass-surface,
+.post-hero-content .glass-btn,
+.project-detail-content .glass-surface,
+.project-detail-content .glass-btn {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.post-hero-content .glass-surface > .glass-surface__highlight,
+.project-detail-content .glass-surface > .glass-surface__highlight {
+  background: none;
+  opacity: 0;
+}
+.post-hero-content .glass-surface:not(.glass-surface--flat),
+.project-detail-content .glass-surface:not(.glass-surface--flat) {
+  background-color: var(--liquid-glass-fill);
+  border: 1px solid var(--liquid-glass-border);
+  box-shadow:
+    0 1px 2px var(--liquid-glass-shadow-a),
+    0 4px 16px var(--liquid-glass-shadow-b),
+    0 0 0 1px var(--liquid-glass-ring) !important;
+}
+.post-hero-content .glass-surface--full-width {
+  border-width: 0;
+  border-top-width: 1px;
+  border-style: solid;
+  border-color: var(--liquid-glass-border);
+}
+.post-hero-content .glass-btn,
+.project-detail-content .glass-btn {
+  background-color: var(--liquid-glass-fill);
+  border: 1px solid var(--liquid-glass-border);
+  box-shadow:
+    0 1px 2px var(--liquid-glass-shadow-a),
+    0 4px 16px var(--liquid-glass-shadow-b),
+    0 0 0 1px var(--liquid-glass-ring) !important;
+}
+.post-hero-content .glass-surface--flat,
+.project-detail-content .glass-surface--flat {
+  background-color: rgb(var(--glass-tint-rgb) / 0.08);
+  border: 1px solid var(--liquid-glass-border);
+  box-shadow: none !important;
+}
+
+/* Project tags: Live, Completed, GitHub, YouTube – shared on Projects + Project Detail */
+.project-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: border-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.project-tag:focus-visible {
+  outline: none;
+  box-shadow: var(--glass-focus-ring);
+}
+.project-tag-status {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  border-width: 1px;
+  border-style: solid;
+}
+@media (min-width: 640px) {
+  .project-tag-status {
+    padding: 0.4375rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+.project-tag-status--live {
+  border-color: rgba(52, 211, 153, 0.5);
+  background-color: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+}
+.project-tag-status--completed {
+  border-color: rgba(74, 142, 183, 0.5);
+  background-color: rgba(74, 142, 183, 0.12);
+  color: #5b9ec4;
+}
+.project-tag-status--default {
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+}
+.project-tag-link {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  border-width: 1px;
+  border-style: solid;
+  cursor: pointer;
+}
+@media (min-width: 640px) {
+  .project-tag-link {
+    padding: 0.4375rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+.project-tag-link {
+  transition: transform 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              border-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              color 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .project-tag-link:hover {
+    transform: translateY(-1px);
+  }
+  .project-tag-link:active {
+    transform: translateY(0);
+    transition-duration: 100ms;
+  }
+}
+.project-tag-link--github {
+  border-color: rgba(43, 49, 55, 0.75);
+  background-color: rgba(43, 49, 55, 0.18);
+  color: rgba(249, 250, 251, 0.96);
+}
+.project-tag-link--github:hover {
+  border-color: rgba(43, 49, 55, 0.9);
+  background-color: rgba(43, 49, 55, 0.24);
+}
+.project-tag-link--youtube {
+  border-color: rgba(239, 68, 68, 0.45);
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+.project-tag-link--youtube:hover {
+  border-color: rgba(239, 68, 68, 0.55);
+  background-color: rgba(239, 68, 68, 0.18);
+}
+
+/* Modal overlay backdrop — shared across Footer + ProjectDetail */
+.modal-overlay {
+  background-color: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* CSS-only reveal (no Framer Motion) - 60fps, Apple ease curve */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.reveal-item.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-item--delay-1 { transition-delay: 0.06s; }
+.reveal-item--delay-2 { transition-delay: 0.12s; }
+.reveal-item--delay-3 { transition-delay: 0.18s; }
+.reveal-item--delay-4 { transition-delay: 0.24s; }
+.reveal-item--delay-5 { transition-delay: 0.3s; }
+.reveal-item--y40 { transform: translateY(24px); }
+.reveal-item--y40.reveal-visible { transform: translateY(0); }
+/* Hero-like: fade only, no slide (mimics hero section where content is simply present) */
+.reveal-item--hero-like { transform: none; }
+.reveal-item--hero-like.reveal-visible { transform: none; }
+.reveal-item--x-left { transform: translateX(-30px); }
+.reveal-item--x-left.reveal-visible { transform: translateX(0); }
+.reveal-item--x-right { transform: translateX(30px); }
+.reveal-item--x-right.reveal-visible { transform: translateX(0); }
+
+/* Converge effect: halves slide in from opposite sides and assemble */
+.reveal-item--converge-left {
+  opacity: 0;
+  transform: translateX(-60px) translateY(12px);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.reveal-item--converge-left.reveal-visible {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}
+.reveal-item--converge-right {
+  opacity: 0;
+  transform: translateX(60px) translateY(12px);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.reveal-item--converge-right.reveal-visible {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}
+/* Card wrapper: subtle rise + fade as the whole card enters */
+.reveal-item--converge-card {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.reveal-item--converge-card.reveal-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-item--converge-left,
+  .reveal-item--converge-right,
+  .reveal-item--converge-card { opacity: 1; transform: none; transition: none; }
+  .reveal-item--converge-left.reveal-visible,
+  .reveal-item--converge-right.reveal-visible,
+  .reveal-item--converge-card.reveal-visible { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-item { opacity: 1; transform: none; transition: none; }
+  .reveal-item.reveal-visible { opacity: 1; transform: none; }
+  .reveal-item--y40, .reveal-item--hero-like, .reveal-item--x-left, .reveal-item--x-right { transform: none; }
+}
+
+.bokeh-orb {
   position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transition: 0.5s;
-  z-index: 2;
+  border-radius: 9999px;
+  transform: translate3d(-50%, -50%, 0);
+  background:
+    radial-gradient(
+      circle at 35% 35%,
+      rgb(var(--bokeh-color, 14 17 22) / 0.42) 0%,
+      rgb(var(--bokeh-color, 14 17 22) / 0.22) 38%,
+      rgb(var(--bokeh-color, 14 17 22) / 0.04) 66%,
+      transparent 78%
+    );
+  animation-name: bokeh-drift, bokeh-pulse;
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-direction: alternate, alternate;
 }
 
-.footer-social-icons li a:hover .footer-social-icon-wrap::before {
-  top: 0;
+@keyframes bokeh-drift {
+  0% {
+    transform: translate3d(
+      calc(-50% - var(--bokeh-drift-x)),
+      calc(-50% - var(--bokeh-drift-y)),
+      0
+    ) scale(0.94);
+  }
+  50% {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(
+      calc(-50% + var(--bokeh-drift-x)),
+      calc(-50% + var(--bokeh-drift-y)),
+      0
+    ) scale(1.05);
+  }
 }
 
-.footer-social-icons li:nth-child(1) a .footer-social-icon-wrap::before {
-  background: #3b5999;
+@keyframes bokeh-pulse {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.65;
+  }
 }
 
-.footer-social-icons li:nth-child(2) a .footer-social-icon-wrap::before {
-  background: #5a6c7d;
+
+/* ── Portfolio mini-hero preview ─────────────────────────────────────────────
+ * Force the hero section to fill its scaled container (2×card size) instead of
+ * min-h-[100svh]. This makes the Three.js canvas exactly 2×card_w × 2×card_h,
+ * giving it a stable aspect ratio so the lanyard position matches the real hero.
+ */
+.pv-scale-wrapper #hero {
+  min-height: 0 !important;
+  height: 100% !important;
 }
 
-.footer-social-icons li:nth-child(3) a .footer-social-icon-wrap::before {
-  background: #24292e;
+/* React Three Fiber (R3F) measures the canvas container via getBoundingClientRect,
+ * which returns the transform-scaled (50%) visual size instead of the layout size.
+ * So R3F creates the Three.js canvas at 494×370 instead of 988×740, filling only
+ * the top-left quarter of the mini-hero. Force the canvas to fill its positioned
+ * ancestor (the relative R3F root div, which IS correctly 988×740 in layout).
+ * R3F's ResizeObserver then detects the correct layout size and updates the renderer.
+ */
+.pv-scale-wrapper canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
-@media (max-width: 640px) {
-  .footer-social-icons {
-    gap: 6px;
+/* ── Skip navigation link ─────────────────────────────────────────────────── */
+.skip-nav {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 12px 24px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--accent-brand);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: top 0.15s ease;
+}
+.skip-nav:focus {
+  top: 12px;
+}
+
+/* ── High contrast mode ──────────────────────────────────────────────────── */
+@media (prefers-contrast: more) {
+  :root {
+    --liquid-glass-fill: rgba(0, 0, 0, 0.08);
+    --liquid-glass-border: rgba(0, 0, 0, 0.2);
+    --liquid-glass-ring: rgba(0, 0, 0, 0.06);
+    --liquid-glass-shadow-a: rgba(0, 0, 0, 0.08);
+    --liquid-glass-shadow-b: rgba(0, 0, 0, 0.14);
+    --text-tertiary: #515154;
+    --text-secondary: #48484a;
+    --border-color: #aeaeb2;
+    --card-border: #c7c7cc;
   }
 
-  .footer-social-icons li:not(:last-child)::after {
-    content: none;
+  .dark {
+    --liquid-glass-fill: rgba(255, 255, 255, 0.16);
+    --liquid-glass-border: rgba(255, 255, 255, 0.28);
+    --liquid-glass-ring: rgba(255, 255, 255, 0.1);
+    --liquid-glass-shadow-a: rgba(0, 0, 0, 0.14);
+    --liquid-glass-shadow-b: rgba(0, 0, 0, 0.2);
+    --text-tertiary: #c7c7cc;
+    --text-secondary: #d1d1d6;
+    --border-color: #636366;
+    --card-border: #636366;
+  }
+
+  .glass-surface,
+  .glass-btn {
+    border-width: 2px;
   }
 }
+
