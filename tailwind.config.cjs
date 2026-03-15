@@ -30,8 +30,8 @@ module.exports = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -44,6 +44,34 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        /* Liquid-glass color system */
+        bg: {
+          0: "var(--bg-0)",
+          1: "var(--bg-1)",
+          2: "var(--bg-2)",
+        },
+        ink: {
+          1: "var(--text-1)",
+          2: "var(--text-2)",
+          3: "var(--text-3)",
+        },
+        glass: {
+          fill: "var(--glass-fill)",
+          strong: "var(--glass-fill-strong)",
+          border: "var(--glass-border)",
+          highlight: "var(--glass-highlight)",
+          shadow: "var(--glass-shadow)",
+        },
+        accentPrimary: {
+          DEFAULT: "var(--accent)",
+          soft: "var(--accent-2)",
+        },
+        projectAccent: {
+          blue: "var(--p-blue)",
+          red: "var(--p-red)",
+          green: "var(--p-green)",
+          violet: "var(--p-violet)",
         },
       },
       borderRadius: {
