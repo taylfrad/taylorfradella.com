@@ -24,3 +24,21 @@ dist-ssr
 *.sw?
 
 .cursorrules
+.npm-cache/
+perf-artifacts/
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Temp screenshots and dev docs
+*.png
+!public/**/*.png
+!src/**/*.png
+desktop.ini
+
+# Claude files
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+**/CLAUDE.md
+**/CLAUDE.local.md
