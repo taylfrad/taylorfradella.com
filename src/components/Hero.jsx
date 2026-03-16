@@ -186,6 +186,7 @@ export default function Hero({
 }) {
   const { shouldReduceEffects } = useTheme();
   const isCompactHero = useMediaQuery("(max-width: 767px)");
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
   const [showHeroEffects, setShowHeroEffects] = useState(
     () => !shouldReduceEffects,
   );
@@ -361,7 +362,7 @@ export default function Hero({
         {!lanyardDeferred && (showHeroEffects || shouldReduceEffects) ? (
           <Suspense fallback={<LanyardPlaceholder />}>
             <Lanyard
-              position={isCompactHero ? [0, 0, 34] : [0, 0, 20]}
+              position={isCompactHero ? [0, 0, 34] : isTablet ? [0, 0, 26] : [0, 0, 20]}
               gravity={
                 previewMode
                   ? [0, -80, 0]
@@ -370,8 +371,8 @@ export default function Hero({
                     : [0, -40, 0]
               }
               fov={20}
-              groupOffsetX={isCompactHero ? 0 : -2.2}
-              groupOffsetY={isCompactHero ? 7 : 5.3}
+              groupOffsetX={isCompactHero ? 0 : isTablet ? -1.4 : -2.2}
+              groupOffsetY={isCompactHero ? 7 : isTablet ? 6 : 5.3}
               introSwing={!shouldReduceEffects && !previewMode}
               interactive
               onReady={onLanyardReady}

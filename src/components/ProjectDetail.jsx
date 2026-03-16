@@ -451,13 +451,13 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p: 4,
+            p: { xs: 1.5, sm: 2.5, md: 4 },
           }}
         >
           <IconButton
             onClick={() => setLightboxOpen(false)}
             className="glass-btn glass-btn--secondary text-white"
-            sx={{ position: "absolute", top: 24, right: 24, zIndex: 10 }}
+            sx={{ position: "absolute", top: { xs: 14, sm: 20, md: 24 }, right: { xs: 14, sm: 20, md: 24 }, zIndex: 10 }}
           >
             <X />
           </IconButton>
@@ -526,7 +526,7 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="glass-btn glass-btn--secondary text-white"
-                sx={{ position: "absolute", left: 24, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+                sx={{ position: "absolute", left: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
               >
                 <ChevronLeft />
               </IconButton>
@@ -537,7 +537,7 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="glass-btn glass-btn--secondary text-white"
-                sx={{ position: "absolute", right: 24, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+                sx={{ position: "absolute", right: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
               >
                 <ChevronRight />
               </IconButton>
@@ -545,7 +545,7 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 as={Box}
                 variant="clear"
                 className="rounded-[20px] px-2 py-1 text-white"
-                sx={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 10 }}
+                sx={{ position: "absolute", bottom: { xs: 14, sm: 20, md: 24 }, left: "50%", transform: "translateX(-50%)", zIndex: 10 }}
               >
                 <Typography variant="body2">
                   {lightboxIndex + 1} / {total}
@@ -734,7 +734,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="absolute bottom-3 right-1/2 z-10 flex translate-x-1/2 items-center gap-2 rounded-2xl px-3 py-1.5 sm:bottom-4 sm:right-6 sm:translate-x-0 md:gap-3 md:px-5 md:py-2"
+              className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-2xl px-2.5 py-1 sm:bottom-4 sm:right-6 sm:gap-2 sm:px-3 sm:py-1.5 md:gap-3 md:px-5 md:py-2"
             >
                 <IconButton
                   onClick={previous}
@@ -742,7 +742,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                   layout={false}
                   whileHover={{ scale: 1.2, x: -3 }}
                   whileTap={{ scale: 0.95 }}
-                  className="min-w-0 rounded-xl p-2 text-muted-foreground transition hover:text-foreground"
+                  className="min-w-0 rounded-xl p-1.5 text-muted-foreground transition hover:text-foreground sm:p-2"
                 >
                   <ChevronLeft className="text-lg sm:text-xl md:text-2xl" />
                 </IconButton>
@@ -753,7 +753,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                   layout={false}
                   whileHover={{ scale: 1.2, x: 3 }}
                   whileTap={{ scale: 0.95 }}
-                  className="min-w-0 rounded-xl p-2 text-muted-foreground transition hover:text-foreground"
+                  className="min-w-0 rounded-xl p-1.5 text-muted-foreground transition hover:text-foreground sm:p-2"
                 >
                   <ChevronRight className="text-lg sm:text-xl md:text-2xl" />
                 </IconButton>
@@ -761,7 +761,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
 
             {/* Dot Indicators */}
             {screenshots.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 sm:bottom-4">
+              <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1 sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2">
                 {screenshots.map((_, index) => (
                   <motion.div
                     key={index}
@@ -821,7 +821,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p: 4,
+            p: { xs: 1.5, sm: 2.5, md: 4 },
           }}
         >
           {/* Close Button */}
@@ -830,8 +830,8 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
             className="glass-btn glass-btn--secondary text-white"
             sx={{
               position: "absolute",
-              top: 24,
-              right: 24,
+              top: { xs: 14, sm: 20, md: 24 },
+              right: { xs: 14, sm: 20, md: 24 },
               zIndex: 10,
             }}
           >
@@ -910,7 +910,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 className="glass-btn glass-btn--secondary text-white"
                 sx={{
                   position: "absolute",
-                  left: 24,
+                  left: { xs: 8, sm: 18, md: 24 },
                   top: "50%",
                   transform: "translateY(-50%)",
                   zIndex: 10,
@@ -927,7 +927,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 className="glass-btn glass-btn--secondary text-white"
                 sx={{
                   position: "absolute",
-                  right: 24,
+                  right: { xs: 8, sm: 18, md: 24 },
                   top: "50%",
                   transform: "translateY(-50%)",
                   zIndex: 10,
@@ -943,7 +943,7 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                 className="rounded-[20px] px-2 py-1 text-white"
                 sx={{
                   position: "absolute",
-                  bottom: 24,
+                  bottom: { xs: 14, sm: 20, md: 24 },
                   left: "50%",
                   transform: "translateX(-50%)",
                   zIndex: 10,
@@ -1268,7 +1268,7 @@ function ActionLinkButton({ href, onClick, label, iconRef, IconComponent, reduce
   return (
     <Tag
       {...linkProps}
-      className="glass-btn glass-btn--ghost group/btn inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold tracking-[0.18em] uppercase shadow-none sm:text-[14px]"
+      className="glass-btn glass-btn--ghost group/btn inline-flex items-center gap-1.5 px-3.5 py-2 text-[11px] font-bold tracking-[0.14em] uppercase shadow-none sm:gap-2 sm:px-5 sm:py-2.5 sm:text-[13px] sm:tracking-[0.18em] md:text-[14px]"
       style={{ color: "var(--text-primary)", textDecoration: "none", borderRadius: "var(--glass-radius-control)" }}
       onMouseEnter={() => !reducedMotion && iconRef.current?.startAnimation?.()}
       onMouseLeave={() => !reducedMotion && iconRef.current?.stopAnimation?.()}
@@ -1298,7 +1298,7 @@ function ActionButtons({ project, onManualOpen }) {
       <RevealSection
         className="mx-auto max-w-4xl px-6 pb-4 pt-16 text-center sm:px-8 sm:pb-6 sm:pt-20 md:pb-8 md:pt-24"
       >
-        <div className="flex flex-wrap items-start justify-center gap-6 sm:gap-8">
+        <div className="flex flex-wrap items-start justify-center gap-3 sm:gap-6 md:gap-8">
           {project.github && (
             <ActionLinkButton
               href={project.github}
