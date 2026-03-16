@@ -24,7 +24,6 @@ export default function heroPreloadPlugin() {
         )
         .filter(
           (chunk) =>
-            chunk.fileName.includes("Balatro") ||
             chunk.fileName.includes("Lanyard") ||
             chunk.fileName.includes("three") ||
             chunk.fileName.includes("Home")

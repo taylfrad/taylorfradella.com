@@ -16,7 +16,7 @@ export const SCROLL_RETRY_MAX_ATTEMPTS = 360;
 export const BACKGROUND_DARK = "#0F172A";
 
 /** Default accent color (e.g. portfolio, generic projects) */
-export const ACCENT_DEFAULT = "#0071e3";
+export const ACCENT_DEFAULT = "#1e5a8a";
 
 /** Workly project accent color */
 export const ACCENT_WORKLY = "#b3363d";

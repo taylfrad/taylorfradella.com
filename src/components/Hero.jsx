@@ -190,6 +190,11 @@ export default function Hero({
     () => !shouldReduceEffects,
   );
   const [heroReady, setHeroReady] = useState(initialHeroReady);
+  // Defer heavy components on backward nav so the page-transition animation
+  // runs without main-thread contention. Video is lighter (150ms deferral),
+  // Lanyard is heavy (500ms — after transition animation finishes).
+  const [videoDeferred, setVideoDeferred] = useState(!initialHeroReady);
+  const [lanyardDeferred, setLanyardDeferred] = useState(!initialHeroReady);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef(null);
   const menuPanelRef = useRef(null);
@@ -243,6 +248,20 @@ export default function Hero({
     setShowHeroEffects(true);
     return undefined;
   }, [shouldReduceEffects]);
+
+  // Staggered deferral: video first (lighter), then Lanyard (heavy).
+  // Spreads the mount cost across multiple frames so no single frame drops.
+  useEffect(() => {
+    if (!videoDeferred) return;
+    const t = setTimeout(() => setVideoDeferred(false), 150);
+    return () => clearTimeout(t);
+  }, [videoDeferred]);
+
+  useEffect(() => {
+    if (!lanyardDeferred) return;
+    const t = setTimeout(() => setLanyardDeferred(false), 600);
+    return () => clearTimeout(t);
+  }, [lanyardDeferred]);
 
   // Fallback: mark hero ready after timeout if Balatro/Lanyard haven't yet.
   // Cleared once we notify parent so we don't cause a second "ready" pulse.
@@ -300,13 +319,16 @@ export default function Hero({
       className="hero-content relative flex min-h-[100svh] w-full flex-col overflow-hidden text-foreground"
       data-hero-ready={heroReady}
     >
-      <Suspense fallback={<StaticHeroBackground />}>
-        <HeroBackground
-          animated={showHeroEffects}
-          onReady={onBackgroundReady}
-          initialVisualReady={initialHeroReady}
-        />
-      </Suspense>
+      {videoDeferred ? (
+        <StaticHeroBackground />
+      ) : (
+        <Suspense fallback={<StaticHeroBackground />}>
+          <HeroBackground
+            onReady={onBackgroundReady}
+            initialVisualReady={initialHeroReady}
+          />
+        </Suspense>
+      )}
 
       <header
         className="pointer-events-none absolute inset-x-0 top-4 z-30 px-4 sm:top-6 sm:px-6 md:px-10"
@@ -336,7 +358,7 @@ export default function Hero({
       </header>
 
       <div className="absolute inset-0 z-10">
-        {showHeroEffects || shouldReduceEffects ? (
+        {!lanyardDeferred && (showHeroEffects || shouldReduceEffects) ? (
           <Suspense fallback={<LanyardPlaceholder />}>
             <Lanyard
               position={isCompactHero ? [0, 0, 34] : [0, 0, 20]}

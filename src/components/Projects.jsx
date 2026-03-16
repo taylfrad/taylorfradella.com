@@ -62,6 +62,10 @@ function VideoVisual({ webm, mp4, poster }) {
       if (!hasLoaded) {
         hasLoaded = true;
         video.load();
+        // Start from a random position so looping videos don't all sync
+        video.addEventListener("loadedmetadata", () => {
+          if (video.duration) video.currentTime = Math.random() * video.duration;
+        }, { once: true });
       }
       playPromise = video.play();
       if (playPromise) {
