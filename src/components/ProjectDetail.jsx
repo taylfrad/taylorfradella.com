@@ -321,9 +321,11 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
     <>
       {/* ── Carousel ──────────────────────────────────────────────────── */}
       <div
-        className="relative select-none overflow-hidden"
-        style={{ aspectRatio: "2.2 / 1", minHeight: 180, maxHeight: 460 }}
+        className="relative select-none"
+        style={{ overflowX: "clip", overflowY: "visible" }}
       >
+        {/* Inner sizing region — padding keeps shadows inside the clip boundary */}
+        <div className="relative" style={{ aspectRatio: "1.6 / 1", minHeight: 280, maxHeight: 620 }}>
         {screenshots.map((src, i) => {
           const pos = getPosition(i);
           if (pos === null) return null;
@@ -332,7 +334,8 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
           return (
             <motion.div
               key={i}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute flex items-center justify-center"
+              style={{ inset: 24, cursor: "pointer" }}
               animate={{
                 x: isCenter ? "0%" : pos === -1 ? "-58%" : "58%",
                 scale: isCenter ? 1 : 0.78,
@@ -351,7 +354,6 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
                   next();
                 }
               }}
-              style={{ cursor: "pointer" }}
             >
               <div
                 className="flex h-full items-center justify-center"
@@ -400,6 +402,7 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
             </motion.button>
           </>
         )}
+        </div>
       </div>
 
       {/* Dot indicators */}
