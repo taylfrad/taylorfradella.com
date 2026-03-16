@@ -274,6 +274,7 @@ export default function Lanyard({
   );
   const containerRef = useRef(null);
   const isVisibleRef = useRef(true);
+  const invalidateRef = useRef(null);
 
   // matchMedia fires only on breakpoint cross (not every resize pixel),
   // avoiding layout thrash from reading window.innerWidth on each event.
@@ -307,11 +308,14 @@ export default function Lanyard({
       <Canvas
         tabIndex={-1}
         camera={{ position, fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
+        frameloop="demand"
+        dpr={[1, 1.5]}
         gl={{ alpha: transparent }}
-        onCreated={({ gl }) =>
-          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)
-        }
+        onCreated={({ gl, invalidate }) => {
+          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+          invalidateRef.current = invalidate;
+          invalidate();
+        }}
       >
         <ambientLight intensity={Math.PI} />
         <group ref={groupRef} position={[groupOffsetX, groupOffsetY, 0]}>
@@ -322,6 +326,7 @@ export default function Lanyard({
               interactive={interactive}
               onReady={onReady}
               isVisibleRef={isVisibleRef}
+              invalidateRef={invalidateRef}
             />
           </Physics>
         </group>
@@ -361,6 +366,11 @@ export default function Lanyard({
 }
 
 // ─── BAND + CARD ─────────────────────────────────────────────────────────────
+// Velocity threshold below which a body is considered "still"
+const IDLE_VELOCITY_THRESHOLD = 0.015;
+// Consecutive still frames before we stop rendering
+const IDLE_FRAME_COUNT = 90;
+
 function Band({
   maxSpeed = 50,
   minSpeed = 0,
@@ -369,6 +379,7 @@ function Band({
   interactive = true,
   onReady,
   isVisibleRef,
+  invalidateRef,
 }) {
   const band = useRef();
   const fixed = useRef();
@@ -379,6 +390,8 @@ function Band({
   const introDoneRef = useRef(!introSwing);
   const introStartTimeRef = useRef(null);
   const onReadyFiredRef = useRef(false);
+  const idleFramesRef = useRef(0);
+  const isIdleRef = useRef(false);
 
   const vec = useMemo(() => new THREE.Vector3(), []);
   const ang = useMemo(() => new THREE.Vector3(), []);
@@ -566,6 +579,38 @@ function Band({
     ang.copy(card.current.angvel());
     rot.copy(card.current.rotation());
     card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
+
+    // ─── Idle detection ─────────────────────────────────────────────────
+    // After intro settles and no drag, check if all bodies are nearly still.
+    // Once idle, stop requesting frames so the render loop halts entirely.
+    if (introDoneRef.current && !dragged) {
+      let totalVelocity = 0;
+      for (const ref of bodyRefs) {
+        const body = ref.current;
+        if (body) {
+          const lv = body.linvel();
+          const av = body.angvel();
+          totalVelocity +=
+            Math.abs(lv.x) + Math.abs(lv.y) + Math.abs(lv.z) +
+            Math.abs(av.x) + Math.abs(av.y) + Math.abs(av.z);
+        }
+      }
+      if (totalVelocity < IDLE_VELOCITY_THRESHOLD) {
+        idleFramesRef.current++;
+      } else {
+        idleFramesRef.current = 0;
+      }
+      if (idleFramesRef.current >= IDLE_FRAME_COUNT) {
+        isIdleRef.current = true;
+        // Don't request another frame — render loop stops here
+        return;
+      }
+    } else {
+      idleFramesRef.current = 0;
+    }
+
+    // Request next frame while still active
+    state.invalidate();
   });
 
   curve.curveType = "chordal";
@@ -616,13 +661,16 @@ function Band({
           <group
             scale={CARD_VISUAL_SCALE}
             position={CARD_VISUAL_OFFSET}
-            onPointerOver={interactive ? () => hover(true) : undefined}
-            onPointerOut={interactive ? () => hover(false) : undefined}
+            onPointerOver={interactive ? () => { hover(true); isIdleRef.current = false; idleFramesRef.current = 0; invalidateRef?.current?.(); } : undefined}
+            onPointerOut={interactive ? () => { hover(false); } : undefined}
             onPointerUp={
               interactive
                 ? (e) => {
                     e.target.releasePointerCapture(e.pointerId);
                     drag(false);
+                    isIdleRef.current = false;
+                    idleFramesRef.current = 0;
+                    invalidateRef?.current?.();
                   }
                 : undefined
             }
@@ -630,6 +678,10 @@ function Band({
               interactive
                 ? (e) => {
                     e.target.setPointerCapture(e.pointerId);
+                    isIdleRef.current = false;
+                    idleFramesRef.current = 0;
+                    invalidateRef?.current?.();
+                    allRefs.forEach((ref) => ref.current?.wakeUp());
                     drag(
                       new THREE.Vector3()
                         .copy(e.point)

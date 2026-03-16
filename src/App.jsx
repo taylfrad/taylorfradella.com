@@ -39,14 +39,11 @@ const ProjectDetail = lazy(() => import("./components/ProjectDetail"));
 // Page transitions — direction via custom prop.
 //
 // Forward (dir=1):  slide from right, simultaneous (mode="sync")
-//   Entering page slides in from 100%. Exiting page fades in place
-//   (only one element moves → less visual noise, easier compositing).
+//   Entering page slides in from 100%. Exiting page fades in place.
 //
 // Backward (dir=-1): slide from left, sequential (mode="wait")
-//   mode="wait" ensures Home mounts + scrolls before animating in.
-//   Enter from -30% (not -100%) so the page reaches the visible area
-//   quickly — closer to iOS back-navigation distance.
-//   Opacity fade-in is safe (wait mode = no overlap = no crossfade flash).
+//   Exit plays first, then Home mounts and slides in.
+//   Heavy 3D (Lanyard) defers its mount so the enter animation isn't blocked.
 //
 // Uses tweens with smooth ease curves (not springs). Springs start at
 // peak velocity on frame 1 which reads as a "snap." Tweens provide
@@ -56,9 +53,7 @@ const EASE_ACCEL = [0.4, 0, 1, 1];    // accelerating out
 
 const pageVariants = {
   initial: (dir) => ({
-    // Forward: full slide from right edge. Backward: short slide from left.
     x: dir > 0 ? "100%" : "-30%",
-    // Backward enter fades in (safe — wait mode means no overlap)
     ...(dir < 0 && { opacity: 0 }),
   }),
   animate: (dir) => ({
@@ -72,12 +67,10 @@ const pageVariants = {
     },
   }),
   exit: (dir) => (dir > 0
-    // Forward exit: fade in place — entering page slides over on top
     ? {
         opacity: 0,
         transition: { opacity: { duration: 0.28, ease: "easeOut" } },
       }
-    // Backward exit: fast fade + directional hint
     : {
         x: "20%",
         opacity: 0,
@@ -104,7 +97,6 @@ function useHeroPrefetch() {
   useEffect(() => {
     if (location.pathname === "/" || location.pathname === "") {
       import("./components/backgrounds/HeroBackground");
-      import("./components/backgrounds/Balatro");
       import("./components/Lanyard");
     }
   }, [location.pathname]);
@@ -149,8 +141,6 @@ function AppContent() {
     }
   }, [location.pathname]);
 
-  const isForward = direction > 0;
-
   // Memoize fallback to prevent recreation
   const fallback = useMemo(
     () =>
@@ -169,7 +159,7 @@ function AppContent() {
         <AnimatePresence
           initial={false}
           custom={direction}
-          mode={isForward ? "sync" : "wait"}
+          mode={direction > 0 ? "sync" : "wait"}
           onExitComplete={handleExitComplete}
         >
           <motion.div
@@ -184,12 +174,8 @@ function AppContent() {
               gridColumn: "1 / -1",
               minHeight: "100svh",
               background: "var(--bg-secondary)",
-              // Flash-frame fix: in wait mode (backward), Framer Motion takes
-              // 1-3 frames to apply the initial variant after React mounts the
-              // DOM element. Without this, the page flashes at its natural
-              // position (x=0, opacity=1) before jumping to the initial state.
-              // Inline opacity=0 hides it instantly; Framer's animate variant
-              // (opacity:1) overrides this once the animation starts.
+              // Flash-frame fix: in wait mode (backward), hide the entering
+              // page until Framer applies the initial variant.
               ...(!isInitialLoad.current && direction < 0 && { opacity: 0 }),
             }}
           >
