@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { projectsData } from "../data/projectsData";
 import useIntersectionObserver from "@/hooks/useIntersectionObserver";
 import { NAME_FONT_FAMILY } from "@/constants";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Prefetch ProjectDetail chunk on hover so it's cached before the user clicks.
 // The dynamic import is idempotent — the browser/bundler deduplicates it with
@@ -167,7 +168,7 @@ function ProjectVisual({ project }) {
 }
 
 // ─── Single project row ────────────────────────────────────────────────────────
-const ProjectRow = memo(function ProjectRow({ project, index }) {
+const ProjectRow = memo(function ProjectRow({ project, index, isTablet }) {
   const ref = useRef(null);
   const navigate = useNavigate();
   const githubIconRef = useRef(null);
@@ -185,15 +186,16 @@ const ProjectRow = memo(function ProjectRow({ project, index }) {
     offset: ["start end", "end start"],
   });
 
+  const slideDistance = isTablet ? 60 : 120;
   const visualX = useTransform(
     scrollYProgress,
     [0, 0.25, 0.75, 1],
-    isEven ? [-120, 0, 0, 0] : [120, 0, 0, 0],
+    isEven ? [-slideDistance, 0, 0, 0] : [slideDistance, 0, 0, 0],
   );
   const textX = useTransform(
     scrollYProgress,
     [0, 0.25, 0.75, 1],
-    isEven ? [120, 0, 0, 0] : [-120, 0, 0, 0],
+    isEven ? [slideDistance, 0, 0, 0] : [-slideDistance, 0, 0, 0],
   );
   const opacity = useTransform(
     scrollYProgress,
@@ -247,10 +249,10 @@ const ProjectRow = memo(function ProjectRow({ project, index }) {
             className="hidden md:block"
             style={{
               position: "absolute",
-              [isEven ? "left" : "right"]: "-60px",
+              [isEven ? "left" : "right"]: isTablet ? "-16px" : "-60px",
               top: 0,
               height: "100%",
-              width: "48px",
+              width: isTablet ? "12px" : "48px",
               borderRadius: "4px",
               background: ACCENT_GRADIENTS[project.id] ?? project.accentColor,
               scaleY: reducedMotion ? 1 : barScaleY,
@@ -370,6 +372,7 @@ const ProjectRow = memo(function ProjectRow({ project, index }) {
 export default function Projects() {
   const headerRef = useRef(null);
   const reducedMotion = useReducedMotion();
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
   const { scrollYProgress: headerScroll } = useScroll({
     target: headerRef,
     offset: ["start end", "end start"],
@@ -388,7 +391,7 @@ export default function Projects() {
     <section
       aria-label="Selected projects"
       className="relative w-full px-4 pb-20 pt-20 sm:px-6 sm:pt-24 md:px-8 md:pb-28 md:pt-28"
-      style={{ background: "var(--bg-secondary)", overflowX: "clip" }}
+      style={{ background: "var(--bg-secondary)", overflow: "clip" }}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8">
         {/* ── Editorial header — matches Skills section ─────────────────── */}
@@ -421,7 +424,7 @@ export default function Projects() {
 
         {projectsData.map((project, idx) => (
           <div key={project.id}>
-            <ProjectRow project={project} index={idx} />
+            <ProjectRow project={project} index={idx} isTablet={isTablet} />
           </div>
         ))}
 
