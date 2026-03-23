@@ -3,8 +3,8 @@ import {
   motion,
   useScroll,
   useTransform,
-  useReducedMotion,
 } from "framer-motion";
+import useReducedMotion from "@/hooks/useReducedMotion";
 import { ArrowRight } from "lucide-react";
 import { GithubIcon } from "@/components/ui/github";
 import { YoutubeIcon } from "@/components/ui/youtube";
@@ -32,10 +32,12 @@ function PortfolioVisual() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       <img
-        src="/images/portfolio-hero.png"
+        src="/images/portfolio-hero.webp"
         alt=""
         loading="lazy"
         decoding="async"
+        width={2549}
+        height={1271}
         className="h-full w-full object-cover"
         style={{ objectPosition: "38% 20%" }}
       />

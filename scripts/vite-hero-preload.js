@@ -1,6 +1,6 @@
 /**
  * Vite plugin: inject modulepreload links for hero chunks into index.html.
- * Makes Balatro, Lanyard, and three.js load in parallel with the main script.
+ * Makes Lanyard and three.js load in parallel with the main script.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
