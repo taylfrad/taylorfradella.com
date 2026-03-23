@@ -1,7 +1,6 @@
 import { useRef } from "react";
-import { useScroll, useTransform, useSpring } from "framer-motion";
+import { useScroll, useTransform } from "framer-motion";
 import useReducedMotion from "./useReducedMotion";
-import useDeviceCapability from "./useDeviceCapability";
 
 /**
  * Scroll-linked motion helper.
@@ -10,7 +9,11 @@ import useDeviceCapability from "./useDeviceCapability";
  * - Motion only updates while the user is scrolling
  * - Reverses naturally when scrolling back up
  * - Respects prefers-reduced-motion (returns static values)
- * - Uses instant springs on low-tier devices to reduce computation
+ *
+ * Uses direct useTransform (no useSpring) — scroll-linked values are already
+ * smooth because they follow the user's finger/wheel. Springs add per-frame
+ * simulation cost and cause values to "drift" after scroll stops, which hurts
+ * frame budget without visible benefit.
  *
  * Usage:
  *   const sectionRef = useRef(null);
@@ -28,35 +31,23 @@ export default function useScrollMotion(targetRef, config = {}) {
   const localRef = useRef(null);
   const ref = targetRef || localRef;
   const reducedMotion = useReducedMotion();
-  const tier = useDeviceCapability();
 
   const {
     offset = ["start 0.9", "end 0.2"],
     y: yRange = [24, 0],
     opacity: opacityRange = [0.0, 1],
     scale: scaleRange = null,
-    spring = {},
     disabled = false,
   } = config;
 
   const isDisabled = reducedMotion || disabled;
 
-  // On low-tier devices, use very stiff springs that settle instantly —
-  // same visual result but nearly zero per-frame simulation cost.
-  const isLowTier = tier === "low";
-  const baseSpring = isLowTier
-    ? { stiffness: 1000, damping: 100, mass: 0.01, ...spring }
-    : { stiffness: 250, damping: 40, mass: 0.6, ...spring };
-
   const { scrollYProgress } = useScroll({ target: ref, offset });
 
   // All hooks must be called unconditionally — pass identity ranges when disabled.
-  const rawOpacity = useTransform(scrollYProgress, [0, 1], isDisabled ? [1, 1] : opacityRange);
-  const opacity = useSpring(rawOpacity, baseSpring);
-  const rawY = useTransform(scrollYProgress, [0, 1], isDisabled ? [0, 0] : yRange);
-  const y = useSpring(rawY, baseSpring);
-  const rawScale = useTransform(scrollYProgress, [0, 1], isDisabled || !scaleRange ? [1, 1] : scaleRange);
-  const scale = useSpring(rawScale, baseSpring);
+  const opacity = useTransform(scrollYProgress, [0, 1], isDisabled ? [1, 1] : opacityRange);
+  const y = useTransform(scrollYProgress, [0, 1], isDisabled ? [0, 0] : yRange);
+  const scale = useTransform(scrollYProgress, [0, 1], isDisabled || !scaleRange ? [1, 1] : scaleRange);
 
   return {
     ref,

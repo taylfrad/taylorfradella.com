@@ -9,7 +9,7 @@ export default function HeroShell() {
   return (
     <section
       id="hero"
-      className="hero-content relative flex min-h-[100svh] w-full flex-col overflow-hidden text-foreground animate-pulse"
+      className="hero-content relative flex min-h-[100svh] w-full flex-col overflow-hidden text-foreground"
       aria-busy="true"
     >
       <div className="pointer-events-none absolute inset-0 z-0">

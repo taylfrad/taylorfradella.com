@@ -42,35 +42,43 @@ export default function HeroBackground({
       {/* Static gradient fallback — always present so we never flash */}
       <StaticHeroBackground />
 
-      {/* Pre-rendered hero video — vastly cheaper than a live WebGL shader */}
-      <div
+      {/* Poster image — loads instantly via <link rel="preload"> */}
+      <img
+        src="/videos/hero-poster.webp"
+        alt=""
+        aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+        }}
+      />
+
+      {/* Video fades in over the poster once buffered */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        onLoadedMetadata={handleLoadedMetadata}
+        onCanPlay={notifyReady}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
           opacity: isVisualReady ? 1 : 0,
           transition: "opacity 600ms ease-out",
         }}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          onLoadedMetadata={handleLoadedMetadata}
-          onCanPlay={notifyReady}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        >
-          <source src="/videos/hero.webm" type="video/webm" />
-          <source src="/videos/hero.mp4" type="video/mp4" />
-        </video>
-      </div>
+        <source src="/videos/hero.webm" type="video/webm" />
+        <source src="/videos/hero.mp4" type="video/mp4" />
+      </video>
 
     </div>
   );

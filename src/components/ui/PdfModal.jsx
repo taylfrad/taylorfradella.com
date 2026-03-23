@@ -117,11 +117,10 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
       onClick={handleOverlayClick}
       className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4"
       style={{
-        backgroundColor: "rgba(0,0,0,0.55)",
+        backgroundColor: "rgba(0,0,0,0.75)",
         opacity: open ? 1 : 0,
         visibility: open ? "visible" : "hidden",
         transition: "opacity 0.2s ease, visibility 0.2s ease",
-        willChange: "opacity",
         paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
       }}
@@ -200,11 +199,12 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden" style={{ contain: "strict" }}>
             <iframe
               src={src}
               title={title}
               className="h-full w-full border-0"
+              style={{ transform: "translateZ(0)" }}
             />
           </div>
         )}

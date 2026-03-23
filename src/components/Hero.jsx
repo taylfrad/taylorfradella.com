@@ -264,7 +264,7 @@ export default function Hero({
     return () => clearTimeout(t);
   }, [lanyardDeferred]);
 
-  // Fallback: mark hero ready after timeout if Balatro/Lanyard haven't yet.
+  // Fallback: mark hero ready after timeout if Lanyard hasn't yet.
   // Cleared once we notify parent so we don't cause a second "ready" pulse.
   useEffect(() => {
     const t = setTimeout(() => {

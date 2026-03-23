@@ -69,6 +69,12 @@
     />
     <link rel="canonical" href="https://taylorfradella.com/" />
     <title>Taylor Fradella — Portfolio</title>
+    <!-- Preload critical fonts so text renders without FOIT -->
+    <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Preload hero poster so first paint has an instant visual -->
+    <link rel="preload" href="/videos/hero-poster.webp" as="image" type="image/webp" fetchpriority="high" />
+    <!-- Prefetch hero video so download starts before JS boots -->
+    <link rel="prefetch" href="/videos/hero.webm" as="fetch" />
     <!-- Structured data -->
     <script type="application/ld+json">
       {

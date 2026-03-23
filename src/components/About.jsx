@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import useReducedMotion from "@/hooks/useReducedMotion";
 
 const AVATAR_SRC = "/images/taylor-avatar.jpg";
 

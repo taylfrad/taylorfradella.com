@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence, useMotionValue, useInView, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useInView, useScroll, useTransform } from "framer-motion";
+import useReducedMotion from "@/hooks/useReducedMotion";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
