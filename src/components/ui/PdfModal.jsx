@@ -115,12 +115,13 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{
         backgroundColor: "rgba(0,0,0,0.75)",
         opacity: open ? 1 : 0,
         visibility: open ? "visible" : "hidden",
         transition: "opacity 0.2s ease, visibility 0.2s ease",
+        padding: "12px",
         paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
       }}
@@ -130,8 +131,10 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative flex flex-col overflow-hidden bg-[var(--bg-primary)] shadow-2xl w-full max-w-4xl rounded-xl sm:rounded-2xl h-[calc(100%-24px)] sm:h-[85vh] sm:w-[90vw] sm:max-h-[90vh]"
+        className="relative flex flex-col overflow-hidden bg-[var(--bg-primary)] shadow-2xl w-full max-w-4xl rounded-xl sm:rounded-2xl"
         style={{
+          height: "100%",
+          maxHeight: "100%",
           transform: open ? "scale(1) translateY(0)" : "scale(0.97) translateY(12px)",
           opacity: open ? 1 : 0,
           transition: "transform 0.25s cubic-bezier(0.16,1,0.3,1), opacity 0.2s ease",
@@ -169,7 +172,7 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
         </div>
 
         {/* Content — inline PDF viewer with download fallback on mobile */}
-        <div className={`overflow-hidden ${isMobile ? "flex-1 min-h-[60vh]" : "flex-1"}`} style={{ contain: "strict" }}>
+        <div className="flex-1 overflow-hidden min-h-0" style={{ contain: "strict" }}>
           <iframe
             src={src}
             title={title}
