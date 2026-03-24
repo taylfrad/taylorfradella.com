@@ -129,7 +129,7 @@ const HeroHeadline = memo(function HeroHeadline({ isCompactHero, onNavClick }) {
     <div className="pointer-events-auto w-full max-w-xl self-center justify-self-center md:col-start-2 md:justify-self-center">
       <div className="flex w-full flex-col items-center gap-5 text-center">
         <h1
-          className="text-balance text-4xl font-semibold leading-tight text-ink-1 sm:text-5xl md:text-6xl lg:text-7xl flex w-full flex-col items-center text-center"
+          className="text-balance text-[2rem] font-semibold leading-tight text-ink-1 sm:text-5xl md:text-6xl lg:text-7xl flex w-full flex-col items-center text-center"
           style={{ fontFamily: NAME_FONT_FAMILY }}
         >
           <>

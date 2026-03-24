@@ -130,12 +130,13 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative flex h-full w-full max-h-[90vh] max-w-4xl flex-col overflow-hidden rounded-xl sm:rounded-2xl bg-[var(--bg-primary)] shadow-2xl sm:h-[85vh] sm:w-[90vw]"
+        className="relative flex flex-col overflow-hidden bg-[var(--bg-primary)] shadow-2xl w-full max-w-4xl rounded-xl sm:rounded-2xl h-[calc(100%-24px)] sm:h-[85vh] sm:w-[90vw] sm:max-h-[90vh]"
         style={{
           transform: open ? "scale(1) translateY(0)" : "scale(0.97) translateY(12px)",
           opacity: open ? 1 : 0,
           transition: "transform 0.25s cubic-bezier(0.16,1,0.3,1), opacity 0.2s ease",
           willChange: "transform, opacity",
+          paddingBottom: isMobile ? "env(safe-area-inset-bottom, 0px)" : undefined,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -167,45 +168,25 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
           </div>
         </div>
 
-        {/* Content — iframe on desktop, action buttons on mobile */}
-        {isMobile ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-10">
-            <div className="text-center">
-              <p className="mb-2 text-base font-semibold text-[var(--text-primary)]">
-                {title}
-              </p>
-              <p className="text-sm text-[var(--text-secondary)]">
-                Open or download to view this document.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 w-full max-w-[240px]">
-              <a
-                href={src}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--text-primary)] px-5 py-3 text-sm font-medium text-[var(--bg-primary)] transition-opacity hover:opacity-90"
-              >
-                <ExternalLink size={16} />
-                Open in Browser
-              </a>
-              <a
-                href={src}
-                download
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--card-border)] px-5 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--card-bg)]"
-              >
-                <Download size={16} />
-                Download PDF
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 overflow-hidden" style={{ contain: "strict" }}>
-            <iframe
-              src={src}
-              title={title}
-              className="h-full w-full border-0"
-              style={{ transform: "translateZ(0)" }}
-            />
+        {/* Content — inline PDF viewer with download fallback on mobile */}
+        <div className={`overflow-hidden ${isMobile ? "flex-1 min-h-[60vh]" : "flex-1"}`} style={{ contain: "strict" }}>
+          <iframe
+            src={src}
+            title={title}
+            className="h-full w-full border-0"
+            style={{ transform: "translateZ(0)" }}
+          />
+        </div>
+        {isMobile && (
+          <div className="flex items-center justify-center gap-3 border-t border-[var(--card-border)] px-5 py-3">
+            <a
+              href={src}
+              download
+              className="inline-flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+            >
+              <Download size={15} />
+              Download
+            </a>
           </div>
         )}
       </div>

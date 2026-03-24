@@ -156,7 +156,14 @@
     -moz-osx-font-smoothing: grayscale;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
-    scrollbar-gutter: stable;
+  }
+
+  /* Only reserve scrollbar gutter on viewports wide enough for classic scrollbars.
+     Mobile browsers use overlay scrollbars, so the gutter just wastes space. */
+  @media (min-width: 768px) {
+    html {
+      scrollbar-gutter: stable;
+    }
   }
 
   html.is-scrolling {

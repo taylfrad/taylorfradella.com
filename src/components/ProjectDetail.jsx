@@ -326,7 +326,7 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
         style={{ overflowX: "clip", overflowY: "visible" }}
       >
         {/* Inner sizing region — padding keeps shadows inside the clip boundary */}
-        <div className="relative" style={{ aspectRatio: "1.6 / 1", minHeight: 280, maxHeight: 620 }}>
+        <div className="relative" style={{ aspectRatio: "1.6 / 1", minHeight: "min(280px, 60svh)", maxHeight: 620 }}>
         {screenshots.map((src, i) => {
           const pos = getPosition(i);
           if (pos === null) return null;
@@ -435,10 +435,10 @@ function ShowcaseCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
           "& .MuiDialog-paper": {
             bgcolor: "rgba(0,0,0,0.95)",
             m: 0,
-            width: "100vw",
-            height: "100vh",
-            maxWidth: "100vw",
-            maxHeight: "100vh",
+            width: "100dvw",
+            height: "100dvh",
+            maxWidth: "100dvw",
+            maxHeight: "100dvh",
             borderRadius: 0,
             overflow: "hidden",
           },
@@ -805,10 +805,10 @@ function LightboxCarousel({ screenshots, projectTitle, accentColor = ACCENT_DEFA
           "& .MuiDialog-paper": {
             bgcolor: "rgba(0,0,0,0.95)",
             m: 0,
-            width: "100vw",
-            height: "100vh",
-            maxWidth: "100vw",
-            maxHeight: "100vh",
+            width: "100dvw",
+            height: "100dvh",
+            maxWidth: "100dvw",
+            maxHeight: "100dvh",
             borderRadius: 0,
             overflow: "hidden",
           },
@@ -1088,10 +1088,10 @@ function Workly3DCarousel({
           "& .MuiDialog-paper": {
             bgcolor: "rgba(0,0,0,0.95)",
             m: 0,
-            width: "100vw",
-            height: "100vh",
-            maxWidth: "100vw",
-            maxHeight: "100vh",
+            width: "100dvw",
+            height: "100dvh",
+            maxWidth: "100dvw",
+            maxHeight: "100dvh",
             borderRadius: 0,
             overflow: "hidden",
           },

@@ -235,7 +235,7 @@ const ProjectRow = memo(function ProjectRow({ project, index, isTablet }) {
         }}
       />
 
-      <div className="grid w-full grid-cols-1 items-center gap-10 pl-5 md:grid-cols-2 md:gap-16 md:pl-8">
+      <div className="grid w-full grid-cols-1 items-center gap-10 pl-5 pr-1 md:grid-cols-2 md:gap-16 md:pl-8 md:pr-0">
         {/* Visual panel — bar lives here so it matches card height exactly */}
         <motion.div
           style={
