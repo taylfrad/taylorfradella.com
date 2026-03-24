@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Resume — Taylor Fradella</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { background: #111; min-height: 100vh; -webkit-text-size-adjust: 100%; font-family: -apple-system, system-ui, sans-serif; }
+
+    /* ── Toolbar ─────────────────────────────────────── */
+    .toolbar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .toolbar-title {
+      font-size: 13px; font-weight: 600; color: #e5e5e5;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .toolbar-actions { display: flex; align-items: center; gap: 2px; }
+    .toolbar-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: none; background: transparent; cursor: pointer;
+      color: #999; transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .toolbar-btn:hover, .toolbar-btn:active { background: rgba(255,255,255,0.08); color: #e5e5e5; }
+    .toolbar-btn svg { width: 17px; height: 17px; }
+
+    /* ── Viewer ──────────────────────────────────────── */
+    #viewer { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; }
+    #viewer canvas { display: block; width: 100%; max-width: 900px; }
+
+    /* ── Loading / Error ─────────────────────────────── */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 80vh; color: #999; font-size: 14px;
+    }
+    .spinner {
+      width: 20px; height: 20px; margin-right: 10px;
+      border: 2px solid #444; border-top-color: #ccc; border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error { color: #f87171; text-align: center; padding: 40px 20px; font-size: 14px; }
+    .error a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="toolbar-title">Resume</span>
+    <div class="toolbar-actions">
+      <button class="toolbar-btn" id="btn-share" aria-label="Share" style="display:none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </button>
+      <a class="toolbar-btn" href="TaylorFradellaResume.pdf" download aria-label="Download">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
+      <button class="toolbar-btn" id="btn-print" aria-label="Print">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="loading" class="loading"><div class="spinner"></div>Loading resume…</div>
+  <div id="viewer"></div>
+
+  <script type="module">
+    const PDF_URL = "TaylorFradellaResume.pdf";
+    const PDFJS_CDN = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.9.155/build/pdf.min.mjs";
+    const WORKER_CDN = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.9.155/build/pdf.worker.min.mjs";
+
+    // Show share button if Web Share API is available
+    if (navigator.share) {
+      const shareBtn = document.getElementById("btn-share");
+      shareBtn.style.display = "";
+      shareBtn.addEventListener("click", () => {
+        navigator.share({ title: "Resume — Taylor Fradella", url: window.location.href }).catch(() => {});
+      });
+    }
+
+    // Print button
+    document.getElementById("btn-print").addEventListener("click", () => {
+      const w = window.open(PDF_URL, "_blank");
+      if (w) { w.onload = () => { w.print(); }; }
+    });
+
+    async function render() {
+      try {
+        const pdfjsLib = await import(PDFJS_CDN);
+        pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_CDN;
+
+        const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+        const viewer = document.getElementById("viewer");
+        const loading = document.getElementById("loading");
+        const containerWidth = Math.min(window.innerWidth, 900);
+        const scale = window.devicePixelRatio || 1;
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const unscaledViewport = page.getViewport({ scale: 1 });
+          const fitScale = containerWidth / unscaledViewport.width;
+          const viewport = page.getViewport({ scale: fitScale * scale });
+
+          const canvas = document.createElement("canvas");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          canvas.style.width = containerWidth + "px";
+          canvas.style.height = (containerWidth * unscaledViewport.height / unscaledViewport.width) + "px";
+          viewer.appendChild(canvas);
+
+          await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        }
+
+        loading.remove();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("loading").innerHTML =
+          '<div class="error">Unable to load PDF.<br><a href="TaylorFradellaResume.pdf">Download instead</a></div>';
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
