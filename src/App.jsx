@@ -172,6 +172,7 @@ function AppContent() {
             style={{
               gridRow: "1 / -1",
               gridColumn: "1 / -1",
+              minWidth: 0,
               minHeight: "100svh",
               background: "var(--bg-secondary)",
               // Flash-frame fix: in wait mode (backward), hide the entering

@@ -313,13 +313,17 @@ export default function Lanyard({
         gl={{ alpha: transparent }}
         onCreated={({ gl, invalidate }) => {
           gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+          // Claim touch events on the canvas so card dragging works on mobile.
+          // Scrolling past the hero still works via the headline/CTA overlay (z-20)
+          // and the header (z-30) which sit above the canvas (z-10).
+          gl.domElement.style.touchAction = "none";
           invalidateRef.current = invalidate;
           invalidate();
         }}
       >
         <ambientLight intensity={Math.PI} />
         <group ref={groupRef} position={[groupOffsetX, groupOffsetY, 0]}>
-          <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+          <Physics gravity={gravity} timeStep={1 / 60}>
             <Band
               isMobile={isMobile}
               introSwing={introSwing}
@@ -477,6 +481,11 @@ function Band({
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
+  // Track pointer velocity during drag so we can apply it as an impulse on release.
+  // Stores the last few world-space positions to compute a smoothed velocity.
+  const dragPositionsRef = useRef([]);
+  const DRAG_HISTORY = 6;
+
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
@@ -494,6 +503,7 @@ function Band({
     }
     return undefined;
   }, [hovered, dragged]);
+
 
   useFrame((state, delta) => {
     if (band.current?.geometry && !band.current.geometry.__bsPatch) {
@@ -535,11 +545,19 @@ function Band({
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
       allRefs.forEach((ref) => ref.current?.wakeUp());
+      const targetX = vec.x - dragged.x;
+      const targetY = vec.y - dragged.y;
+      const targetZ = vec.z - dragged.z;
       card.current?.setNextKinematicTranslation({
-        x: vec.x - dragged.x,
-        y: vec.y - dragged.y,
-        z: vec.z - dragged.z,
+        x: targetX,
+        y: targetY,
+        z: targetZ,
       });
+      // Record position for velocity calculation on release
+      const now = state.clock.elapsedTime;
+      const history = dragPositionsRef.current;
+      history.push({ x: targetX, y: targetY, z: targetZ, t: now });
+      if (history.length > DRAG_HISTORY) history.shift();
     }
 
     if (!onReadyFiredRef.current && typeof onReady === "function") {
@@ -666,7 +684,27 @@ function Band({
             onPointerUp={
               interactive
                 ? (e) => {
-                    e.target.releasePointerCapture(e.pointerId);
+                    (e.nativeEvent?.target ?? e.target)?.releasePointerCapture?.(e.pointerId);
+                    // Compute fling velocity from recent drag positions
+                    const history = dragPositionsRef.current;
+                    if (history.length >= 2 && card.current) {
+                      const newest = history[history.length - 1];
+                      // Use an older sample for a smoother velocity estimate
+                      const oldest = history[0];
+                      const dt = newest.t - oldest.t;
+                      if (dt > 0.005) {
+                        const vx = (newest.x - oldest.x) / dt;
+                        const vy = (newest.y - oldest.y) / dt;
+                        const vz = (newest.z - oldest.z) / dt;
+                        // Apply velocity after the body switches back to dynamic.
+                        // Defer by one microtask so Rapier processes the type change first.
+                        const bodyRef = card.current;
+                        queueMicrotask(() => {
+                          bodyRef.setLinvel?.({ x: vx, y: vy, z: vz }, true);
+                        });
+                      }
+                    }
+                    dragPositionsRef.current = [];
                     drag(false);
                     isIdleRef.current = false;
                     idleFramesRef.current = 0;
@@ -677,9 +715,11 @@ function Band({
             onPointerDown={
               interactive
                 ? (e) => {
-                    e.target.setPointerCapture(e.pointerId);
+                    const domTarget = e.nativeEvent?.target ?? e.target;
+                    domTarget?.setPointerCapture?.(e.pointerId);
                     isIdleRef.current = false;
                     idleFramesRef.current = 0;
+                    dragPositionsRef.current = [];
                     invalidateRef?.current?.();
                     allRefs.forEach((ref) => ref.current?.wakeUp());
                     drag(
