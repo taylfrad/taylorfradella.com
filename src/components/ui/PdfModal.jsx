@@ -1,6 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, lazy, Suspense } from "react";
 import { createPortal } from "react-dom";
-import { X, ExternalLink, Download } from "lucide-react";
+import { X, ExternalLink, Download, Share2, Printer } from "lucide-react";
+
+const MobilePdfViewer = lazy(() => import("./MobilePdfViewer"));
 
 /**
  * Trap focus within a container element.
@@ -149,9 +151,9 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
             {title}
           </span>
           <div className="flex items-center gap-1.5">
-            {/* Open in new tab — always available as escape hatch */}
+            {/* Open in new tab — on mobile, use the canvas-based viewer page for proper scaling */}
             <a
-              href={src}
+              href={isMobile ? src.replace(/\/[^/]+$/, "/resume-viewer.html") : src}
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
@@ -171,25 +173,63 @@ export default function PdfModal({ open, onClose, src, title = "Document", prelo
           </div>
         </div>
 
-        {/* Content — inline PDF viewer with download fallback on mobile */}
-        <div className="flex-1 overflow-hidden min-h-0" style={{ contain: "strict" }}>
-          <iframe
-            src={src}
-            title={title}
-            className="h-full w-full border-0"
-            style={{ transform: "translateZ(0)" }}
-          />
-        </div>
+        {/* Content — canvas renderer on mobile (iOS Safari can't scale PDFs in iframes), iframe on desktop */}
+        {isMobile ? (
+          <div className="flex-1 overflow-hidden min-h-0">
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--text-tertiary)] border-t-[var(--text-primary)]" />
+                </div>
+              }
+            >
+              <MobilePdfViewer src={src} />
+            </Suspense>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-hidden min-h-0" style={{ contain: "strict" }}>
+            <iframe
+              src={src}
+              title={title}
+              className="h-full w-full border-0"
+              style={{ transform: "translateZ(0)" }}
+            />
+          </div>
+        )}
         {isMobile && (
-          <div className="flex items-center justify-center gap-3 border-t border-[var(--card-border)] px-5 py-3">
+          <div className="flex items-center justify-center gap-1 border-t border-[var(--card-border)] px-4 py-2">
+            {typeof navigator !== "undefined" && navigator.share && (
+              <button
+                type="button"
+                onClick={() => {
+                  const fullUrl = new URL(src, window.location.origin).href;
+                  navigator.share({ title, url: fullUrl }).catch(() => {});
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
+                aria-label="Share"
+              >
+                <Share2 size={17} />
+              </button>
+            )}
             <a
               href={src}
               download
-              className="inline-flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
+              aria-label="Download"
             >
-              <Download size={15} />
-              Download
+              <Download size={17} />
             </a>
+            <button
+              type="button"
+              onClick={() => {
+                const w = window.open(src, "_blank");
+                if (w) { w.onload = () => { w.print(); }; }
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:bg-[var(--card-bg)] hover:text-[var(--text-primary)]"
+              aria-label="Print"
+            >
+              <Printer size={17} />
+            </button>
           </div>
         )}
       </div>
