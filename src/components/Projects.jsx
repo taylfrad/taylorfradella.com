@@ -111,25 +111,12 @@ function getRowSpan(gridRow) {
 // ─── Bento card ────────────────────────────────────────────────────────────────
 const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMobile }) {
   const [hovered, setHovered] = useState(false);
-  const [inView, setInView] = useState(false);
-  const cardRef = useRef(null);
+  const [mobilePlaying, setMobilePlaying] = useState(false);
   const [revealRef, visible] = useReveal(0.08);
   const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
 
-  // On mobile, auto-play videos when the card is in the viewport
-  // (no hover on touch devices). Desktop uses hover as before.
-  useEffect(() => {
-    if (!isMobile || !cardRef.current) return undefined;
-    const obs = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.5 },
-    );
-    obs.observe(cardRef.current);
-    return () => obs.disconnect();
-  }, [isMobile]);
-
-  const videoPlaying = isMobile ? inView : hovered;
+  const videoPlaying = isMobile ? mobilePlaying : hovered;
 
   const transform = (() => {
     if (!visible) return "translateY(28px)";
@@ -157,10 +144,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
 
   return (
     <div
-      ref={(el) => {
-        revealRef.current = el;
-        cardRef.current = el;
-      }}
+      ref={revealRef}
       role="link"
       tabIndex={0}
       aria-label={`View ${project.title} project details`}
@@ -331,6 +315,41 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
         />
       )}
 
+      {/* Mobile play/pause button — tap to preview the project video */}
+      {isMobile && project.id <= 7 && (
+        <button
+          type="button"
+          aria-label={mobilePlaying ? "Pause preview" : "Play preview"}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMobilePlaying((p) => !p);
+          }}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 5,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.45)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "rgba(255,255,255,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          {mobilePlaying ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1" /><rect x="8.5" y="1" width="3.5" height="12" rx="1" /></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z" /></svg>
+          )}
+        </button>
+      )}
+
       {/* Content */}
       <div
         style={{
@@ -340,7 +359,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
           right: 0,
           padding: featured ? "36px 36px" : "24px 24px",
           zIndex: 2,
-          // Fade out content when video is playing (hover or in-view on mobile)
+          // Fade out content when video is playing
           ...(project.id <= 7
             ? {
                 opacity: videoPlaying ? 0 : 1,
