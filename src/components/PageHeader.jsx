@@ -98,7 +98,7 @@ export default function PageHeader({ active, theme = "dark" }) {
                 aria-expanded={isMenuOpen}
                 aria-controls="page-mobile-menu"
                 onClick={() => setIsMenuOpen((o) => !o)}
-                className={`inline-flex h-9 w-9 items-center justify-center transition-colors duration-200 ease-out ${isDark ? "text-white/60 hover:text-white" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}
+                className={`inline-flex h-11 w-11 items-center justify-center transition-colors duration-200 ease-out ${isDark ? "text-white/60 hover:text-white" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}
               >
                 {isMenuOpen ? (
                   <X className="h-4 w-4" aria-hidden />
@@ -113,6 +113,19 @@ export default function PageHeader({ active, theme = "dark" }) {
                   role="menu"
                   className={`absolute right-0 top-full mt-2 min-w-[160px] overflow-hidden rounded-2xl ${isDropdownDark ? "page-mobile-dropdown--dark" : "page-mobile-dropdown--light"}`}
                 >
+                  {/* Home button — mobile only, navigates back to hero */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { setIsMenuOpen(false); navigate("/"); }}
+                    className={`w-full px-5 py-3 text-[14px] font-medium tracking-wide transition-colors duration-150 ${
+                      isDropdownDark ? "page-mobile-dropdown__item--dark" : "page-mobile-dropdown__item--light"
+                    }${active === "home" ? " page-mobile-dropdown__item--active" : ""} ${
+                      isDropdownDark ? "border-b border-white/[0.08]" : "border-b border-black/[0.06]"
+                    }`}
+                  >
+                    Home
+                  </button>
                   {ROUTES.map((route, i, arr) => {
                     const isActive = route.key === active;
                     return (

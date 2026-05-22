@@ -64,13 +64,11 @@ const pageVariants = {
       return { x: "0%", y: "0%", opacity: 1 };
     }
     if (axis === "y") {
-      return { y: dir > 0 ? "100svh" : "-100svh", x: "0%" };
+      return { y: dir > 0 ? "100vh" : "-100vh", x: "0%", opacity: 1 };
     }
     if (kind === "sibling") {
-      // Full slide in either direction — clean horizontal sibling navigation.
       return { x: dir > 0 ? "100%" : "-100%", y: "0%" };
     }
-    // project flow (default)
     return {
       x: dir > 0 ? "100%" : "-30%",
       y: "0%",
@@ -84,12 +82,9 @@ const pageVariants = {
     if (axis === "y") {
       return {
         x: "0%",
-        y: "0svh",
+        y: 0,
         opacity: 1,
-        transition: {
-          y: { duration: Y_DURATION, ease: EASE },
-          opacity: { duration: 0 },
-        },
+        transition: { y: { duration: Y_DURATION, ease: EASE } },
       };
     }
     if (kind === "sibling") {
@@ -116,7 +111,7 @@ const pageVariants = {
     }
     if (axis === "y") {
       return {
-        y: dir > 0 ? "-100svh" : "100svh",
+        y: dir > 0 ? "-100vh" : "100vh",
         x: "0%",
         opacity: 1,
         transition: { y: { duration: Y_DURATION, ease: EASE } },
@@ -225,15 +220,19 @@ function AppContent() {
   // Lock body scroll during the vertical page transition so:
   //   1. The user can't scroll mid-animation (would desync the pages)
   //   2. The off-screen translated page doesn't add document height
-  // Restored after the animation duration + a small buffer.
+  // Uses overflow:clip instead of hidden to avoid scrollbar width change
+  // (hidden causes a reflow/jump as the scrollbar disappears and reappears).
   useEffect(() => {
     if (direction.axis !== "y" || isInitialLoad.current) return undefined;
-    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "clip";
+    document.body.style.overflow = "clip";
     const t = setTimeout(() => {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }, 1400); // Y_DURATION (1.2s) + 200ms buffer
     return () => {
       clearTimeout(t);
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     };
   }, [direction.axis, location.pathname]);
@@ -313,6 +312,7 @@ function AppContent() {
               minWidth: 0,
               minHeight: "100svh",
               background: "var(--bg-secondary)",
+              willChange: direction.axis !== "none" ? "transform" : "auto",
               // Flash-frame fix: in wait mode (project backward), hide the
               // entering page until Framer applies the initial variant.
               // Sibling navigation uses sync mode and a full off-screen

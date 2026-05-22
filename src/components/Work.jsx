@@ -385,8 +385,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           right: "12%",
           top: 0,
           bottom: 0,
-          width: "42vw",
-          maxWidth: 580,
+          width: "44vw",
+          maxWidth: 620,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -409,8 +409,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 width: "100%",
               }}
             >
-              <AnimatedLogoMark size={400} animate={!reducedMotion} />
-              <AnimatedLogoWordmark fontSize={56} />
+              <AnimatedLogoMark size={500} animate={!reducedMotion} />
+              <AnimatedLogoWordmark fontSize={64} />
             </div>
           ) : (
             <img
@@ -435,8 +435,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         className="work-entry__content relative px-6 sm:px-8 md:pl-0"
         style={{
           zIndex: 2,
-          maxWidth: 460,
-          marginLeft: "clamp(24px, 18%, 240px)",
+          maxWidth: 520,
+          marginLeft: "clamp(24px, 24%, 380px)",
         }}
       >
         {entry.useAnimatedLogo ? (
@@ -445,9 +445,9 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           // list below stays at the same Y position.
           <div
             className={shouldAnimate ? "work-fade-up work-fade-up--mini" : ""}
-            style={{ marginBottom: 40, opacity: 0.95 }}
+            style={{ marginBottom: "clamp(28px, 4vh, 44px)", opacity: 0.95 }}
           >
-            <AnimatedLogoFull height={36} animate={!reducedMotion} />
+            <AnimatedLogoFull height={44} animate={!reducedMotion} />
           </div>
         ) : (
           <img
@@ -455,11 +455,11 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
             alt={entry.logoAlt}
             className={shouldAnimate ? "work-fade-up work-fade-up--mini" : ""}
             style={{
-              width: 140,
+              width: "clamp(120px, 25vw, 200px)",
               height: "auto",
               filter: entry.logoMiniFilter,
               opacity: 0.9,
-              marginBottom: 40,
+              marginBottom: "clamp(28px, 4vh, 44px)",
             }}
           />
         )}
@@ -515,8 +515,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
             className="work-cta"
             style={{
               display: "inline-block",
-              padding: "14px 36px",
-              fontSize: 12,
+              padding: "16px 40px",
+              fontSize: "clamp(11px, 1.2vw, 13px)",
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
@@ -542,16 +542,16 @@ function MetaGroup({ label, value, delay, animate }) {
     <div
       className={animate ? "work-fade-up" : ""}
       style={{
-        marginBottom: 28,
+        marginBottom: "clamp(20px, 3vh, 28px)",
         ...(animate ? { animationDelay: `${delay}s` } : {}),
       }}
     >
       <p
         style={{
-          fontSize: 13,
+          fontSize: "clamp(13px, 1.5vw, 16px)",
           fontWeight: 700,
           color: "rgba(255,255,255,0.95)",
-          marginBottom: 4,
+          marginBottom: 6,
           letterSpacing: "0.01em",
         }}
       >
@@ -559,7 +559,7 @@ function MetaGroup({ label, value, delay, animate }) {
       </p>
       <p
         style={{
-          fontSize: 15,
+          fontSize: "clamp(15px, 1.8vw, 19px)",
           fontWeight: 400,
           color: "rgba(255,255,255,0.6)",
           lineHeight: 1.5,

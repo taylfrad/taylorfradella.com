@@ -109,11 +109,14 @@ function getRowSpan(gridRow) {
 }
 
 // ─── Bento card ────────────────────────────────────────────────────────────────
-const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
+const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMobile }) {
   const [hovered, setHovered] = useState(false);
+  const [mobilePlaying, setMobilePlaying] = useState(false);
   const [revealRef, visible] = useReveal(0.08);
   const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
+
+  const videoPlaying = isMobile ? mobilePlaying : hovered;
 
   const transform = (() => {
     if (!visible) return "translateY(28px)";
@@ -176,7 +179,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
       }}
     >
 
-      {/* Hover videos */}
+      {/* Project videos — hover on desktop, auto-play on mobile when in view */}
       {project.id === 1 && (
         <div
           aria-hidden
@@ -184,13 +187,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <TaylorVideo playing={hovered} />
+            <TaylorVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -201,13 +204,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <LionsDenVideo playing={hovered} />
+            <LionsDenVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -218,13 +221,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <SweetSpotVideo playing={hovered} />
+            <SweetSpotVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -235,13 +238,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <WorklyVideo playing={hovered} />
+            <WorklyVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -252,13 +255,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <TaylCraftVideo playing={hovered} />
+            <TaylCraftVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -269,13 +272,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <FradellaDevVideo playing={hovered} />
+            <FradellaDevVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -286,13 +289,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
             position: "absolute",
             inset: 0,
             zIndex: 3,
-            opacity: hovered ? 1 : 0,
+            opacity: videoPlaying ? 1 : 0,
             transition: "opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
             pointerEvents: "none",
           }}
         >
           <Suspense fallback={null}>
-            <FieldFlowVideo playing={hovered} />
+            <FieldFlowVideo playing={videoPlaying} />
           </Suspense>
         </div>
       )}
@@ -312,6 +315,46 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
         />
       )}
 
+      {/* Mobile play/pause button — tap to preview the project video */}
+      {isMobile && project.id <= 7 && (
+        <button
+          type="button"
+          aria-label={mobilePlaying ? "Pause preview" : "Play preview"}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setMobilePlaying((p) => !p);
+          }}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 5,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.45)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "rgba(255,255,255,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+          }}
+        >
+          {mobilePlaying ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect x="2" y="1" width="3.5" height="12" rx="1" /><rect x="8.5" y="1" width="3.5" height="12" rx="1" /></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z" /></svg>
+          )}
+        </button>
+      )}
+
       {/* Content */}
       <div
         style={{
@@ -321,10 +364,10 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay }) {
           right: 0,
           padding: featured ? "36px 36px" : "24px 24px",
           zIndex: 2,
-          // Fade out content when hover video is playing
+          // Fade out content when video is playing
           ...(project.id <= 7
             ? {
-                opacity: hovered ? 0 : 1,
+                opacity: videoPlaying ? 0 : 1,
                 transition: "opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
               }
             : {}),
@@ -562,6 +605,7 @@ export default function Projects() {
                     // larger title size (see fontSize tier in BentoCard).
                     tall={getRowSpan(cell.gridRow) > 1}
                     delay={idx * 70}
+                    isMobile={cols === 1}
                   />
                 </Link>
               </div>

@@ -170,7 +170,7 @@ export default function About() {
           padding: "0 clamp(0px, 3vw, 32px)",
           display: "grid",
           gridTemplateColumns: "1.15fr 1fr",
-          columnGap: 64,
+          columnGap: "clamp(32px, 5vw, 64px)",
           alignItems: "start",
         }}
       >

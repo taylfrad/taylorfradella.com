@@ -74,17 +74,15 @@ function CapabilitySlide({ cap, index, progress, isActive, isLast, total, scroll
 
   return (
     <div
-      // The centering box shrinks from 100vh (true viewport center) to 80vh
-      // (centered above the parked footer) as scrollProgress crosses 0.9 → 1.0.
-      // `items-center` does the actual centering — we just animate the box's
-      // bottom edge. While the footer is far below viewport (slides 1–3), the
-      // box is full-height and content sits dead-center; as the footer rises
-      // into view, the box pulls up and content recenters above it.
+      // The centering box shrinks from 100vh to ~68vh (centered above the
+      // parked footer) as scrollProgress crosses 0.9 → 1.0. On mobile the
+      // footer is taller relative to the viewport, so 32vh clearance keeps
+      // the tools/pills row visible above it.
       className="absolute inset-x-0 top-0 flex items-center justify-center"
       style={{
         opacity: masterOpacity,
         pointerEvents: isActive ? "auto" : "none",
-        bottom: `${lerp(0, 20, clamp((scrollProgress - 0.9) / 0.1))}vh`,
+        bottom: `${lerp(0, 32, clamp((scrollProgress - 0.9) / 0.1))}vh`,
       }}
     >
       <div

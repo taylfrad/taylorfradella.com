@@ -945,7 +945,7 @@ export default function ProjectDetail() {
             <button
               type="button"
               onClick={handleBackToProjects}
-              className="group/back inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--text-tertiary)] transition-colors duration-200 hover:text-[var(--text-primary)]"
+              className="group/back inline-flex items-center gap-1.5 py-2 text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--text-tertiary)] transition-colors duration-200 hover:text-[var(--text-primary)]"
             >
               <ArrowLeft size={10} className="transition-transform duration-300 group-hover/back:-translate-x-1" />
               <span className="relative">

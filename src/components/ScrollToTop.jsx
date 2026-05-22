@@ -14,13 +14,17 @@ export default function ScrollToTop() {
     // Project-page scroll is deferred to AnimatePresence.onExitComplete.
     if (pathname.startsWith("/project/")) return;
 
-    // Returning to home with scrollToProjects — Home.jsx handles positioning.
+    // Returning to home — Home.jsx always mounts at scrollTop=0 since it
+    // re-creates from scratch. Skip the scrollTo to avoid a layout reflow
+    // that competes with the page transition animation.
     if (pathname === "/") {
       const shouldScrollToProjects = Boolean(state?.scrollToProjects);
       const hasSessionFlag =
         typeof window !== "undefined" &&
         sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1";
       if (shouldScrollToProjects || hasSessionFlag) return;
+      // Home remounts fresh — no scrollTo needed (avoids reflow during animation)
+      return;
     }
 
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
