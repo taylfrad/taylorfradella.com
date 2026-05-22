@@ -251,16 +251,17 @@ export default function Hero({
   }, [shouldReduceEffects]);
 
   // Staggered deferral: video first (lighter), then Lanyard (heavy).
-  // Spreads the mount cost across multiple frames so no single frame drops.
+  // Lanyard deferred past 1.4s so its Three.js/physics init doesn't
+  // compete with the 1.2s page transition animation on return-to-home.
   useEffect(() => {
     if (!videoDeferred) return;
-    const t = setTimeout(() => setVideoDeferred(false), 150);
+    const t = setTimeout(() => setVideoDeferred(false), 200);
     return () => clearTimeout(t);
   }, [videoDeferred]);
 
   useEffect(() => {
     if (!lanyardDeferred) return;
-    const t = setTimeout(() => setLanyardDeferred(false), 600);
+    const t = setTimeout(() => setLanyardDeferred(false), 1400);
     return () => clearTimeout(t);
   }, [lanyardDeferred]);
 
