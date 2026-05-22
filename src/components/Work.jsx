@@ -338,8 +338,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
   //   foreground content → 100% scroll speed (moves with the section)
   //   big logo           → ~40% scroll speed (visibly lags — floats behind)
   //   ambient gradient   → ~70% scroll speed (subtle background drift)
-  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-30vh", "30vh"]);
-  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-15vh", "15vh"]);
+  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-15vh", "15vh"]);
+  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-8vh", "8vh"]);
 
   // Trigger build-out when a non-first entry becomes visible
   useEffect(() => {
@@ -405,8 +405,9 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 64,
+                gap: 48,
                 width: "100%",
+                overflow: "hidden",
               }}
             >
               <AnimatedLogoMark size={400} animate={!reducedMotion} />
