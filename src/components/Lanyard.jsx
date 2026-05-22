@@ -25,7 +25,17 @@ import {
   useSphericalJoint,
 } from "@react-three/rapier";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
-import * as THREE from "three";
+import {
+  CanvasTexture,
+  CatmullRomCurve3,
+  ClampToEdgeWrapping,
+  Color,
+  DoubleSide,
+  RepeatWrapping,
+  SRGBColorSpace,
+  Sphere,
+  Vector3,
+} from "three";
 
 import almondMilkyWoff2 from "@/assets/fonts/AlmondMilky.woff2";
 import cardGLB from "@/assets/lanyard/card.glb";
@@ -249,10 +259,10 @@ function makeCardFaceTexture({ useCustomNameFont = false } = {}) {
   ctx.fillText(nameLines[1], 0, bottomLineY);
   ctx.restore();
 
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  const tex = new CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = ClampToEdgeWrapping;
   tex.flipY = true;
-  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.colorSpace = SRGBColorSpace;
   return tex;
 }
 
@@ -312,7 +322,7 @@ export default function Lanyard({
         dpr={[1, 1.5]}
         gl={{ alpha: transparent }}
         onCreated={({ gl, invalidate }) => {
-          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+          gl.setClearColor(new Color(0x000000), transparent ? 0 : 1);
           // Claim touch events on the canvas so card dragging works on mobile.
           // Scrolling past the hero still works via the headline/CTA overlay (z-20)
           // and the header (z-30) which sit above the canvas (z-10).
@@ -397,10 +407,10 @@ function Band({
   const idleFramesRef = useRef(0);
   const isIdleRef = useRef(false);
 
-  const vec = useMemo(() => new THREE.Vector3(), []);
-  const ang = useMemo(() => new THREE.Vector3(), []);
-  const rot = useMemo(() => new THREE.Vector3(), []);
-  const dir = useMemo(() => new THREE.Vector3(), []);
+  const vec = useMemo(() => new Vector3(), []);
+  const ang = useMemo(() => new Vector3(), []);
+  const rot = useMemo(() => new Vector3(), []);
+  const dir = useMemo(() => new Vector3(), []);
   // Pre-allocate arrays used every frame to avoid GC pressure from
   // creating new arrays inside useFrame (60fps = thousands of arrays/sec).
   const bodyRefs = useMemo(() => [j1, j2, j3, card], []);
@@ -454,8 +464,8 @@ function Band({
         zFront: 0.02,
         zBack: -0.02,
       };
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
+    const size = new Vector3();
+    const center = new Vector3();
     bbox.getSize(size);
     bbox.getCenter(center);
     return {
@@ -470,11 +480,11 @@ function Band({
 
   const [curve] = useState(
     () =>
-      new THREE.CatmullRomCurve3([
-        new THREE.Vector3(),
-        new THREE.Vector3(),
-        new THREE.Vector3(),
-        new THREE.Vector3(),
+      new CatmullRomCurve3([
+        new Vector3(),
+        new Vector3(),
+        new Vector3(),
+        new Vector3(),
       ]),
   );
 
@@ -509,7 +519,7 @@ function Band({
     if (band.current?.geometry && !band.current.geometry.__bsPatch) {
       band.current.geometry.__bsPatch = true;
       band.current.geometry.computeBoundingSphere = function () {
-        if (!this.boundingSphere) this.boundingSphere = new THREE.Sphere();
+        if (!this.boundingSphere) this.boundingSphere = new Sphere();
         this.boundingSphere.center.set(0, 0, 0);
         this.boundingSphere.radius = 10;
       };
@@ -569,7 +579,7 @@ function Band({
 
     lerpRefs.forEach((ref) => {
       if (!ref.current.lerped)
-        ref.current.lerped = new THREE.Vector3().copy(
+        ref.current.lerped = new Vector3().copy(
           ref.current.translation(),
         );
       const d = Math.max(
@@ -632,7 +642,7 @@ function Band({
   });
 
   curve.curveType = "chordal";
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.wrapS = texture.wrapT = RepeatWrapping;
 
   return (
     <>
@@ -723,7 +733,7 @@ function Band({
                     invalidateRef?.current?.();
                     allRefs.forEach((ref) => ref.current?.wakeUp());
                     drag(
-                      new THREE.Vector3()
+                      new Vector3()
                         .copy(e.point)
                         .sub(vec.copy(card.current.translation())),
                     );
@@ -786,7 +796,7 @@ function Band({
                 transparent
                 alphaTest={0.05}
                 depthWrite={false}
-                side={THREE.DoubleSide}
+                side={DoubleSide}
                 polygonOffset
                 polygonOffsetFactor={-1}
                 polygonOffsetUnits={-1}
