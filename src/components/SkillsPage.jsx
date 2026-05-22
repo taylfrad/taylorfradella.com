@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react"
 import PageHeader from "./PageHeader";
 import Footer from "./Footer";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
+import { smoothScrollToTop } from "@/lib/navigation";
 
 // Skills retains its existing scrollytelling internals — we just put it on
 // its own route with the shared subpage shell (top nav + footer at the end).
@@ -24,19 +25,7 @@ export default function SkillsPage() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollToTop = useCallback(() => {
-    const start = window.scrollY;
-    if (start === 0) return;
-    const duration = Math.min(3000, 1200 + start * 0.15);
-    const startTime = performance.now();
-    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-    function step(now) {
-      const t = Math.min((now - startTime) / duration, 1);
-      window.scrollTo(0, start * (1 - ease(t)));
-      if (t < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }, []);
+  const scrollToTop = useCallback(() => smoothScrollToTop(), []);
 
   return (
     <div

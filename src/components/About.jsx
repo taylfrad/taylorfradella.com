@@ -178,7 +178,7 @@ export default function About() {
         <div className="about-reveal__left">
           <div>
             <img
-              src="/images/taylor-photo.png"
+              src="/images/taylor-photo.webp"
               alt="Taylor Fradella"
               width={180}
               height={180}
@@ -263,7 +263,7 @@ export default function About() {
 
           <div>
             <img
-              src="/images/otis.png"
+              src="/images/otis.webp"
               alt="Otis the dog"
               loading="lazy"
               decoding="async"

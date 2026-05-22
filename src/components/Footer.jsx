@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import useReducedMotion from "@/hooks/useReducedMotion";
-import PdfModal from "@/components/ui/PdfModal";
+
+const PdfModal = lazy(() => import("@/components/ui/PdfModal"));
 import useScrollMotion from "@/hooks/useScrollMotion";
 import { FileTextIcon } from "@/components/ui/file-text";
 import { GithubIcon } from "@/components/ui/github";
@@ -147,13 +148,17 @@ const Footer = () => {
       </motion.div>
 
       {/* ── Resume modal ───────────────────────────────────────────── */}
-      <PdfModal
-        open={resumeOpen}
-        onClose={() => setResumeOpen(false)}
-        src={RESUME_PDF}
-        title="Resume"
-        preload
-      />
+      {resumeOpen && (
+        <Suspense fallback={null}>
+          <PdfModal
+            open={resumeOpen}
+            onClose={() => setResumeOpen(false)}
+            src={RESUME_PDF}
+            title="Resume"
+            preload
+          />
+        </Suspense>
+      )}
     </footer>
   );
 };

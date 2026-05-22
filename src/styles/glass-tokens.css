@@ -296,15 +296,10 @@
     z-index: 1;
   }
 
-  .glass-surface--regular {
-    --glass-fill-alpha: var(--glass-regular-fill-alpha);
-    --glass-fill-alpha-hover: var(--glass-regular-fill-alpha-hover);
-    --glass-blur: var(--glass-regular-blur);
-    --glass-blur-active: var(--glass-regular-blur-active);
-    --glass-border-alpha: var(--glass-regular-border-alpha);
-    --glass-border-alpha-hover: var(--glass-regular-border-alpha-hover);
-    --glass-radius: var(--glass-radius-card);
-  }
+  /* --regular is the default variant — .glass-surface already sets these values.
+     The modifier class is kept as a no-op anchor so variant logic in
+     GlassSurface.jsx doesn't need a special-case for "regular". */
+  .glass-surface--regular {}
 
   .glass-surface--clear {
     --glass-fill-alpha: var(--glass-clear-fill-alpha);

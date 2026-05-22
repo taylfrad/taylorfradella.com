@@ -40,6 +40,7 @@ export default defineConfig({
         entryFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
         manualChunks: (id) => {
+          if (id.includes("node_modules/@react-three/rapier")) return "rapier";
           if (id.includes("node_modules/@react-three")) return "r3f";
           if (id.includes("node_modules/three") || id.includes("node_modules/meshline")) return "three";
           if (id.includes("node_modules/framer-motion")) return "motion";
