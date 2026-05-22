@@ -382,7 +382,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         aria-hidden
         className="work-bg-logo pointer-events-none absolute select-none"
         style={{
-          right: "8%",
+          right: "12%",
           top: 0,
           bottom: 0,
           width: "44vw",
@@ -436,7 +436,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         style={{
           zIndex: 2,
           maxWidth: 520,
-          marginLeft: "clamp(24px, 20%, 320px)",
+          marginLeft: "clamp(24px, 24%, 380px)",
         }}
       >
         {entry.useAnimatedLogo ? (
