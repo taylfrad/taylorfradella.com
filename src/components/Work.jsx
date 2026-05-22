@@ -407,7 +407,6 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 alignItems: "center",
                 gap: 48,
                 width: "100%",
-                overflow: "hidden",
               }}
             >
               <AnimatedLogoMark size={400} animate={!reducedMotion} />
