@@ -3,6 +3,7 @@ import { useEffect, useRef, lazy, Suspense, Component, useCallback, useMemo, mem
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollToTop from "./components/ScrollToTop";
 import HeroShell from "./components/HeroShell";
+import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -35,52 +36,129 @@ class ErrorBoundary extends Component {
 
 const Home = lazy(() => import("./components/Home"));
 const ProjectDetail = lazy(() => import("./components/ProjectDetail"));
+const Work = lazy(() => import("./components/Work"));
+const SkillsPage = lazy(() => import("./components/SkillsPage"));
+const AboutPage = lazy(() => import("./components/AboutPage"));
 
-// Page transitions — direction via custom prop.
+// Page transitions — direction encoded as { axis, dir }.
 //
-// Forward (dir=1):  slide from right, simultaneous (mode="sync")
-//   Entering page slides in from 100%. Exiting page fades in place.
+// Horizontal axis ("x") — between `/` and `/project/:id`:
+//   Forward (dir=1):  slide from right, simultaneous (mode="sync")
+//   Backward (dir=-1): slide from left, sequential (mode="wait")
 //
-// Backward (dir=-1): slide from left, sequential (mode="wait")
-//   Exit plays first, then Home mounts and slides in.
-//   Heavy 3D (Lanyard) defers its mount so the enter animation isn't blocked.
+// Vertical axis ("y") — between `/` and `/work`:
+//   Forward (dir=1):  Work slides up from bottom; hero exits up off the top.
+//   Backward (dir=-1): Work slides down off the bottom; hero enters from top.
 //
-// Uses tweens with smooth ease curves (not springs). Springs start at
-// peak velocity on frame 1 which reads as a "snap." Tweens provide
-// controlled acceleration → deceleration that feels cinematic.
-const EASE = [0.4, 0, 0.2, 1];        // moderate accel, long smooth decel
-const EASE_ACCEL = [0.4, 0, 1, 1];    // accelerating out
+// Uses tweens with smooth ease curves (not springs). Springs start at peak
+// velocity which reads as a "snap." Tweens give cinematic accel → decel.
+const EASE = [0.25, 0.1, 0.25, 1];    // smooth, unhurried cubic
+const EASE_ACCEL = [0.4, 0, 0.8, 1];  // gentle accelerating out
+
+// Vertical animation tuning — deliberate and cinematic.
+const Y_DURATION = 1.2;
 
 const pageVariants = {
-  initial: (dir) => ({
-    x: dir > 0 ? "100%" : "-30%",
-    ...(dir < 0 && { opacity: 0 }),
-  }),
-  animate: (dir) => ({
-    x: "0%",
-    opacity: 1,
-    transition: {
-      x: { duration: dir > 0 ? 0.42 : 0.35, ease: EASE },
-      opacity: dir < 0
-        ? { duration: 0.3, ease: EASE }
-        : { duration: 0 },
-    },
-  }),
-  exit: (dir) => (dir > 0
-    ? {
-        opacity: 0,
-        transition: { opacity: { duration: 0.28, ease: "easeOut" } },
-      }
-    : {
-        x: "20%",
-        opacity: 0,
+  initial: ({ axis, dir, kind }) => {
+    if (axis === "none") {
+      return { x: "0%", y: "0%", opacity: 1 };
+    }
+    if (axis === "y") {
+      return { y: dir > 0 ? "100svh" : "-100svh", x: "0%" };
+    }
+    if (kind === "sibling") {
+      // Full slide in either direction — clean horizontal sibling navigation.
+      return { x: dir > 0 ? "100%" : "-100%", y: "0%" };
+    }
+    // project flow (default)
+    return {
+      x: dir > 0 ? "100%" : "-30%",
+      y: "0%",
+      ...(dir < 0 && { opacity: 0 }),
+    };
+  },
+  animate: ({ axis, dir, kind }) => {
+    if (axis === "none") {
+      return { x: "0%", y: "0%", opacity: 1, transition: { duration: 0 } };
+    }
+    if (axis === "y") {
+      return {
+        x: "0%",
+        y: "0svh",
+        opacity: 1,
         transition: {
-          x: { duration: 0.15, ease: EASE_ACCEL },
-          opacity: { duration: 0.13, ease: "easeOut" },
+          y: { duration: Y_DURATION, ease: EASE },
+          opacity: { duration: 0 },
         },
-      }
-  ),
+      };
+    }
+    if (kind === "sibling") {
+      return {
+        x: "0%",
+        y: "0%",
+        opacity: 1,
+        transition: { x: { duration: Y_DURATION, ease: EASE } },
+      };
+    }
+    return {
+      x: "0%",
+      y: "0%",
+      opacity: 1,
+      transition: {
+        x: { duration: Y_DURATION, ease: EASE },
+        opacity: dir < 0 ? { duration: 0.6, ease: EASE } : { duration: 0 },
+      },
+    };
+  },
+  exit: ({ axis, dir, kind }) => {
+    if (axis === "none") {
+      return { x: "0%", y: "0%", opacity: 0, transition: { duration: 0.15 } };
+    }
+    if (axis === "y") {
+      return {
+        y: dir > 0 ? "-100svh" : "100svh",
+        x: "0%",
+        opacity: 1,
+        transition: { y: { duration: Y_DURATION, ease: EASE } },
+      };
+    }
+    if (kind === "sibling") {
+      return {
+        x: dir > 0 ? "-100%" : "100%",
+        y: "0%",
+        opacity: 1,
+        transition: { x: { duration: Y_DURATION, ease: EASE } },
+      };
+    }
+    return dir > 0
+      ? {
+          opacity: 0,
+          transition: { opacity: { duration: 0.6, ease: EASE } },
+        }
+      : {
+          x: "20%",
+          opacity: 0,
+          transition: {
+            x: { duration: Y_DURATION, ease: EASE },
+            opacity: { duration: 0.6, ease: EASE },
+          },
+        };
+  },
 };
+
+// Classify a pathname into a route group so transitions can compare source
+// + destination without string-checking everywhere. All subpages (work,
+// skills, about) sit spatially below the hero — vertical slide axis.
+const SUBPAGES = new Set(["/work", "/skills", "/about"]);
+// Nav order for subpage-to-subpage direction. Pages "to the right" in this
+// list slide in from the right; pages "to the left" slide in from the left.
+// (Projects is on home — not a subpage — so it isn't in this list.)
+const SUBPAGE_NAV_ORDER = { "/skills": 0, "/work": 1, "/about": 2 };
+function classifyPath(pathname) {
+  if (pathname.startsWith("/project/")) return "project";
+  if (SUBPAGES.has(pathname)) return "subpage";
+  return "home";
+}
 
 // Memoized fallback components — prevents recreation on parent re-render
 const ProjectFallback = memo(function ProjectFallback() {
@@ -108,16 +186,57 @@ function AppContent() {
   const isInitialLoad = useRef(true);
   useHeroPrefetch();
 
-  // Memoized direction — compute only when pathname changes
-  const direction = useMemo(
-    () => (location.pathname.startsWith("/project/") ? 1 : -1),
-    [location.pathname],
-  );
+  // Direction is computed from prev + current pathname so we can tell forward
+  // vs. backward AND which axis to use. Stored as { axis, dir, kind }.
+  //   kind = "sibling" → full slide both directions (Skills↔Work↔About)
+  //   kind = "project" → original /project flow (fade-back on dir=-1)
+  const direction = useMemo(() => {
+    const from = classifyPath(prevPathRef.current);
+    const to = classifyPath(location.pathname);
+    // home <-> subpage : vertical slide (Work / Skills / About sit below hero)
+    // Exception: when returning home with scrollToProjects, skip the slide
+    // so we land directly at the projects section without showing the hero.
+    if ((from === "home" && to === "subpage") || (from === "subpage" && to === "home")) {
+      const goingHomeToProjects = to === "home" && (
+        location.state?.scrollToProjects ||
+        sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1"
+      );
+      if (goingHomeToProjects) {
+        return { axis: "none", dir: 0, kind: "instant" };
+      }
+      return { axis: "y", dir: to === "subpage" ? 1 : -1, kind: "subpage" };
+    }
+    // subpage <-> subpage : direction follows nav-order. Destination to the
+    // RIGHT of source = slide in from right (dir=1); to the LEFT = from left.
+    if (from === "subpage" && to === "subpage") {
+      const fromIdx = SUBPAGE_NAV_ORDER[prevPathRef.current] ?? 0;
+      const toIdx = SUBPAGE_NAV_ORDER[location.pathname] ?? 0;
+      return { axis: "x", dir: toIdx > fromIdx ? 1 : -1, kind: "sibling" };
+    }
+    // home <-> project : horizontal (existing behavior)
+    return { axis: "x", dir: to === "project" ? 1 : -1, kind: "project" };
+  }, [location.pathname, location.state?.scrollToProjects]);
 
   useEffect(() => {
     isInitialLoad.current = false;
     prevPathRef.current = location.pathname;
   }, [location.pathname]);
+
+  // Lock body scroll during the vertical page transition so:
+  //   1. The user can't scroll mid-animation (would desync the pages)
+  //   2. The off-screen translated page doesn't add document height
+  // Restored after the animation duration + a small buffer.
+  useEffect(() => {
+    if (direction.axis !== "y" || isInitialLoad.current) return undefined;
+    document.body.style.overflow = "hidden";
+    const t = setTimeout(() => {
+      document.body.style.overflow = "";
+    }, 1400); // Y_DURATION (1.2s) + 200ms buffer
+    return () => {
+      clearTimeout(t);
+      document.body.style.overflow = "";
+    };
+  }, [direction.axis, location.pathname]);
 
   // Hide project route in URL after React Router processes it
   useEffect(() => {
@@ -134,12 +253,20 @@ function AppContent() {
     return undefined;
   }, [location.pathname]);
 
-  // Memoized exit handler — AnimatePresence receives stable reference
+  // Memoized exit handler — AnimatePresence receives stable reference.
+  // Reset scroll on project + subpage entries so they always start at the top.
+  // Skip when returning to home with scrollToProjects (already positioned).
   const handleExitComplete = useCallback(() => {
-    if (location.pathname.startsWith("/project/")) {
+    if (location.pathname === "/" && (location.state?.scrollToProjects || sessionStorage.getItem(SCROLL_TO_PROJECTS_FLAG) === "1")) {
+      return;
+    }
+    if (
+      location.pathname.startsWith("/project/") ||
+      SUBPAGES.has(location.pathname)
+    ) {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.state]);
 
   // Memoize fallback to prevent recreation
   const fallback = useMemo(
@@ -159,7 +286,18 @@ function AppContent() {
         <AnimatePresence
           initial={false}
           custom={direction}
-          mode={direction > 0 ? "sync" : "wait"}
+          // Vertical transitions stay in "sync" both directions so the two
+          // pages move together (one sliding off as the other slides on).
+          // Horizontal keeps the existing sync/wait split.
+          mode={
+            direction.axis === "y"
+              ? "sync"
+              : direction.kind === "sibling"
+                ? "sync"
+                : direction.dir > 0
+                  ? "sync"
+                  : "wait"
+          }
           onExitComplete={handleExitComplete}
         >
           <motion.div
@@ -175,9 +313,14 @@ function AppContent() {
               minWidth: 0,
               minHeight: "100svh",
               background: "var(--bg-secondary)",
-              // Flash-frame fix: in wait mode (backward), hide the entering
-              // page until Framer applies the initial variant.
-              ...(!isInitialLoad.current && direction < 0 && { opacity: 0 }),
+              // Flash-frame fix: in wait mode (project backward), hide the
+              // entering page until Framer applies the initial variant.
+              // Sibling navigation uses sync mode and a full off-screen
+              // x-translate, so doesn't need this.
+              ...(!isInitialLoad.current &&
+                direction.axis === "x" &&
+                direction.kind === "project" &&
+                direction.dir < 0 && { opacity: 0 }),
             }}
           >
             <ErrorBoundary>
@@ -185,6 +328,9 @@ function AppContent() {
                 <Routes location={location}>
                   <Route path="/" element={<Home />} />
                   <Route path="/project/:id" element={<ProjectDetail />} />
+                  <Route path="/work" element={<Work />} />
+                  <Route path="/skills" element={<SkillsPage />} />
+                  <Route path="/about" element={<AboutPage />} />
                 </Routes>
               </Suspense>
             </ErrorBoundary>

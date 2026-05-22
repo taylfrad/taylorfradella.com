@@ -553,6 +553,57 @@ html.theme-transition nav {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* PageHeader mobile dropdown — dark variant (Work page) */
+.page-mobile-dropdown--dark {
+  background-color: rgba(20, 30, 50, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.page-mobile-dropdown__item--dark {
+  color: rgba(248, 250, 252, 0.98);
+  text-align: center;
+  background: transparent;
+}
+.page-mobile-dropdown__item--dark:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.page-mobile-dropdown__item--dark.page-mobile-dropdown__item--active {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* PageHeader mobile dropdown — light variant (Skills, About pages) */
+.page-mobile-dropdown--light {
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  -webkit-backdrop-filter: saturate(1.2) blur(20px);
+  backdrop-filter: saturate(1.2) blur(20px);
+}
+.page-mobile-dropdown__item--light {
+  color: #6e6e73;
+  text-align: center;
+  background: transparent;
+}
+.page-mobile-dropdown__item--light:active {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.page-mobile-dropdown__item--light.page-mobile-dropdown__item--active {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+
+/* Blinking cursor for Workly cover letter video scene */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* Chevron bounce: CSS-only so hero avoids Framer every frame */
 @keyframes hero-chevron-bounce {
   0%, 100% { transform: translateY(0); }
@@ -843,3 +894,181 @@ html.theme-transition nav {
   }
 }
 
+/* ── About page — build-out reveal on mount ────────────────────────────────── */
+@keyframes about-fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.about-reveal__left {
+  animation: about-fade-up 1.2s 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+.about-reveal__right {
+  animation: about-fade-up 1.2s 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-reveal__left,
+  .about-reveal__right {
+    animation: none;
+  }
+}
+
+/* ── About page — responsive two-column collapse + footer tone ─────────────── */
+@media (max-width: 820px) {
+  .about-grid {
+    grid-template-columns: 1fr !important;
+    column-gap: 0 !important;
+    row-gap: 56px;
+  }
+}
+
+/* About edge fades — viewport-fixed strips at the top and bottom of the
+   screen that blur (and tint toward the page background color) whatever
+   scrolls underneath. Subtle — just a hint of feathering, not a curtain.
+   Multi-stop gradients approximate an ease-out curve for a smoother dissolve
+   than a single linear stop. */
+.about-edge-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 72px;
+  pointer-events: none;
+  z-index: 30;
+  -webkit-backdrop-filter: blur(1.5px);
+  backdrop-filter: blur(1.5px);
+  animation: about-edge-delay 0s 1.4s both;
+}
+@keyframes about-edge-delay {
+  from { visibility: hidden; }
+  to   { visibility: visible; }
+}
+.about-edge-fade--top {
+  top: 0;
+  height: 120px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  background: linear-gradient(
+    to bottom,
+    var(--bg-secondary) 0%,
+    var(--bg-secondary) 30%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
+}
+.about-edge-fade--bottom {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--bg-secondary) 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+/* Respect reduced motion / transparency: skip the blur and dim the
+   gradient slightly so the effect doesn't compete with content. */
+@media (prefers-reduced-transparency: reduce) {
+  .about-edge-fade {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Site-wide footer tint — subtle off-shade from --bg-secondary so the footer
+   reads as a distinct surface in both light and dark mode. Consumed by
+   Footer via var(--site-footer-bg, var(--bg-secondary)). */
+:root {
+  --site-footer-bg: #e2e6ed; /* slightly darker / cool of #f5f5f7 */
+}
+.dark {
+  --site-footer-bg: #232328; /* slightly lighter than #1d1d1f */
+}
+
+/* Hide all scrollbars on the Work page — both the inner scroll container
+   and the html/body scrollbar track. The page uses JS-driven scroll
+   animation so a native scrollbar serves no purpose. */
+.work-page { scrollbar-width: none; -ms-overflow-style: none; }
+.work-page::-webkit-scrollbar { display: none; width: 0; height: 0; }
+html:has(.work-page)::-webkit-scrollbar,
+html:has(.work-page) body::-webkit-scrollbar { width: 0; display: none; }
+html:has(.work-page),
+html:has(.work-page) body { scrollbar-width: none; }
+
+/* ── Work page — fade-up reveals & nav hovers ─────────────────────────────── */
+@keyframes work-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: var(--work-fade-target, 1);
+    transform: translateY(0);
+  }
+}
+/* Opacity-only fade — for elements that need to keep their own transform
+   (e.g. the big background logo, which is centered via translateY(-50%)
+   and would lose that centering if the shared keyframe overrode it). */
+@keyframes work-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--work-fade-target, 1);
+  }
+}
+.work-fade-up {
+  animation: work-fade-up 1.1s 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+.work-fade-up--logo {
+  /* Full shorthand overrides the parent .work-fade-up animation entirely
+     so the keyframe's `transform: translateY(0)` doesn't wipe out the
+     inline `translateY(-50%)` centering on the logo image. */
+  animation: work-fade-in 1.8s 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  --work-fade-target: 1;
+}
+.work-fade-up--mini {
+  --work-fade-target: 0.9;
+  animation-duration: 1.2s;
+  animation-delay: 0.3s;
+}
+.work-fade-up--cta {
+  animation-delay: 1.1s;
+}
+.work-page .work-nav__name:hover {
+  color: #fff;
+}
+.work-page nav a:hover {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+}
+.work-page .work-cta:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* On mobile, the background logo becomes a subtle blurred watermark instead
+   of being hidden. Repositioned center-right and enlarged to fill the
+   viewport as atmospheric texture, not competing with foreground content. */
+@media (max-width: 767px) {
+  .work-bg-logo {
+    right: auto !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 80vw !important;
+    opacity: 0.15;
+    filter: blur(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-fade-up,
+  .work-fade-up--logo,
+  .work-fade-up--mini,
+  .work-fade-up--cta {
+    animation: none;
+    opacity: var(--work-fade-target, 1);
+    transform: none;
+  }
+}

@@ -12,20 +12,11 @@ export const NAME_FONT_FAMILY = "font_shi8d64tg, sans-serif";
 /** Max RAF attempts for scroll-to-section retry (e.g. projects section not yet mounted) */
 export const SCROLL_RETRY_MAX_ATTEMPTS = 360;
 
-/** Dark background for hero, bokeh, fallbacks. */
-export const BACKGROUND_DARK = "#0F172A";
-
 /** Default accent color (e.g. portfolio, generic projects) */
 export const ACCENT_DEFAULT = "#1e5a8a";
 
 /** Workly project accent color */
 export const ACCENT_WORKLY = "#b3363d";
-
-/** Fixed header height in px (used for scroll-to-top offset) */
-export const FIXED_HEADER_HEIGHT = 80;
-
-/** Scrollbar reveal duration in ms before hiding again */
-export const SCROLLBAR_HIDE_MS = 700;
 
 /**
  * Z-index scale — keeps stacking order in one place.

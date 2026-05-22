@@ -9,6 +9,8 @@ export const projectsData = [
     role: "UI ENGINEER · PERSONAL",
     title: "Personal Portfolio Website",
     accentColor: ACCENT_DEFAULT,
+    // Deep blue → teal cyan: cool, calm, "interface" energy
+    gradientColors: [ACCENT_DEFAULT, "#0EA5E9"],
     tags: ["React", "Framer Motion", "Three.js"],
     description:
       "A modern portfolio featuring liquid glass UI surfaces, a physics-driven lanyard hero, and responsive motion tuned for desktop and mobile.",
@@ -79,8 +81,10 @@ export const projectsData = [
     id: 2,
     image: null, // TODO: add public/images/lionsden.png
     role: "FULL-STACK DEVELOPER",
-    title: "Lions Den Cinemas Website and Mobile App",
+    title: "Lions Den Cinemas",
     accentColor: "#c20000",
+    // Cinema red → deep wine: theatrical, low-light, premiere feel
+    gradientColors: ["#c20000", "#4A0E0E"],
     tags: ["React Native", "Node.js", "SQL", "GitHub"],
     description:
       "A full-stack cinema management system with a mobile app and website for browsing showtimes, purchasing tickets, and an admin panel for staff operations.",
@@ -146,6 +150,8 @@ export const projectsData = [
     role: "IOT & AI DEVELOPER",
     title: "SweetSpot",
     accentColor: "#22c55e",
+    // Green → teal: health/medical, calming
+    gradientColors: ["#22c55e", "#0E7490"],
     tags: ["Python", "Raspberry Pi", "Dexcom API", "AI"],
     description:
       "A Raspberry Pi-powered glucose monitoring system that tracks blood sugar levels and provides AI-driven health insights using the Dexcom API and Grok AI.",
@@ -209,6 +215,8 @@ export const projectsData = [
     role: "MOBILE APP DEVELOPER",
     title: "Workly",
     accentColor: ACCENT_WORKLY,
+    // Deep red → coral orange: swipe-app warmth, energy
+    gradientColors: [ACCENT_WORKLY, "#EA580C"],
     tags: ["Flutter", "Dart", "Firebase", "Mobile", "GitHub"],
     description:
       "A mobile job search app with a Tinder-like swipe interface, AI-powered matching, and cover letter generation built with Flutter and Firebase.",
@@ -268,6 +276,76 @@ export const projectsData = [
       "Cross-platform support (iOS, Android, Web) with Flutter",
       "Firebase backend with Firestore for real-time data sync",
       "Smooth animations and transitions for enhanced UX",
+    ],
+  },
+  {
+    id: 5,
+    image: null,
+    role: "HOMELAB ENGINEER · PERSONAL",
+    title: "TaylCraft",
+    accentColor: "#43A047",
+    // Minecraft grass green → dirt brown: literal block-world palette
+    gradientColors: ["#43A047", "#5D4037"],
+    tags: ["HTML/JS", "Node.js", "nginx", "Caddy"],
+    description:
+      "A self-hosted Minecraft Java server with a custom landing page showing live player status, whitelist requests via Discord webhooks, and a Dynmap world viewer.",
+    extendedDescription:
+      "TaylCraft is a self-hosted Minecraft Java server running on the homelab, paired with a custom landing page that surfaces live server state, accepts whitelist requests, and embeds a Dynmap world viewer. The landing page polls the Minecraft server for online player count, MOTD, and version, displaying them in a styled status panel. Whitelist requests are submitted through a small form that posts to a Discord webhook for moderator review. The deployment uses nginx and Caddy as reverse proxies in front of the Minecraft server and a small Node.js status API, and is run as a long-lived service alongside other homelab containers.",
+    status: "Live",
+    liveUrl: "https://taylcraft.com",
+    tools: ["HTML", "JavaScript", "Node.js", "nginx", "Caddy", "Discord Webhooks"],
+    timeline: [],
+    keyFeatures: [
+      "Live player count, MOTD, and version surfaced on the landing page",
+      "Whitelist request form routed to Discord for moderator approval",
+      "Embedded Dynmap world viewer for live world exploration",
+      "Self-hosted on homelab hardware with reverse-proxied access",
+    ],
+  },
+  {
+    id: 6,
+    image: null,
+    role: "FULL-STACK ENGINEER · PERSONAL",
+    title: "Fradella.dev",
+    accentColor: "#7C3AED",
+    // Purple → cyan: dashboard/tech, dark-mode console vibe
+    gradientColors: ["#7C3AED", "#0891B2"],
+    tags: ["React", "TypeScript", "Vite", "Fastify"],
+    description:
+      "A full-stack homelab dashboard with live CPU/RAM/temp monitoring, Pi-hole stats, Tailscale peers, and deep panels for Coolify, Immich, and more.",
+    extendedDescription:
+      "Fradella.dev is a full-stack operations dashboard for the homelab, built with React, TypeScript, and Vite on the frontend and a Fastify Node service on the backend. It surfaces live CPU, RAM, and temperature monitoring, Pi-hole DNS stats, Tailscale peer status, and deeper panels for services like Coolify and Immich. The frontend and backend are co-located in a single container that both serves the built SPA and exposes an internal JSON API. The design favors a dark, information-dense layout with Outfit and JetBrains Mono typography, oriented around quick at-a-glance reads of the homelab's health.",
+    status: "Live",
+    tools: ["React", "TypeScript", "Vite", "Fastify", "Node.js"],
+    timeline: [],
+    keyFeatures: [
+      "Live CPU, RAM, and temperature monitoring",
+      "Pi-hole stats and Tailscale peer status surfaced together",
+      "Deep panels for Coolify, Immich, and other homelab services",
+      "Single-container deployment serving SPA + internal JSON API",
+    ],
+  },
+  {
+    id: 7,
+    image: null,
+    role: "FRONTEND DEVELOPER · SENIOR CAPSTONE",
+    title: "FieldFlow",
+    accentColor: "#F97066",
+    // Coral → violet: matches the brand gradient used on the Work page
+    gradientColors: ["#F97066", "#A855F7"],
+    tags: ["Next.js", "React", "TypeScript", "Tailwind"],
+    description:
+      "An offline-first field service PWA with an AI voice pipeline using Whisper + GPT-4o-mini, built as a senior capstone.",
+    extendedDescription:
+      "FieldFlow is a senior capstone project: an offline-first progressive web app for field service technicians. It uses wa-sqlite for client-side storage so technicians can capture jobs, notes, and forms without network access, and syncs back when connectivity returns. An AI voice pipeline (Whisper transcription plus GPT-4o-mini structuring) lets technicians dictate visit notes that are parsed into structured form fields. The frontend is built with Next.js, React, TypeScript, and Tailwind, on top of a custom design system tuned for field conditions and one-handed use.",
+    status: "Completed",
+    tools: ["Next.js", "React", "TypeScript", "Tailwind", "wa-sqlite", "OpenAI Whisper", "GPT-4o-mini"],
+    timeline: [],
+    keyFeatures: [
+      "Offline-first with wa-sqlite client storage and background sync",
+      "AI voice pipeline: Whisper transcription + GPT-4o-mini structuring",
+      "Custom design system tuned for field conditions",
+      "Progressive web app installable on any device",
     ],
   },
 ];
