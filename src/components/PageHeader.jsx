@@ -113,6 +113,19 @@ export default function PageHeader({ active, theme = "dark" }) {
                   role="menu"
                   className={`absolute right-0 top-full mt-2 min-w-[160px] overflow-hidden rounded-2xl ${isDropdownDark ? "page-mobile-dropdown--dark" : "page-mobile-dropdown--light"}`}
                 >
+                  {/* Home button — mobile only, navigates back to hero */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { setIsMenuOpen(false); navigate("/"); }}
+                    className={`w-full px-5 py-3 text-[14px] font-medium tracking-wide transition-colors duration-150 ${
+                      isDropdownDark ? "page-mobile-dropdown__item--dark" : "page-mobile-dropdown__item--light"
+                    }${active === "home" ? " page-mobile-dropdown__item--active" : ""} ${
+                      isDropdownDark ? "border-b border-white/[0.08]" : "border-b border-black/[0.06]"
+                    }`}
+                  >
+                    Home
+                  </button>
                   {ROUTES.map((route, i, arr) => {
                     const isActive = route.key === active;
                     return (

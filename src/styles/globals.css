@@ -1054,8 +1054,9 @@ html:has(.work-page) body { scrollbar-width: none; }
   .work-bg-logo {
     right: auto !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translateX(-50%) !important;
     width: 80vw !important;
+    max-width: none !important;
     opacity: 0.15;
     filter: blur(6px);
   }
