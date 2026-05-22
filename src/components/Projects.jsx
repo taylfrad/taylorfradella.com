@@ -320,8 +320,13 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
         <button
           type="button"
           aria-label={mobilePlaying ? "Pause preview" : "Play preview"}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             setMobilePlaying((p) => !p);
           }}
           style={{
