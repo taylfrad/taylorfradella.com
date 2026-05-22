@@ -390,10 +390,9 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          paddingTop: "12vh",
         }}
       >
-        <motion.div style={{ y: logoParallaxY }}>
+        <motion.div style={{ y: logoParallaxY, marginTop: "8vh" }}>
           {entry.useAnimatedLogo ? (
             // FieldFlow: animated polygon mark + gradient wordmark. Stacked
             // vertically inside the parallax wrapper so they read as one unit
