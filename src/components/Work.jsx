@@ -334,11 +334,10 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
     target: localRef,
     offset: ["start end", "end start"],
   });
-  // Three-layer depth:
-  //   foreground content → 100% scroll speed (moves with the section)
-  //   big logo           → ~40% scroll speed (visibly lags — floats behind)
-  //   ambient gradient   → ~70% scroll speed (subtle background drift)
-  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-8vh", "8vh"]);
+  // Subtle ambient parallax — the background gradient drifts slightly
+  // during section transitions for a depth cue. The logo itself is
+  // statically centered (parallax on the logo caused positioning drift
+  // on the live site due to scroll-progress timing differences).
   const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-4vh", "4vh"]);
 
   // Trigger build-out when a non-first entry becomes visible
@@ -396,7 +395,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ y: logoParallaxY }}>
+        <div>
           {entry.useAnimatedLogo ? (
             // FieldFlow: animated polygon mark + gradient wordmark. Stacked
             // vertically inside the parallax wrapper so they read as one unit
@@ -430,7 +429,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
               }}
             />
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Left content: small logo + stacked metadata */}
