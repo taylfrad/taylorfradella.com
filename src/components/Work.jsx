@@ -338,8 +338,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
   //   foreground content → 100% scroll speed (moves with the section)
   //   big logo           → ~40% scroll speed (visibly lags — floats behind)
   //   ambient gradient   → ~70% scroll speed (subtle background drift)
-  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-15vh", "15vh"]);
-  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-8vh", "8vh"]);
+  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-8vh", "8vh"]);
+  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-4vh", "4vh"]);
 
   // Trigger build-out when a non-first entry becomes visible
   useEffect(() => {
@@ -387,10 +387,13 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         className="work-bg-logo pointer-events-none absolute select-none"
         style={{
           right: "12%",
-          top: "50%",
+          top: 0,
+          bottom: 0,
           width: "42vw",
           maxWidth: 580,
-          transform: "translateY(-50%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <motion.div style={{ y: logoParallaxY }}>
