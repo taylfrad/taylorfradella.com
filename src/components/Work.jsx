@@ -386,11 +386,11 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         aria-hidden
         className="work-bg-logo pointer-events-none absolute select-none"
         style={{
-          left: "68%",
+          right: "12%",
           top: "50%",
           width: "42vw",
           maxWidth: 580,
-          transform: "translate(-50%, -50%)",
+          transform: "translateY(-50%)",
         }}
       >
         <motion.div style={{ y: logoParallaxY }}>
@@ -432,10 +432,13 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
 
       {/* Left content: small logo + stacked metadata */}
       <div
-        className="work-entry__content relative w-full px-6 sm:px-8 md:flex md:w-1/2 md:justify-center md:pl-[8%] md:pr-0"
-        style={{ zIndex: 2 }}
+        className="work-entry__content relative px-6 sm:px-8 md:pl-0"
+        style={{
+          zIndex: 2,
+          maxWidth: 460,
+          marginLeft: "clamp(24px, 18%, 240px)",
+        }}
       >
-        <div className="w-full" style={{ maxWidth: 460 }}>
         {entry.useAnimatedLogo ? (
           // FieldFlow: animated mark + wordmark above the "Role" MetaGroup.
           // marginBottom matches the static <img> spacing so the metadata
@@ -465,7 +468,6 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         <MetaGroup label="Duration" value={entry.duration} delay={0.45} animate={shouldAnimate} />
         <MetaGroup label="Tools" value={entry.tools} delay={0.55} animate={shouldAnimate} />
         <MetaGroup label="Team" value={entry.team} delay={0.65} animate={shouldAnimate} />
-        </div>
       </div>
 
       {/* Location badge */}
