@@ -1,31 +1,22 @@
 import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Hero from "./Hero";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
 import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
 import { scrollToSection } from "@/lib/navigation";
 
-const Skills = lazy(() => import("./Skills"));
 const Projects = lazy(() => import("./Projects"));
-const About = lazy(() => import("./About"));
 const Footer = lazy(() => import("./Footer"));
 
 function HomeSections() {
   return (
     <div className="relative flex min-h-[100svh] flex-1 flex-col">
       <div className="post-hero-content relative flex flex-col">
-        {/* Always-mounted anchors so scroll works even while sections lazy-load */}
-        <div id="skills" className="h-0 w-0" aria-hidden />
-        <Suspense fallback={<div className="h-40" />}>
-          <Skills />
-        </Suspense>
+        {/* Projects is the only in-page section on home now. Skills / Work /
+            About each live on their own routes and slide up from below. */}
         <div id="projects" className="h-0 w-0" aria-hidden />
         <Suspense fallback={<div className="h-40" />}>
           <Projects />
-        </Suspense>
-        <div id="about" className="h-0 w-0" aria-hidden />
-        <Suspense fallback={<div className="h-40" />}>
-          <About />
         </Suspense>
         <div id="footer" className="h-0 w-0" aria-hidden />
         <Suspense fallback={<div className="h-40" />}>
@@ -38,7 +29,21 @@ function HomeSections() {
 
 export default function Home() {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const shouldScrollToProjects = Boolean(state?.scrollToProjects);
+
+  // Nav handler — Skills / Work / About are routes (vertical slide); Projects
+  // is the only in-page section that scrolls (it lives under the hero).
+  const handleNav = useCallback(
+    (target) => {
+      if (target === "work" || target === "skills" || target === "about") {
+        navigate(`/${target}`);
+        return;
+      }
+      scrollToSection(target);
+    },
+    [navigate],
+  );
 
   // If we're returning from a project detail view and immediately scrolling
   // back down to Projects, consider the hero "ready" up front.
@@ -159,7 +164,17 @@ export default function Home() {
   }, []);
 
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const start = window.scrollY;
+    if (start === 0) return;
+    const duration = Math.min(3000, 1200 + start * 0.15);
+    const startTime = performance.now();
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    function step(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      window.scrollTo(0, start * (1 - ease(t)));
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }, []);
 
   return (
@@ -172,7 +187,7 @@ export default function Home() {
       <div ref={sentinelRef} className="pointer-events-none absolute left-0 top-[90vh] h-px w-px" aria-hidden />
       <main id="main-content" className="relative z-10 flex flex-1 flex-col">
         <Hero
-          onNav={scrollToSection}
+          onNav={handleNav}
           onHeroReady={handleHeroReady}
           initialHeroReady={initialHeroReady}
         />

@@ -64,7 +64,7 @@ const MobileHeroMenu = memo(function MobileHeroMenu({
           role="menu"
           className="hero-mobile-dropdown absolute right-0 top-full mt-2 min-w-[160px] overflow-hidden rounded-2xl"
         >
-          {["Skills", "Projects", "About", "Contact"].map((label, i, arr) => (
+          {["Projects", "Skills", "Work", "About"].map((label, i, arr) => (
             <button
               key={label}
               type="button"
@@ -92,13 +92,6 @@ const DesktopHeroNav = memo(function DesktopHeroNav({ onNavClick }) {
   return (
     <nav className="ml-auto flex w-full flex-wrap items-center justify-end gap-1.5 text-xs font-medium tracking-tight text-ink-2 sm:w-auto sm:flex-nowrap sm:gap-3 sm:text-sm md:gap-6 md:text-base">
       <a
-        href="#skills"
-        onClick={(e) => handleClick(e, "skills")}
-        className={navButtonClass}
-      >
-        Skills
-      </a>
-      <a
         href="#projects"
         onClick={(e) => handleClick(e, "projects")}
         className={navButtonClass}
@@ -106,18 +99,25 @@ const DesktopHeroNav = memo(function DesktopHeroNav({ onNavClick }) {
         Projects
       </a>
       <a
-        href="#about"
+        href="/skills"
+        onClick={(e) => handleClick(e, "skills")}
+        className={navButtonClass}
+      >
+        Skills
+      </a>
+      <a
+        href="/work"
+        onClick={(e) => handleClick(e, "work")}
+        className={navButtonClass}
+      >
+        Work
+      </a>
+      <a
+        href="/about"
         onClick={(e) => handleClick(e, "about")}
         className={navButtonClass}
       >
         About
-      </a>
-      <a
-        href="#footer"
-        onClick={(e) => handleClick(e, "contact")}
-        className={navButtonClass}
-      >
-        Contact
       </a>
       <ModeToggle />
     </nav>
@@ -170,7 +170,7 @@ const HeroScrollChevron = memo(function HeroScrollChevron({ onClick }) {
         type="button"
         onClick={onClick}
         className="pointer-events-auto inline-flex items-center justify-center p-2 text-[var(--text-tertiary)] transition-colors duration-200 hover:text-[var(--text-primary)]"
-        aria-label="Scroll down to skills"
+        aria-label="Scroll down to projects"
       >
         <ChevronDownIcon size={36} />
       </button>
@@ -237,7 +237,7 @@ export default function Hero({
 
   const toggleMenu = useCallback(() => setIsMenuOpen((open) => !open), []);
   const handleChevronClick = useCallback(
-    () => handleNavClick("skills"),
+    () => handleNavClick("projects"),
     [handleNavClick],
   );
 

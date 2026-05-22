@@ -4,7 +4,7 @@ import { SunIcon } from "@/components/ui/sun-icon";
 import { MoonIcon } from "@/components/ui/moon-icon";
 import { useTheme } from "@/components/theme-provider";
 
-export function ModeToggle() {
+export function ModeToggle({ colorClass } = {}) {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
   const sunRef = useRef(null);
@@ -24,7 +24,7 @@ export function ModeToggle() {
       type="button"
       onClick={handleClick}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="floating-nav-btn group relative inline-flex h-9 items-center justify-center px-2 text-ink-1 transition-colors duration-200 ease-out hover:text-ink-1 motion-reduce:transition-none sm:px-2.5"
+      className={`floating-nav-btn group relative inline-flex h-9 items-center justify-center px-2 transition-colors duration-200 ease-out motion-reduce:transition-none sm:px-2.5 ${colorClass || "text-ink-1 hover:text-ink-1"}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isDark ? (
