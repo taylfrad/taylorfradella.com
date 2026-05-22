@@ -409,8 +409,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 width: "100%",
               }}
             >
-              <AnimatedLogoMark size={400} animate={!reducedMotion} />
-              <AnimatedLogoWordmark fontSize={56} />
+              <AnimatedLogoMark size={500} animate={!reducedMotion} />
+              <AnimatedLogoWordmark fontSize={64} />
             </div>
           ) : (
             <img
