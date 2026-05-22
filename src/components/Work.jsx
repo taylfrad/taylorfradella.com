@@ -390,7 +390,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          paddingTop: "5vh",
+          paddingTop: "8vh",
         }}
       >
         <motion.div style={{ y: logoParallaxY }}>
