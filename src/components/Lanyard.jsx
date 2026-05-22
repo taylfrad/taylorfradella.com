@@ -27,10 +27,10 @@ import {
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import * as THREE from "three";
 
-import almondMilkyOtf from "@/assets/fonts/AlmondMilky.otf";
+import almondMilkyWoff2 from "@/assets/fonts/AlmondMilky.woff2";
 import cardGLB from "@/assets/lanyard/card.glb";
-import lanyardPng from "@/assets/lanyard/lanyard.png";
-import rollSafeStickerPng from "@/assets/lanyard/roll-safe-sticker.png";
+import lanyardWebp from "@/assets/lanyard/lanyard.webp";
+import rollSafeStickerWebp from "@/assets/lanyard/roll-safe-sticker.webp";
 
 const STICKER_NAME_FONT_FAMILY = "Almond Milky";
 const STICKER_NAME_FONT_FALLBACK =
@@ -51,7 +51,7 @@ function loadStickerNameFont() {
   if (!stickerNameFontLoadPromise) {
     const font = new FontFace(
       STICKER_NAME_FONT_FAMILY,
-      `url(${almondMilkyOtf}) format("opentype")`,
+      `url(${almondMilkyWoff2}) format("woff2")`,
       { style: "normal", weight: "400" },
     );
     stickerNameFontLoadPromise = font
@@ -432,8 +432,8 @@ function Band({
   };
 
   const { nodes, materials } = useGLTF(cardGLB);
-  const texture = useTexture(lanyardPng);
-  const rollSafe = useTexture(rollSafeStickerPng);
+  const texture = useTexture(lanyardWebp);
+  const rollSafe = useTexture(rollSafeStickerWebp);
   const [cardFaceTex, setCardFaceTex] = useState(() => makeCardFaceTexture());
 
   useEffect(() => {

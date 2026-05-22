@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Hero from "./Hero";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
 import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
-import { scrollToSection } from "@/lib/navigation";
+import { scrollToSection, smoothScrollToTop } from "@/lib/navigation";
 
 const Projects = lazy(() => import("./Projects"));
 const Footer = lazy(() => import("./Footer"));
@@ -163,19 +163,7 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  const scrollToTop = useCallback(() => {
-    const start = window.scrollY;
-    if (start === 0) return;
-    const duration = Math.min(3000, 1200 + start * 0.15);
-    const startTime = performance.now();
-    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-    function step(now) {
-      const t = Math.min((now - startTime) / duration, 1);
-      window.scrollTo(0, start * (1 - ease(t)));
-      if (t < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }, []);
+  const scrollToTop = useCallback(() => smoothScrollToTop(), []);
 
   return (
     <div className="flex min-h-[100svh] flex-col text-ink-1">

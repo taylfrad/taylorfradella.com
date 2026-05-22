@@ -20,6 +20,23 @@ function smoothScrollTo(targetTop) {
 }
 
 /**
+ * Smoothly scrolls to the top of the page with distance-adaptive duration.
+ * Drop-in replacement for the duplicated scrollToTop pattern in page components.
+ */
+export function smoothScrollToTop() {
+  const start = window.scrollY;
+  if (start === 0) return;
+  const duration = Math.min(3000, 1200 + start * 0.15);
+  const startTime = performance.now();
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    window.scrollTo(0, start * (1 - easeInOutCubic(t)));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/**
  * Smoothly scrolls to a section by ID.
  * @param {string} sectionId - One of "hero", "/", "skills", "projects", "contact", "footer"
  */

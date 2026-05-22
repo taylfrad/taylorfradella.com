@@ -23,8 +23,7 @@ import { YoutubeIcon } from "@/components/ui/youtube";
 import { FileTextIcon } from "@/components/ui/file-text";
 import { ExternalLinkIcon } from "@/components/ui/external-link";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
-import PdfModal from "@/components/ui/PdfModal";
-
+const PdfModal = lazy(() => import("@/components/ui/PdfModal"));
 const Footer = lazy(() => import("./Footer"));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1032,12 +1031,16 @@ export default function ProjectDetail() {
       </Suspense>
 
       {/* ── PDF Manual Modal ──────────────────────────────────────────── */}
-      <PdfModal
-        open={manualOpen}
-        onClose={() => setManualOpen(false)}
-        src={project.userManual}
-        title="User Manual"
-      />
+      {manualOpen && (
+        <Suspense fallback={null}>
+          <PdfModal
+            open={manualOpen}
+            onClose={() => setManualOpen(false)}
+            src={project.userManual}
+            title="User Manual"
+          />
+        </Suspense>
+      )}
 
       {/* ── Back to top ───────────────────────────────────────────────── */}
       <button
