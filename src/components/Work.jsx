@@ -455,11 +455,11 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
             alt={entry.logoAlt}
             className={shouldAnimate ? "work-fade-up work-fade-up--mini" : ""}
             style={{
-              width: 140,
+              width: "clamp(100px, 20vw, 140px)",
               height: "auto",
               filter: entry.logoMiniFilter,
               opacity: 0.9,
-              marginBottom: 40,
+              marginBottom: "clamp(24px, 4vh, 40px)",
             }}
           />
         )}
@@ -515,8 +515,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
             className="work-cta"
             style={{
               display: "inline-block",
-              padding: "14px 36px",
-              fontSize: 12,
+              padding: "16px 40px",
+              fontSize: "clamp(11px, 1.2vw, 13px)",
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
@@ -542,13 +542,13 @@ function MetaGroup({ label, value, delay, animate }) {
     <div
       className={animate ? "work-fade-up" : ""}
       style={{
-        marginBottom: 28,
+        marginBottom: "clamp(20px, 3vh, 28px)",
         ...(animate ? { animationDelay: `${delay}s` } : {}),
       }}
     >
       <p
         style={{
-          fontSize: 13,
+          fontSize: "clamp(12px, 1.4vw, 14px)",
           fontWeight: 700,
           color: "rgba(255,255,255,0.95)",
           marginBottom: 4,
@@ -559,7 +559,7 @@ function MetaGroup({ label, value, delay, animate }) {
       </p>
       <p
         style={{
-          fontSize: 15,
+          fontSize: "clamp(14px, 1.6vw, 16px)",
           fontWeight: 400,
           color: "rgba(255,255,255,0.6)",
           lineHeight: 1.5,

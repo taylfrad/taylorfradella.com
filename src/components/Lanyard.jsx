@@ -319,7 +319,7 @@ export default function Lanyard({
         tabIndex={-1}
         camera={{ position, fov }}
         frameloop="demand"
-        dpr={[1, 1.5]}
+        dpr={[1, Math.min(window.devicePixelRatio, 2)]}
         gl={{ alpha: transparent }}
         onCreated={({ gl, invalidate }) => {
           gl.setClearColor(new Color(0x000000), transparent ? 0 : 1);

@@ -98,7 +98,7 @@ export default function PageHeader({ active, theme = "dark" }) {
                 aria-expanded={isMenuOpen}
                 aria-controls="page-mobile-menu"
                 onClick={() => setIsMenuOpen((o) => !o)}
-                className={`inline-flex h-9 w-9 items-center justify-center transition-colors duration-200 ease-out ${isDark ? "text-white/60 hover:text-white" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}
+                className={`inline-flex h-11 w-11 items-center justify-center transition-colors duration-200 ease-out ${isDark ? "text-white/60 hover:text-white" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"}`}
               >
                 {isMenuOpen ? (
                   <X className="h-4 w-4" aria-hidden />
