@@ -80,12 +80,6 @@ export default function Work() {
   const containerRef = useRef(null);
   const entryRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  // MOBILE-SWARM: scrollytelling — the fullpage wheel/touch/key snap hijack
-  // only attaches on desktop (hover + fine pointer). On phones the page uses
-  // NATIVE momentum scroll through the 100svh entries — no preventDefault on
-  // touch ever runs (MOBILE_PORT_SPEC §5.2). The per-entry build-out
-  // animations (IO at 0.5) and the progress dots (desktop-only) are unchanged.
-  const isDesktop = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   // Hide the body-level scrollbar while Work is mounted — the page has its
   // own scroll container so the body bar is redundant visual noise.
@@ -153,18 +147,15 @@ export default function Work() {
     requestAnimationFrame(step);
   }, []);
 
-  // Fullpage-style input: any meaningful wheel/touch/key input advances one
-  // entry. Small scroll motion triggers the full transition (with parallax)
-  // rather than partially scrolling between sections.
-  // MOBILE-SWARM: scrollytelling — desktop-only. On touch devices this effect
-  // does not attach, so wheel/touch/key handlers (and their preventDefault)
-  // never run; mobile gets native momentum scroll instead.
+  // Fullpage-style input on ALL devices: any meaningful wheel/touch/key input
+  // advances one entry. The slightest scroll/swipe triggers the full RAF-tweened
+  // transition (with parallax) rather than partially scrolling between sections.
   useEffect(() => {
-    if (!isDesktop) return undefined;
     const container = containerRef.current;
     if (!container) return undefined;
 
     let touchStartY = 0;
+    let gestureConsumed = false;
 
     const getCurrentIndex = () => {
       const h = container.clientHeight || 1;
@@ -198,14 +189,22 @@ export default function Work() {
 
     const onTouchStart = (e) => {
       touchStartY = e.touches[0].clientY;
+      gestureConsumed = false;
     };
 
-    const onTouchEnd = (e) => {
-      if (animatingRef.current) return;
-      const deltaY = touchStartY - e.changedTouches[0].clientY;
-      // ~40px swipe threshold — small but intentional.
-      if (Math.abs(deltaY) < 55) return;
+    // Block native scroll so even the slightest swipe glides to the next entry
+    // (fullpage feel) instead of free-scrolling. One advance per swipe gesture.
+    const onTouchMove = (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (gestureConsumed || animatingRef.current) return;
+      const deltaY = touchStartY - e.touches[0].clientY;
+      if (Math.abs(deltaY) < 12) return; // the slightest swipe advances
+      gestureConsumed = true;
       advance(deltaY > 0 ? 1 : -1);
+    };
+
+    const onTouchEnd = () => {
+      gestureConsumed = false;
     };
 
     const onKeyDown = (e) => {
@@ -219,16 +218,18 @@ export default function Work() {
 
     container.addEventListener("wheel", onWheel, { passive: false });
     container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: false });
     container.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       container.removeEventListener("wheel", onWheel);
       container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
       container.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [scrollToEntry, isDesktop]);
+  }, [scrollToEntry]);
 
   return (
     <div
@@ -346,15 +347,19 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
     target: localRef,
     offset: ["start end", "end start"],
   });
+  // Parallax now runs on mobile too: the fullpage snap drives the container
+  // scroll programmatically, so the background logo glides during transitions
+  // just like desktop. Gentler travel on mobile, where the logo is an 80vw
+  // blurred watermark rather than the right-anchored desktop wordmark.
   const logoParallaxY = useTransform(
     scrollYProgress,
     [0, 1],
-    isMobile ? ["0vh", "0vh"] : ["-10vh", "10vh"],
+    isMobile ? ["-6vh", "6vh"] : ["-10vh", "10vh"],
   );
   const ambientParallaxY = useTransform(
     scrollYProgress,
     [0, 1],
-    isMobile ? ["0vh", "0vh"] : ["-5vh", "5vh"],
+    isMobile ? ["-3vh", "3vh"] : ["-5vh", "5vh"],
   );
 
   // Trigger build-out when a non-first entry becomes visible
@@ -428,7 +433,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 width: "100%",
               }}
             >
-              <AnimatedLogoMark size={isMobile ? 280 : 500} animate={!reducedMotion && !isMobile} />
+              {/* Animate on mobile too (reanimated FieldFlow bg logo); reduced-motion still static. */}
+              <AnimatedLogoMark size={isMobile ? 280 : 500} animate={!reducedMotion} />
               <AnimatedLogoWordmark fontSize={isMobile ? 36 : 64} />
             </div>
           ) : (
