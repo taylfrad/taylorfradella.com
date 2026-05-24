@@ -80,6 +80,12 @@ export default function Work() {
   const containerRef = useRef(null);
   const entryRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  // MOBILE-SWARM: scrollytelling — the fullpage wheel/touch/key snap hijack
+  // only attaches on desktop (hover + fine pointer). On phones the page uses
+  // NATIVE momentum scroll through the 100svh entries — no preventDefault on
+  // touch ever runs (MOBILE_PORT_SPEC §5.2). The per-entry build-out
+  // animations (IO at 0.5) and the progress dots (desktop-only) are unchanged.
+  const isDesktop = useMediaQuery("(hover: hover) and (pointer: fine)");
 
   // Hide the body-level scrollbar while Work is mounted — the page has its
   // own scroll container so the body bar is redundant visual noise.
@@ -150,7 +156,11 @@ export default function Work() {
   // Fullpage-style input: any meaningful wheel/touch/key input advances one
   // entry. Small scroll motion triggers the full transition (with parallax)
   // rather than partially scrolling between sections.
+  // MOBILE-SWARM: scrollytelling — desktop-only. On touch devices this effect
+  // does not attach, so wheel/touch/key handlers (and their preventDefault)
+  // never run; mobile gets native momentum scroll instead.
   useEffect(() => {
+    if (!isDesktop) return undefined;
     const container = containerRef.current;
     if (!container) return undefined;
 
@@ -218,7 +228,7 @@ export default function Work() {
       container.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [scrollToEntry]);
+  }, [scrollToEntry, isDesktop]);
 
   return (
     <div

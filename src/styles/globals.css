@@ -1077,3 +1077,21 @@ html:has(.work-page) body { scrollbar-width: none; }
 @media (prefers-reduced-motion: reduce) {
   .scrolly-chevron { animation: none; }
 }
+
+/* MOBILE-SWARM: scrollytelling — dynamic-viewport pinned-scene height.
+   Pinned/sticky scrubbed children used bare 100vh, which on mobile ignores
+   the dynamic address bar and makes the pinned scene jump/clip as the bar
+   hides/shows. `svh` is the SMALLEST viewport, so a pinned scene sized to it
+   never gets clipped when the bar is visible — exactly what scroll-pinned
+   sections want (MOBILE_PORT_SPEC §5.1). `vh` fallback for old browsers.
+   These mirror Tailwind's `h-screen` / `min-h-screen` so they can replace
+   them 1:1 on the sticky children without disturbing the outer scrub math
+   (the outer containers stay in vh — see useStickyMotion offsets). */
+.h-screen-svh {
+  height: 100vh;
+  height: 100svh;
+}
+.min-h-screen-svh {
+  min-height: 100vh;
+  min-height: 100svh;
+}

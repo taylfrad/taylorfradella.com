@@ -68,7 +68,10 @@ const pageVariants = {
       return { x: "0%", y: "0%", opacity: 1 };
     }
     if (axis === "y") {
-      return { y: dir > 0 ? "100vh" : "-100vh", x: "0%", opacity: 1 };
+      // MOBILE-SWARM: scrollytelling — full off-screen translate uses dvh so
+      // the slide distance matches the live mobile viewport (no leftover
+      // sliver). Direction/timing/EASE unchanged — units only.
+      return { y: dir > 0 ? "100dvh" : "-100dvh", x: "0%", opacity: 1 };
     }
     if (kind === "sibling") {
       return { x: dir > 0 ? "100%" : "-100%", y: "0%" };
@@ -109,8 +112,9 @@ const pageVariants = {
       return { x: "0%", y: "0%", opacity: 0, transition: { duration: 0.15 } };
     }
     if (axis === "y") {
+      // MOBILE-SWARM: scrollytelling — dvh (units only; see initial variant).
       return {
-        y: dir > 0 ? "-100vh" : "100vh",
+        y: dir > 0 ? "-100dvh" : "100dvh",
         x: "0%",
         opacity: 1,
         transition: { y: { duration: Y_DURATION, ease: EASE } },

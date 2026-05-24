@@ -16,9 +16,26 @@ import { ExternalLinkIcon } from "@/components/ui/external-link";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
 import { easeIO, useScrollyInView } from "@/hooks/useScrollyProgress";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import useReducedMotion from "@/hooks/useReducedMotion";
 
 const PdfModal = lazy(() => import("@/components/ui/PdfModal"));
 const Footer = lazy(() => import("./Footer"));
+
+// MOBILE-SWARM: scrollytelling — reduced-motion source progress.
+// Every scroll-linked reveal in this file derives from a 0→1 progress value
+// fed into useTransform(...). Under prefers-reduced-motion we swap that source
+// for a constant motion value pinned at 1, so every derived reveal resolves to
+// its END (fully-revealed) state with no scrubbing — a coherent static path
+// that mirrors how Skills' SkillsStatic snaps everything to its final layout.
+// The useScroll hooks still run unconditionally (rules of hooks); we only
+// choose which value to consume. Non-reduced (desktop default) is byte-
+// identical to before. `clamp:true` (Framer default) means input 1 yields the
+// end of each range regardless of where the range sits.
+function useRevealProgress(liveProgress, staticValue = 1) {
+  const reduce = useReducedMotion();
+  const staticMv = useMotionValue(staticValue);
+  return reduce ? staticMv : liveProgress;
+}
 
 // Sticky scroll progress as a MotionValue: 0 when the tall outer container
 // begins pinning its sticky child, 1 when it finishes scrolling past. This is
@@ -169,11 +186,14 @@ function ScrollRevealImage({ src, alt, index, onClickImage }) {
     target: ref,
     offset: ["start end", "center center"],
   });
+  // MOBILE-SWARM: scrollytelling — reduced-motion users get the fully-open
+  // image (clip 0%, scale 1) instead of a scroll-scrubbed clip/scale reveal.
+  const p = useRevealProgress(scrollYProgress);
 
   // Fully closed at 0, fully open by 1 (when center hits mid-screen)
-  const clip = useTransform(scrollYProgress, [0, 1], [50, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.2, 1]);
-  const borderRadius = useTransform(scrollYProgress, [0, 1], [20, 12]);
+  const clip = useTransform(p, [0, 1], [50, 0]);
+  const scale = useTransform(p, [0, 1], [1.2, 1]);
+  const borderRadius = useTransform(p, [0, 1], [20, 12]);
 
   const clipPath = useMotionTemplate`inset(${clip}% round ${borderRadius}px)`;
 
@@ -246,7 +266,10 @@ function ProgressBarFill({ accent }) {
 function HeroSection({ project, accent }) {
   const containerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const p = useStickyMotion(containerRef);
+  const stickyP = useStickyMotion(containerRef);
+  // MOBILE-SWARM: scrollytelling — reduced-motion users get the fully-revealed
+  // end state (source pinned at 1); everyone else scrubs exactly as before.
+  const p = useRevealProgress(stickyP);
 
   // Scroll-driven values as motion values (same breakpoints + easeIO curve as
   // the old elerp() calls). Framer writes these straight to the DOM, so the
@@ -271,7 +294,10 @@ function HeroSection({ project, accent }) {
 
   return (
     <div ref={containerRef} style={{ height: isMobile ? "170vh" : "220vh", position: "relative" }}>
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
+      {/* MOBILE-SWARM: scrollytelling — pinned scene uses svh (smallest viewport)
+          so it never clips when the mobile address bar is visible; outer scrub
+          container stays in vh so useStickyMotion progress 0→1 is unchanged. */}
+      <div className="sticky top-0 flex h-screen-svh flex-col items-center justify-center overflow-hidden">
         {/* Accent glow — hidden on mobile for GPU performance */}
         {!isMobile && (
           <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-[12%] h-[55vh] w-[55vw] -translate-x-1/2 rounded-full" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: glowOp, filter: "blur(80px)" }} />
@@ -389,13 +415,15 @@ function StatementSpotlightsSection({ project, accent }) {
     target: sectionRef,
     offset: ["start 0.85", "end 0.5"],
   });
+  // MOBILE-SWARM: scrollytelling — reduced-motion end-state source.
+  const revealP = useRevealProgress(scrollYProgress);
 
   // Sticky pinned: content builds 0→60%, reading pause 60→100%. Motion values
   // (driven straight to the DOM) so scrolling doesn't re-render the section.
-  const titleOp = useTransform(scrollYProgress, [0, 0.12], [0, 1], { ease: easeIO });
-  const titleY = useTransform(scrollYProgress, [0, 0.12], [40, 0], { ease: easeIO });
-  const stmtOp = useTransform(scrollYProgress, [0.15, 0.28], [0, 1], { ease: easeIO });
-  const stmtY = useTransform(scrollYProgress, [0.15, 0.28], [28, 0], { ease: easeIO });
+  const titleOp = useTransform(revealP, [0, 0.12], [0, 1], { ease: easeIO });
+  const titleY = useTransform(revealP, [0, 0.12], [40, 0], { ease: easeIO });
+  const stmtOp = useTransform(revealP, [0.15, 0.28], [0, 1], { ease: easeIO });
+  const stmtY = useTransform(revealP, [0.15, 0.28], [28, 0], { ease: easeIO });
 
   const statement = project.statement;
   const spotlights = project.spotlights;
@@ -436,7 +464,8 @@ function StatementSpotlightsSection({ project, accent }) {
 
   return (
     <div ref={sectionRef} style={{ height: isMobile ? "200vh" : "220vh", position: "relative" }}>
-      <div className="sticky top-0 flex min-h-screen items-center" style={{ background: "var(--st-bg-alt)" }}>
+      {/* MOBILE-SWARM: scrollytelling — svh pinned child (see HeroSection note). */}
+      <div className="sticky top-0 flex min-h-screen-svh items-center" style={{ background: "var(--st-bg-alt)" }}>
         <section className="mx-auto w-full max-w-[1100px]" style={{ padding: "clamp(48px, 6vh, 80px) clamp(28px, 6vw, 80px)" }}>
           <div className={isMobile ? "flex flex-col gap-8" : "grid gap-14"} style={!isMobile ? { gridTemplateColumns: "1fr 1fr", alignItems: "start" } : undefined}>
 
@@ -465,7 +494,7 @@ function StatementSpotlightsSection({ project, accent }) {
                     key={i}
                     spotlight={s}
                     index={i}
-                    progress={scrollYProgress}
+                    progress={revealP}
                     accent={accent}
                     isMobile={isMobile}
                   />
@@ -536,19 +565,25 @@ function TechSection({ project, accent }) {
   const outerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const stickyP = useStickyMotion(outerRef);
+  // MOBILE-SWARM: scrollytelling — reduced-motion end-state for the reveals.
+  const revealP = useRevealProgress(stickyP);
 
-  // Horizontal text movement still driven by page-level scroll
+  // Horizontal text movement still driven by page-level scroll.
   const { scrollYProgress } = useScroll({
     target: outerRef,
     offset: ["start end", "end start"],
   });
+  // MOBILE-SWARM: scrollytelling — under reduced motion freeze the kinetic
+  // rows at mid-travel (0.5) so they sit centered/readable instead of being
+  // slammed to one edge (which a static 1 or 0 would do).
+  const kineticP = useRevealProgress(scrollYProgress, 0.5);
 
   // Sticky pinned: title 0→12%, rows 18→30%, reading pause 55→100%. Motion
   // values keep the whole row stack (many stroked spans) off the re-render path.
-  const titleOp = useTransform(stickyP, [0, 0.12], [0, 1], { ease: easeIO });
-  const titleY = useTransform(stickyP, [0, 0.12], [40, 0], { ease: easeIO });
-  const rowsOp = useTransform(stickyP, [0.18, 0.3], [0, 1], { ease: easeIO });
-  const rowsY = useTransform(stickyP, [0.18, 0.3], [24, 0], { ease: easeIO });
+  const titleOp = useTransform(revealP, [0, 0.12], [0, 1], { ease: easeIO });
+  const titleY = useTransform(revealP, [0, 0.12], [40, 0], { ease: easeIO });
+  const rowsOp = useTransform(revealP, [0.18, 0.3], [0, 1], { ease: easeIO });
+  const rowsY = useTransform(revealP, [0.18, 0.3], [24, 0], { ease: easeIO });
 
   const primaryName = project.primaryTool?.name || null;
 
@@ -590,7 +625,8 @@ function TechSection({ project, accent }) {
 
   return (
     <div ref={outerRef} style={{ height: "200vh", position: "relative" }}>
-      <div className="sticky top-0 flex min-h-screen items-center" style={{ background: "var(--st-bg)" }}>
+      {/* MOBILE-SWARM: scrollytelling — svh pinned child (see HeroSection note). */}
+      <div className="sticky top-0 flex min-h-screen-svh items-center" style={{ background: "var(--st-bg)" }}>
         <section className="relative w-full overflow-hidden py-12">
           {/* Phase 1: Title slides up first */}
           <motion.div className="mx-auto max-w-[860px] px-7 mb-10" style={{ opacity: titleOp, y: titleY }}>
@@ -607,7 +643,7 @@ function TechSection({ project, accent }) {
                 <ScrollTextRow
                   items={row.items}
                   accent={accent}
-                  scrollYProgress={scrollYProgress}
+                  scrollYProgress={kineticP}
                   speed={row.speed}
                   direction={row.direction}
                   opacity={row.opacity}
@@ -647,15 +683,18 @@ function FeaturesSection({ project, accent }) {
   const outerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
   const stickyP = useStickyMotion(outerRef);
+  // MOBILE-SWARM: scrollytelling — reduced-motion users get the fully-revealed
+  // end state; the bullets and summary reveal below also consume this source.
+  const revealP = useRevealProgress(stickyP);
 
   // Sticky pinned: title 0→10%, features 15→50%, links 50→56%, summary fade-in
   // ~10%, reading pause 55→100%. All motion values → no per-frame re-render.
-  const titleOp = useTransform(stickyP, [0, 0.1], [0, 1], { ease: easeIO });
-  const titleY = useTransform(stickyP, [0, 0.1], [40, 0], { ease: easeIO });
-  const linksOp = useTransform(stickyP, [0.5, 0.56], [0, 1], { ease: easeIO });
-  const linksY = useTransform(stickyP, [0.5, 0.56], [12, 0], { ease: easeIO });
+  const titleOp = useTransform(revealP, [0, 0.1], [0, 1], { ease: easeIO });
+  const titleY = useTransform(revealP, [0, 0.1], [40, 0], { ease: easeIO });
+  const linksOp = useTransform(revealP, [0.5, 0.56], [0, 1], { ease: easeIO });
+  const linksY = useTransform(revealP, [0.5, 0.56], [12, 0], { ease: easeIO });
   // Right column fade-in (replaces the old boolean opacity + CSS transition).
-  const summaryOp = useTransform(stickyP, [0.08, 0.18], [0, 1], { ease: easeIO });
+  const summaryOp = useTransform(revealP, [0.08, 0.18], [0, 1], { ease: easeIO });
 
   if (!project.keyFeatures || project.keyFeatures.length === 0) return null;
 
@@ -664,7 +703,8 @@ function FeaturesSection({ project, accent }) {
 
   return (
     <div ref={outerRef} style={{ height: isMobile ? "220vh" : "260vh", position: "relative" }}>
-      <div className="sticky top-0 flex min-h-screen items-center" style={{ background: "var(--st-bg-alt)" }}>
+      {/* MOBILE-SWARM: scrollytelling — svh pinned child (see HeroSection note). */}
+      <div className="sticky top-0 flex min-h-screen-svh items-center" style={{ background: "var(--st-bg-alt)" }}>
         <section className="mx-auto w-full max-w-[1100px]" style={{ padding: "clamp(48px, 6vh, 80px) clamp(28px, 6vw, 80px)" }}>
           <div className={isMobile ? "flex flex-col gap-8" : "grid gap-14"} style={!isMobile ? { gridTemplateColumns: "1fr 1fr", alignItems: "start" } : undefined}>
 
@@ -681,7 +721,7 @@ function FeaturesSection({ project, accent }) {
               {/* Feature bullets — stagger in after title */}
               <div>
                 {project.keyFeatures.map((f, i) => (
-                  <FeatureBullet key={i} text={f} index={i} total={total} progress={stickyP} accent={accent} />
+                  <FeatureBullet key={i} text={f} index={i} total={total} progress={revealP} accent={accent} />
                 ))}
               </div>
 
@@ -713,7 +753,7 @@ function FeaturesSection({ project, accent }) {
             {/* Right: Summary with sentence-by-sentence reveal */}
             {hasDescription && (
               <motion.div className={isMobile ? "" : "pt-2"} style={{ opacity: summaryOp }}>
-                <DescriptionReveal text={project.extendedDescription} progress={stickyP} accent={accent} />
+                <DescriptionReveal text={project.extendedDescription} progress={revealP} accent={accent} />
               </motion.div>
             )}
           </div>

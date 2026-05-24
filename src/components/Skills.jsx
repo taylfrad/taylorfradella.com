@@ -309,6 +309,11 @@ function SkillsScrollytelling() {
   const currentRef = useRef(0);
   const rafRef = useRef(null);
   const activeRef = useRef(false);
+  // MOBILE-SWARM: scrollytelling — cache the scrollable distance so the
+  // per-scroll path never reads window.innerHeight (which fluctuates with the
+  // mobile address bar and desynced progress vs. the now-svh pinned frame).
+  // Recomputed only on resize/orientationchange.
+  const scrollableRef = useRef(0);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // Mount intro: slide 0 builds out visually while the scrollbar stays at the
@@ -354,29 +359,57 @@ function SkillsScrollytelling() {
     };
   }, []);
 
-  // Update scroll target on scroll/resize — cheap, just reads getBoundingClientRect
+  // Update scroll target. MOBILE-SWARM: scrollytelling — the desync bug was
+  // reading window.innerHeight INSIDE the per-scroll handler: on iOS the
+  // address-bar show/hide changes innerHeight mid-scroll, so progress jumped
+  // even though the pinned (now svh) frame didn't move. Fix: cache the
+  // scrollable distance (containerH − viewportH) and recompute it only on a
+  // real resize / orientationchange (debounced via rAF). The per-scroll path
+  // then reads ONLY getBoundingClientRect().top against that stable cache, so
+  // the address bar can't desync it. innerHeight (not the svh child height) is
+  // the correct denominator here so progress still reaches a true 1.0 at the
+  // bottom of the scrub (matching the desktop baseline).
   useEffect(() => {
-    const computeTarget = () => {
+    let resizeRaf = null;
+
+    const measure = () => {
       const el = containerRef.current;
       if (!el) return;
-      const rect = el.getBoundingClientRect();
       const containerH = el.offsetHeight;
       const viewH = window.innerHeight;
-      const scrollable = containerH - viewH;
+      scrollableRef.current = Math.max(0, containerH - viewH);
+    };
+
+    const updateTarget = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const scrollable = scrollableRef.current;
       if (scrollable <= 0) {
         targetRef.current = 0;
         return;
       }
-      targetRef.current = clamp(-rect.top / scrollable);
+      targetRef.current = clamp(-el.getBoundingClientRect().top / scrollable);
     };
 
-    window.addEventListener("scroll", computeTarget, { passive: true });
-    window.addEventListener("resize", computeTarget, { passive: true });
-    computeTarget();
+    const onResize = () => {
+      if (resizeRaf != null) cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(() => {
+        measure();
+        updateTarget();
+      });
+    };
+
+    window.addEventListener("scroll", updateTarget, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("orientationchange", onResize);
+    measure();
+    updateTarget();
 
     return () => {
-      window.removeEventListener("scroll", computeTarget);
-      window.removeEventListener("resize", computeTarget);
+      window.removeEventListener("scroll", updateTarget);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      if (resizeRaf != null) cancelAnimationFrame(resizeRaf);
     };
   }, []);
 
@@ -445,8 +478,11 @@ function SkillsScrollytelling() {
         background: "var(--bg-secondary)",
       }}
     >
-      {/* Sticky viewport — pins to top of screen while parent scrolls past */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+      {/* Sticky viewport — pins to top of screen while parent scrolls past.
+          MOBILE-SWARM: scrollytelling — svh (smallest viewport) so the pinned
+          frame doesn't clip when the mobile address bar is visible; the
+          scroll math above caches its denominator so the bar can't desync it. */}
+      <div className="sticky top-0 h-screen-svh w-full overflow-hidden">
 
         <ScrollProgressDots
           activeIndex={activeIndex}
