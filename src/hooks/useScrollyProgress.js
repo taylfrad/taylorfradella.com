@@ -8,12 +8,11 @@
 // the motion curve matches the original elerp()-based reveals.
 
 import { useEffect, useState } from "react";
+import { easeInOutCubic } from "@/lib/easing";
 
-/** Cubic ease-in-out (0→1). Shared as the easing curve for scroll-linked
+/** Cubic ease-in-out (0→1). Re-exported as the easing curve for scroll-linked
  *  useTransform() ranges in ProjectDetail. */
-export function easeIO(t) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+export const easeIO = easeInOutCubic;
 
 // ─── InView (scroll + polling fallback, fires once) ────────────────────────
 

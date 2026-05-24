@@ -1,10 +1,9 @@
 /**
  * Shared navigation/scroll utilities.
  */
+import { easeInOutCubic } from "./easing";
 
 const SCROLL_DURATION = 1200;
-const easeInOutCubic = (t) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 function smoothScrollTo(targetTop) {
   const start = window.scrollY;

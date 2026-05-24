@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import PageHeader from "./PageHeader";
 import useReducedMotion from "@/hooks/useReducedMotion";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { easeInOutCubic } from "@/lib/easing";
 import {
   AnimatedLogoFull,
   AnimatedLogoMark,
@@ -135,14 +136,11 @@ export default function Work() {
     animatingRef.current = true;
     const duration = 1200;
     const startTime = performance.now();
-    // Cubic ease-in-out — soft start, soft stop. Matches Michelle Gore's pacing.
-    const ease = (t) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     function step(now) {
       const elapsed = now - startTime;
       const t = Math.min(elapsed / duration, 1);
-      container.scrollTop = startY + distance * ease(t);
+      container.scrollTop = startY + distance * easeInOutCubic(t);
       if (t < 1) {
         requestAnimationFrame(step);
       } else {
