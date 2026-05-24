@@ -8,17 +8,29 @@ import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null, info: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    // Surface the real cause. Without this, the boundary swallows the error,
+    // which makes device-specific crashes (e.g. older mobile Safari) very hard
+    // to diagnose — you only ever see "Something went wrong".
+    console.error("[ErrorBoundary]", error, info?.componentStack);
+    this.setState({ info });
   }
   render() {
     if (this.state.hasError) {
+      const { error, info } = this.state;
+      const details = `${error?.stack || error?.message || String(error)}${info?.componentStack || ""}`;
       return (
-        <div className="grid min-h-[100svh] place-items-center" style={{ background: "var(--bg-primary)" }}>
-          <div className="text-center">
-            <p className="mb-4 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Something went wrong</p>
+        <div className="grid min-h-[100svh] place-items-center px-6" style={{ background: "var(--bg-primary)" }}>
+          <div className="w-full max-w-md text-center">
+            <p className="mb-3 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Something went wrong</p>
+            {error?.message ? (
+              <p className="mb-4 break-words text-sm" style={{ color: "var(--text-secondary)" }}>{error.message}</p>
+            ) : null}
             <button
               onClick={() => window.location.reload()}
               className="rounded-lg px-4 py-2 text-sm font-medium"
@@ -26,6 +38,17 @@ class ErrorBoundary extends Component {
             >
               Reload page
             </button>
+            {details.trim() ? (
+              <details className="mt-6 text-left">
+                <summary className="cursor-pointer text-xs" style={{ color: "var(--text-tertiary)" }}>Error details</summary>
+                <pre
+                  className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap break-words rounded-lg p-3 text-[11px] leading-relaxed"
+                  style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)" }}
+                >
+                  {details}
+                </pre>
+              </details>
+            ) : null}
           </div>
         </div>
       );
