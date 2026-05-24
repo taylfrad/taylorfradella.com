@@ -1,4 +1,4 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const LD_RED = "#c20000";
 const LD_RED_DARK = "#8a0000";
@@ -6,7 +6,7 @@ const LD_RED_LIGHT = "#e63333";
 const LD_BG = "#0a0000";
 const LD_WHITE = "#f5f5f7";
 const LD_DIM = "rgba(220,210,210,0.5)";
-const LD_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const LD_FONT = VIDEO_FONT_STACK;
 
 function LDMonogram({ size = 100, glow = 0 }) {
   return (

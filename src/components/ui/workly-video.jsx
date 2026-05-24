@@ -1,9 +1,9 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const RED = "#b3363d";
 const RED_DARK = "#8a2329";
 const RED_LIGHT = "#d44a52";
-const FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = VIDEO_FONT_STACK;
 
 function WLogo({ size = 80, glow = 0 }) {
   return (

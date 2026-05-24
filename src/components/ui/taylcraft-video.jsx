@@ -1,4 +1,4 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const TC_GREEN = "#43A047";
 const TC_GREEN_DARK = "#2E7D32";
@@ -6,7 +6,7 @@ const TC_GREEN_LIGHT = "#66BB6A";
 const TC_BG = "#050908";
 const TC_WHITE = "#f5f5f7";
 const TC_DIM = "rgba(200,220,210,0.5)";
-const TC_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const TC_FONT = VIDEO_FONT_STACK;
 
 function TCMonogram({ size = 100, glow = 0 }) {
   const r = size * 0.18;

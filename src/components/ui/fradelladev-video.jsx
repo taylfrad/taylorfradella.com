@@ -1,4 +1,4 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const FD_PURPLE = "#7C3AED";
 const FD_PURPLE_DARK = "#5B21B6";
@@ -7,7 +7,7 @@ const FD_CYAN_LIGHT = "#22D3EE";
 const FD_BG = "#0A0A12";
 const FD_WHITE = "#f5f5f7";
 const FD_DIM = "rgba(200,210,230,0.5)";
-const FD_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FD_FONT = VIDEO_FONT_STACK;
 const FD_MONO = "'JetBrains Mono', monospace";
 const FD_AMBER = "#F59E0B";
 

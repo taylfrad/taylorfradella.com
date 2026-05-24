@@ -1,11 +1,11 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const TF_NAVY = "#0F172A";
 const TF_TEAL = "#4A8EB7";
 const TF_CYAN = "#2C6F85";
 const TF_WHITE = "#f5f5f7";
 const TF_DIM = "rgba(209,213,219,0.55)";
-const TF_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const TF_FONT = VIDEO_FONT_STACK;
 
 const P_BLUE = "#0071e3";
 const P_RED = "#c20000";

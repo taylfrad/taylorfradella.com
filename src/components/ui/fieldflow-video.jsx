@@ -1,4 +1,4 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const FF_CORAL = "#F97066";
 const FF_CORAL_DARK = "#DC2626";
@@ -8,7 +8,7 @@ const FF_VIOLET_LIGHT = "#C084FC";
 const FF_BG = "#0C0A14";
 const FF_WHITE = "#f5f5f7";
 const FF_DIM = "rgba(220,210,230,0.5)";
-const FF_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FF_FONT = VIDEO_FONT_STACK;
 const FF_MONO = "'JetBrains Mono', monospace";
 
 function FFMonogram({ size = 100, glow = 0 }) {

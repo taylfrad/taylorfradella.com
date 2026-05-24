@@ -1,4 +1,4 @@
-import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp } from "./video-stage";
+import { CardStage, Sprite, useSprite, useTime, animate, Easing, clamp, VIDEO_FONT_STACK } from "./video-stage";
 
 const SS_GREEN = "#22c55e";
 const SS_GREEN_DARK = "#16a34a";
@@ -6,7 +6,7 @@ const SS_GREEN_LIGHT = "#4ade80";
 const SS_BG = "#0a0f0a";
 const SS_WHITE = "#f5f5f7";
 const SS_DIM = "rgba(210,220,210,0.5)";
-const SS_FONT = "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const SS_FONT = VIDEO_FONT_STACK;
 
 function SSMonogram({ size = 100, glow = 0 }) {
   return (

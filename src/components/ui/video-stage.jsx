@@ -1,5 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
+// Shared font stack used by every project video scene (one source of truth).
+export const VIDEO_FONT_STACK =
+  "'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif";
+
 // Easing functions
 export const Easing = {
   linear: (t) => t,
