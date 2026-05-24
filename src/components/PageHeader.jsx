@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { NAME_FONT_FAMILY } from "@/constants";
+import { NAME_FONT_FAMILY, SCROLL_TO_PROJECTS_FLAG } from "@/constants";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTheme } from "@/components/theme-provider";
@@ -30,7 +30,7 @@ export default function PageHeader({ active, theme = "dark" }) {
       setIsMenuOpen(false);
       if (route.key === "projects") {
         try {
-          sessionStorage.setItem("scrollToProjectsPending", "1");
+          sessionStorage.setItem(SCROLL_TO_PROJECTS_FLAG, "1");
         } catch {
           // ignore
         }
