@@ -392,7 +392,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ y: logoParallaxY, marginTop: "12vh" }}>
+        <motion.div style={{ y: logoParallaxY, marginTop: "18vh" }}>
           {entry.useAnimatedLogo ? (
             // FieldFlow: animated polygon mark + gradient wordmark. Stacked
             // vertically inside the parallax wrapper so they read as one unit
