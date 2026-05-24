@@ -417,7 +417,10 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           justifyContent: "center",
         }}
       >
-        <motion.div style={{ y: logoParallaxY, marginTop: "22vh" }}>
+        {/* Desktop: no top offset — the outer flex centers the logo vertically
+            so it lines up with the centered left-hand text column. Mobile keeps
+            the lower watermark placement. */}
+        <motion.div style={{ y: logoParallaxY, marginTop: isMobile ? "22vh" : 0 }}>
           {entry.useAnimatedLogo ? (
             // FieldFlow: animated polygon mark + gradient wordmark. Stacked
             // vertically inside the parallax wrapper so they read as one unit
