@@ -8,7 +8,7 @@ import {
   memo,
 } from "react";
 import { Menu, X } from "lucide-react";
-import { ChevronDownIcon } from "@/components/ui/chevron-down";
+import ScrollCue from "@/components/ui/ScrollCue";
 
 import { ModeToggle } from "@/components/mode-toggle";
 import GlassSurface from "@/components/surfaces/GlassSurface";
@@ -172,7 +172,7 @@ const HeroScrollChevron = memo(function HeroScrollChevron({ onClick }) {
         className="pointer-events-auto inline-flex items-center justify-center p-2 text-[var(--text-tertiary)] transition-colors duration-200 hover:text-[var(--text-primary)]"
         aria-label="Scroll down to projects"
       >
-        <ChevronDownIcon size={36} />
+        <ScrollCue />
       </button>
     </div>
   );

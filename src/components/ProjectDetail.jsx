@@ -15,6 +15,7 @@ import { GithubIcon } from "@/components/ui/github";
 import { YoutubeIcon } from "@/components/ui/youtube";
 import { ExternalLinkIcon } from "@/components/ui/external-link";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
+import ScrollCue from "@/components/ui/ScrollCue";
 import { easeIO, useScrollyInView } from "@/hooks/useScrollyProgress";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import useReducedMotion from "@/hooks/useReducedMotion";
@@ -377,9 +378,8 @@ function HeroSection({ project, accent }) {
         </motion.div>
 
         {/* Scroll indicator */}
-        <motion.div className="absolute bottom-8 flex flex-col items-center gap-2" style={{ opacity: scrollInd }}>
-          <span className="text-[10px] font-medium uppercase tracking-[0.2em]" style={{ color: "var(--st-scroll-ind)" }}>Scroll</span>
-          <svg className="scrolly-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--st-scroll-ind)" strokeWidth="1.5"><path d="M3 5L7 9L11 5" /></svg>
+        <motion.div className="absolute bottom-8 flex flex-col items-center" style={{ opacity: scrollInd, color: "var(--st-scroll-ind)" }}>
+          <ScrollCue />
         </motion.div>
       </div>
     </div>

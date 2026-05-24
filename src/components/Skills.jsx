@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useReducedMotion from "@/hooks/useReducedMotion";
+import ScrollCue from "@/components/ui/ScrollCue";
 
 // ─── Capability data ────────────────────────────────────────────────────────────
 const capabilities = [
@@ -518,20 +519,10 @@ function SkillsScrollytelling() {
 
         {/* Bottom scroll hint — fades out as user begins scrolling */}
         <div
-          className="absolute bottom-8 left-1/2 z-[5] flex -translate-x-1/2 flex-col items-center gap-1.5"
+          className="absolute bottom-8 left-1/2 z-[5] -translate-x-1/2 text-[var(--text-3)]"
           style={{ opacity: clamp(1 - scrollProgress * 5) * 0.4 }}
-          aria-hidden
         >
-          <span className="text-[11px] font-medium uppercase tracking-[0.15em] text-[var(--text-3)]">
-            Scroll
-          </span>
-          <svg width="16" height="24" viewBox="0 0 16 24" fill="none" style={{ opacity: 0.5 }}>
-            <rect x="3.5" y="0.5" width="9" height="15" rx="4.5" stroke="var(--text-3)" strokeWidth="1" />
-            <circle cx="8" cy="5.5" r="1.5" fill="var(--text-3)">
-              <animate attributeName="cy" values="5;10;5" dur="2s" repeatCount="indefinite" />
-            </circle>
-            <path d="M4 19l4 4 4-4" stroke="var(--text-3)" strokeWidth="1" fill="none" />
-          </svg>
+          <ScrollCue />
         </div>
       </div>
     </section>
