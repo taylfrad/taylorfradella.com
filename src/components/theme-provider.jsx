@@ -95,7 +95,6 @@ export function ThemeProvider({ children }) {
   const value = useMemo(
     () => ({
       theme,
-      resolvedTheme: theme,
       prefersReducedMotion,
       shouldReduceEffects,
       setTheme,

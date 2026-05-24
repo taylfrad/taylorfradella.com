@@ -76,7 +76,6 @@ const AboutPage = lazy(() => import("./components/AboutPage"));
 // Uses tweens with smooth ease curves (not springs). Springs start at peak
 // velocity which reads as a "snap." Tweens give cinematic accel → decel.
 const EASE = [0.25, 0.1, 0.25, 1];    // smooth, unhurried cubic
-const EASE_ACCEL = [0.4, 0, 0.8, 1];  // gentle accelerating out
 
 // Vertical animation tuning — deliberate and cinematic.
 const Y_DURATION = 1.2;

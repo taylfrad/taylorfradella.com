@@ -162,42 +162,6 @@ export const Box = forwardRef(function Box(
   );
 });
 
-const TYPOGRAPHY_VARIANTS = {
-  body1: { fontSize: "1rem", lineHeight: 1.5 },
-  body2: { fontSize: "0.875rem", lineHeight: 1.43 },
-  h1: { fontSize: "2.5rem", lineHeight: 1.2, fontWeight: 700 },
-  h2: { fontSize: "2rem", lineHeight: 1.25, fontWeight: 700 },
-  h3: { fontSize: "1.75rem", lineHeight: 1.25, fontWeight: 700 },
-  h4: { fontSize: "1.5rem", lineHeight: 1.3, fontWeight: 700 },
-  h5: { fontSize: "1.25rem", lineHeight: 1.35, fontWeight: 700 },
-  h6: { fontSize: "1rem", lineHeight: 1.4, fontWeight: 700 },
-};
-
-export const Typography = forwardRef(function Typography(
-  { component = "p", variant = "body1", sx, style, className, noWrap = false, ...props },
-  ref
-) {
-  const width = _cachedWidth;
-  const resolvedStyle = sxToStyle(sx, width);
-  const noWrapStyle = noWrap
-    ? {
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }
-    : null;
-  const Comp = component;
-
-  return (
-    <Comp
-      ref={ref}
-      className={className}
-      style={{ ...TYPOGRAPHY_VARIANTS[variant], ...resolvedStyle, ...noWrapStyle, ...style }}
-      {...props}
-    />
-  );
-});
-
 export const IconButton = forwardRef(function IconButton(
   { component = "button", sx, style, className, type, ...props },
   ref
