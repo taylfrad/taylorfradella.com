@@ -529,10 +529,6 @@ html.theme-transition div {
   }
 }
 
-.bokeh-field {
-  pointer-events: none;
-}
-
 /* Hero: no backdrop-filter for 60fps (nav/menu/buttons over animated bg) */
 .hero-content .glass-surface,
 .hero-content .glass-btn {
@@ -853,29 +849,6 @@ html.theme-transition div {
 }
 
 
-/* ── Portfolio mini-hero preview ─────────────────────────────────────────────
- * Force the hero section to fill its scaled container (2×card size) instead of
- * min-h-[100svh]. This makes the Three.js canvas exactly 2×card_w × 2×card_h,
- * giving it a stable aspect ratio so the lanyard position matches the real hero.
- */
-.pv-scale-wrapper #hero {
-  min-height: 0 !important;
-  height: 100% !important;
-}
-
-/* React Three Fiber (R3F) measures the canvas container via getBoundingClientRect,
- * which returns the transform-scaled (50%) visual size instead of the layout size.
- * So R3F creates the Three.js canvas at 494×370 instead of 988×740, filling only
- * the top-left quarter of the mini-hero. Force the canvas to fill its positioned
- * ancestor (the relative R3F root div, which IS correctly 988×740 in layout).
- * R3F's ResizeObserver then detects the correct layout size and updates the renderer.
- */
-.pv-scale-wrapper canvas {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-}
 
 /* ── Skip navigation link ─────────────────────────────────────────────────── */
 .skip-nav {
