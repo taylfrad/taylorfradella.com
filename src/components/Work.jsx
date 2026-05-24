@@ -80,6 +80,11 @@ export default function Work() {
   const containerRef = useRef(null);
   const entryRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  // Desktop fills the true window via 100dvh (dynamic viewport). 100svh can
+  // render shorter than the real viewport on some browsers, leaving a black
+  // strip below the page. Mobile keeps 100svh — the stable small-viewport unit
+  // the mobile-swarm tuned so the dynamic toolbar can't clip section content.
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   // Hide the body-level scrollbar while Work is mounted — the page has its
   // own scroll container so the body bar is redundant visual noise.
@@ -236,8 +241,8 @@ export default function Work() {
       ref={containerRef}
       className="work-page relative w-full"
       style={{
-        minHeight: "100svh",
-        height: "100svh",
+        minHeight: isMobile ? "100svh" : "100dvh",
+        height: isMobile ? "100svh" : "100dvh",
         background: ENTRIES[0].background.split(",")[0] || "#09090B",
         color: "#fff",
         fontFamily: "var(--font-body, system-ui, sans-serif)",
@@ -382,7 +387,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
       className="relative flex items-center overflow-hidden"
       style={{
         width: "100%",
-        height: "100svh",
+        height: isMobile ? "100svh" : "100dvh",
         background: entry.background,
         // Brand gradient CSS variables for the animated logo (FieldFlow only;
         // other entries set no vars and the spread is a no-op).
