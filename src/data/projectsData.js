@@ -76,6 +76,44 @@ export const projectsData = [
       "Optimized performance with Vite build tool",
       "Accessible navigation with semantic HTML and keyboard support",
     ],
+    // ── Scrollytelling data ──────────────────────────────────────────────
+    statement: {
+      before: "Built from the ground up for",
+      highlights: ["visual polish", "motion quality", "responsive usability"],
+    },
+    spotlights: [
+      {
+        title: "Liquid Glass",
+        text: "A custom visual system for surfaces and overlays with graceful fallbacks across every device.",
+      },
+      {
+        title: "Physics Lanyard",
+        text: "Three.js-powered hero with drag interaction, swing-in animation, and tuned mobile positioning.",
+      },
+      {
+        title: "Motion Design",
+        text: "Framer Motion animations paired with reduced-effects support for smooth, accessible experiences.",
+      },
+    ],
+    primaryTool: {
+      name: "React",
+      label: "Primary Framework",
+      description:
+        "Component-based UI with hooks, context, and the full React ecosystem powering every interaction.",
+    },
+    toolsDetailed: [
+      { name: "Framer Motion", category: "Animation" },
+      { name: "Three.js", category: "3D Graphics" },
+      { name: "React Three Fiber", category: "React 3D" },
+      { name: "Rapier Physics", category: "Physics Engine" },
+      { name: "Tailwind CSS", category: "Styling" },
+      { name: "Vite", category: "Build Tool" },
+      { name: "React Router", category: "Navigation" },
+      { name: "Intersection Observer", category: "Scroll API" },
+      { name: "Radix UI", category: "Primitives" },
+      { name: "JavaScript", category: "Language" },
+      { name: "ESLint", category: "Linting" },
+    ],
   },
   {
     id: 2,
@@ -89,7 +127,7 @@ export const projectsData = [
     description:
       "A full-stack cinema management system with a mobile app and website for browsing showtimes, purchasing tickets, and an admin panel for staff operations.",
     extendedDescription:
-      "Lions Den Cinemas represents a comprehensive full-stack solution that seamlessly connects customers with cinema services through multiple platforms. The project encompasses a cross-platform mobile application built with React Native, a responsive web interface, and a powerful administrative dashboard. Customers can browse current and upcoming movie showtimes, view detailed film information, and purchase tickets and concessions either as guests or through authenticated accounts. The mobile app provides a native experience on both iOS and Android devices, with smooth navigation and intuitive user flows. The web interface ensures desktop users have full access to all features, while the admin panel empowers cinema staff to manage movie listings, update showtimes, adjust ticket pricing, and monitor inventory in real-time. The backend architecture, built with Node.js and Express, provides RESTful APIs that handle user authentication via JWT tokens, secure payment processing, and real-time inventory management. The PostgreSQL database stores all cinema data, including user accounts, movie information, showtimes, ticket sales, and concession inventory. The system ensures data consistency across all platforms, with the admin panel providing immediate updates that reflect instantly in both the mobile app and website. This project demonstrates expertise in full-stack development, team collaboration, database design, API architecture, and creating intuitive user experiences for both end-users and administrators.",
+      "Lions Den Cinemas connects customers with cinema services through a React Native mobile app, responsive website, and admin dashboard — all powered by a shared Node.js backend. Customers browse showtimes, purchase tickets and concessions, and manage accounts across platforms. The admin panel lets staff update listings, pricing, and inventory in real time. The backend uses Express with JWT authentication, PostgreSQL for data storage, and RESTful APIs that keep every platform in sync.",
     status: "Completed",
     github:
       "https://github.com/Southeastern-Louisiana-University/cmps383-2025-sp-p03-g06",
@@ -143,6 +181,24 @@ export const projectsData = [
       "Responsive web interface for desktop users",
       "JWT-based authentication and session management",
     ],
+    statement: {
+      before: "A complete cinema platform connecting",
+      highlights: ["mobile customers", "web users", "staff operations"],
+    },
+    spotlights: [
+      { title: "Multi-Platform", text: "React Native mobile app, responsive website, and admin dashboard — all sharing one backend." },
+      { title: "Real-Time Sync", text: "Showtimes, inventory, and ticket availability update instantly across every platform." },
+      { title: "Secure Commerce", text: "JWT authentication, guest checkout, and payment processing with full data consistency." },
+    ],
+    primaryTool: { name: "React Native", label: "Mobile Framework", description: "Cross-platform mobile development delivering native iOS and Android experiences from a single codebase." },
+    toolsDetailed: [
+      { name: "React Native", category: "Mobile" },
+      { name: "Node.js", category: "Runtime" },
+      { name: "Express", category: "API Framework" },
+      { name: "PostgreSQL", category: "Database" },
+      { name: "RESTful API", category: "Architecture" },
+      { name: "JavaScript", category: "Language" },
+    ],
   },
   {
     id: 3,
@@ -156,7 +212,7 @@ export const projectsData = [
     description:
       "A Raspberry Pi-powered glucose monitoring system that tracks blood sugar levels and provides AI-driven health insights using the Dexcom API and Grok AI.",
     extendedDescription:
-      "SweetSpot is an innovative health monitoring solution that bridges hardware, software, and artificial intelligence to create a comprehensive diabetes management system. The project integrates a Raspberry Pi as the central processing unit, connecting to the Dexcom API to retrieve real-time glucose level data from continuous glucose monitors. The system processes this data using Python, implementing sophisticated algorithms to identify patterns, trends, and potential health concerns. Grok AI integration enables the system to provide personalized health insights, generating recommendations based on individual glucose patterns, meal timing, exercise habits, and historical data. The user interface, designed with a modern grey and bright green color scheme, displays real-time glucose readings, interactive trend graphs, and AI-generated analysis in an intuitive dashboard format. The visualization system uses Python libraries to create clear, actionable charts that help users understand their glucose patterns over time. The system can predict future glucose readings based on historical data and current trends, alerting users to potential issues before they occur. SweetSpot demonstrates expertise in hardware integration, API integration, data processing, AI implementation, and creating user-friendly interfaces for health technology. The project showcases the ability to work with embedded systems, process real-time data streams, and leverage AI to provide meaningful insights that improve user health outcomes.",
+      "SweetSpot connects a Raspberry Pi to the Dexcom API for continuous glucose monitoring, processing real-time data with Python to identify patterns and trends. Grok AI analyzes glucose history, meal timing, and exercise habits to generate personalized health insights and predictive alerts. The dashboard displays live readings, interactive trend graphs, and AI recommendations in a clean interface designed for quick, actionable health decisions.",
     status: "Completed",
     youtube:
       "https://www.youtube.com/watch?v=64Pnq-MybS8&list=PLk22IJ-X9itqH1UIuWYtNs3cfTwHqOIvM&index=14",
@@ -208,6 +264,23 @@ export const projectsData = [
       "Historical trend analysis and predictive glucose readings",
       "Python-based data processing and visualization",
     ],
+    statement: {
+      before: "Bridging hardware and AI for",
+      highlights: ["real-time monitoring", "predictive insights", "health outcomes"],
+    },
+    spotlights: [
+      { title: "Hardware Integration", text: "Raspberry Pi processing unit connected to Dexcom CGM for continuous glucose data capture." },
+      { title: "AI Insights", text: "Grok AI analyzes glucose patterns and generates personalized health recommendations." },
+      { title: "Live Dashboard", text: "Interactive trend graphs, real-time readings, and predictive alerts in one clear interface." },
+    ],
+    primaryTool: { name: "Python", label: "Core Language", description: "Data processing pipeline, API integration, AI orchestration, and visualization — all in Python." },
+    toolsDetailed: [
+      { name: "Python", category: "Language" },
+      { name: "Raspberry Pi", category: "Hardware" },
+      { name: "Dexcom API", category: "Data Source" },
+      { name: "Grok AI", category: "Intelligence" },
+      { name: "Python Libraries", category: "Visualization" },
+    ],
   },
   {
     id: 4,
@@ -221,7 +294,7 @@ export const projectsData = [
     description:
       "A mobile job search app with a Tinder-like swipe interface, AI-powered matching, and cover letter generation built with Flutter and Firebase.",
     extendedDescription:
-      "Workly revolutionizes the job search experience by combining an intuitive, gamified interface with powerful AI-driven features. Built with Flutter for true cross-platform compatibility, the app provides a native experience on iOS, Android, and web platforms. The core interaction model uses a Tinder-like swipe interface, allowing job seekers to quickly browse opportunities by swiping right on interesting positions or left to pass, making the traditionally tedious job search process fast, engaging, and enjoyable. The app features sophisticated AI-powered job matching that analyzes user qualifications, skills, experience, and preferences to calculate a matching score for each job opportunity. This intelligent matching system helps users focus on positions that align with their career goals and qualifications. One of Workly's standout features is the AI cover letter generator, which creates personalized cover letters tailored to specific job postings, saving users significant time while ensuring each application is customized and relevant. The backend infrastructure, built entirely on Firebase, leverages Cloud Firestore for real-time data synchronization, ensuring job listings, user profiles, and application statuses update instantly across all devices. Firebase Authentication provides secure user account management, while Firebase Cloud Functions handle server-side logic for job matching algorithms and AI processing. The app includes comprehensive user profile management, allowing job seekers to upload resumes, specify skills, set preferences, and track their application history. The Provider state management pattern ensures efficient data flow and reactive UI updates throughout the application. Workly demonstrates expertise in cross-platform mobile development, Firebase backend services, AI integration, and creating engaging user experiences that solve real-world problems.",
+      "Workly turns job searching into a swipe-based experience built with Flutter for iOS, Android, and web. Swipe right on positions that interest you, left to pass — fast, engaging, and enjoyable. AI-powered matching scores each opportunity against your qualifications and preferences. The cover letter generator creates tailored applications in seconds. Firebase handles real-time sync, authentication, and serverless processing across all devices.",
     status: "Completed",
     github: "https://github.com/maheessh/workly",
     userManual: "/docs/workly-user-manual.pdf",
@@ -277,6 +350,25 @@ export const projectsData = [
       "Firebase backend with Firestore for real-time data sync",
       "Smooth animations and transitions for enhanced UX",
     ],
+    statement: {
+      before: "Reimagining job search with",
+      highlights: ["gamified interaction", "AI matching", "instant applications"],
+    },
+    spotlights: [
+      { title: "Swipe Interface", text: "Tinder-like card swiping makes browsing jobs fast, engaging, and enjoyable." },
+      { title: "AI Matching", text: "Intelligent scoring analyzes qualifications and preferences to surface the best-fit positions." },
+      { title: "Cover Letters", text: "AI-generated cover letters tailored to each posting — personalized in seconds." },
+    ],
+    primaryTool: { name: "Flutter", label: "App Framework", description: "True cross-platform development delivering native iOS, Android, and web experiences from one Dart codebase." },
+    toolsDetailed: [
+      { name: "Flutter", category: "Framework" },
+      { name: "Dart", category: "Language" },
+      { name: "Firebase", category: "Backend" },
+      { name: "Firestore", category: "Database" },
+      { name: "Firebase Auth", category: "Identity" },
+      { name: "Cloud Functions", category: "Serverless" },
+      { name: "Provider", category: "State" },
+    ],
   },
   {
     id: 5,
@@ -301,6 +393,24 @@ export const projectsData = [
       "Embedded Dynmap world viewer for live world exploration",
       "Self-hosted on homelab hardware with reverse-proxied access",
     ],
+    statement: {
+      before: "A self-hosted server with",
+      highlights: ["live status", "community tools", "world exploration"],
+    },
+    spotlights: [
+      { title: "Live Status", text: "Landing page polls the server for player count, MOTD, and version in real time." },
+      { title: "Discord Integration", text: "Whitelist requests submit via webhook for moderator review — no manual server access needed." },
+      { title: "World Viewer", text: "Embedded Dynmap lets visitors explore the live world from the browser." },
+    ],
+    primaryTool: { name: "Node.js", label: "Status API", description: "Lightweight Node service polling the Minecraft server and serving live status data to the landing page." },
+    toolsDetailed: [
+      { name: "HTML", category: "Markup" },
+      { name: "JavaScript", category: "Language" },
+      { name: "Node.js", category: "Runtime" },
+      { name: "nginx", category: "Proxy" },
+      { name: "Caddy", category: "Proxy" },
+      { name: "Discord Webhooks", category: "Integration" },
+    ],
   },
   {
     id: 6,
@@ -324,6 +434,23 @@ export const projectsData = [
       "Deep panels for Coolify, Immich, and other homelab services",
       "Single-container deployment serving SPA + internal JSON API",
     ],
+    statement: {
+      before: "One dashboard for",
+      highlights: ["system health", "network status", "service management"],
+    },
+    spotlights: [
+      { title: "Live Metrics", text: "CPU, RAM, and temperature readings streamed in real time from the homelab." },
+      { title: "Network View", text: "Pi-hole DNS stats and Tailscale peer status in one unified panel." },
+      { title: "Service Panels", text: "Deep-dive views for Coolify, Immich, and other self-hosted services." },
+    ],
+    primaryTool: { name: "React", label: "Frontend", description: "TypeScript React SPA with Vite, delivering an information-dense dark dashboard with real-time data." },
+    toolsDetailed: [
+      { name: "React", category: "Framework" },
+      { name: "TypeScript", category: "Language" },
+      { name: "Vite", category: "Build Tool" },
+      { name: "Fastify", category: "API Server" },
+      { name: "Node.js", category: "Runtime" },
+    ],
   },
   {
     id: 7,
@@ -346,6 +473,25 @@ export const projectsData = [
       "AI voice pipeline: Whisper transcription + GPT-4o-mini structuring",
       "Custom design system tuned for field conditions",
       "Progressive web app installable on any device",
+    ],
+    statement: {
+      before: "Field service reimagined with",
+      highlights: ["offline-first storage", "voice AI", "one-handed design"],
+    },
+    spotlights: [
+      { title: "Offline-First", text: "wa-sqlite client storage captures jobs and forms without network — syncs when connectivity returns." },
+      { title: "Voice Pipeline", text: "Whisper transcribes dictated notes, GPT-4o-mini structures them into form fields automatically." },
+      { title: "Field-Ready", text: "Custom design system tuned for outdoor conditions, gloves, and one-handed use." },
+    ],
+    primaryTool: { name: "Next.js", label: "App Framework", description: "React meta-framework powering the PWA with server-side rendering, API routes, and optimized builds." },
+    toolsDetailed: [
+      { name: "Next.js", category: "Framework" },
+      { name: "React", category: "UI Library" },
+      { name: "TypeScript", category: "Language" },
+      { name: "Tailwind", category: "Styling" },
+      { name: "wa-sqlite", category: "Client DB" },
+      { name: "OpenAI Whisper", category: "Speech AI" },
+      { name: "GPT-4o-mini", category: "Language AI" },
     ],
   },
 ];

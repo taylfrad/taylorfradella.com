@@ -1,9 +1,9 @@
-import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Hero from "./Hero";
-import { ChevronUpIcon } from "@/components/ui/chevron-up";
+import BackToTop from "@/components/ui/BackToTop";
 import { SCROLL_TO_PROJECTS_FLAG } from "@/constants";
-import { scrollToSection, smoothScrollToTop } from "@/lib/navigation";
+import { scrollToSection } from "@/lib/navigation";
 
 const Projects = lazy(() => import("./Projects"));
 const Footer = lazy(() => import("./Footer"));
@@ -146,33 +146,12 @@ export default function Home() {
     return () => observer.disconnect();
   }, [shouldScrollToProjects, clearPendingProjectsScroll, state]);
 
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const sentinelRef = useRef(null);
-
-  // IntersectionObserver on a sentinel at ~90vh — fires once on cross,
-  // replacing a per-frame scroll listener that called setState on every tick.
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowBackToTop(!entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollToTop = useCallback(() => smoothScrollToTop(), []);
 
   return (
     <div className="flex min-h-[100svh] flex-col text-ink-1">
       <a href="#main-content" className="skip-nav">
         Skip to main content
       </a>
-      {/* Sentinel for back-to-top IntersectionObserver — when this scrolls
-          out of view (~90vh from top), the back-to-top button appears. */}
-      <div ref={sentinelRef} className="pointer-events-none absolute left-0 top-[90vh] h-px w-px" aria-hidden />
       <main id="main-content" className="relative z-10 flex flex-1 flex-col">
         <Hero
           onNav={handleNav}
@@ -183,19 +162,7 @@ export default function Home() {
         <HomeSections />
       </main>
 
-      <button
-        type="button"
-        onClick={scrollToTop}
-        className={`fixed bottom-6 right-6 z-50 inline-flex items-center justify-center p-2 text-[var(--text-tertiary)] transition-all duration-300 ease-out hover:text-[var(--text-primary)] md:bottom-8 md:right-8 ${
-          showBackToTop
-            ? "translate-x-0 opacity-100"
-            : "translate-x-16 opacity-0 pointer-events-none"
-        }`}
-        aria-label="Back to top"
-        title="Back to top"
-      >
-        <ChevronUpIcon size={36} />
-      </button>
+      <BackToTop />
     </div>
   );
 }

@@ -58,6 +58,10 @@ const EASE_ACCEL = [0.4, 0, 0.8, 1];  // gentle accelerating out
 // Vertical animation tuning — deliberate and cinematic.
 const Y_DURATION = 1.2;
 
+// Project transitions — ribbon slide, both pages move together.
+const PROJECT_DURATION = 0.7;
+const PROJECT_EASE = [0.4, 0, 0.2, 1]; // smooth decel — iOS-like
+
 const pageVariants = {
   initial: ({ axis, dir, kind }) => {
     if (axis === "none") {
@@ -69,13 +73,10 @@ const pageVariants = {
     if (kind === "sibling") {
       return { x: dir > 0 ? "100%" : "-100%", y: "0%" };
     }
-    return {
-      x: dir > 0 ? "100%" : "-30%",
-      y: "0%",
-      ...(dir < 0 && { opacity: 0 }),
-    };
+    // Project: enter from fully off-screen
+    return { x: dir > 0 ? "100%" : "-100%", y: "0%", opacity: 1 };
   },
-  animate: ({ axis, dir, kind }) => {
+  animate: ({ axis, kind }) => {
     if (axis === "none") {
       return { x: "0%", y: "0%", opacity: 1, transition: { duration: 0 } };
     }
@@ -95,14 +96,12 @@ const pageVariants = {
         transition: { x: { duration: Y_DURATION, ease: EASE } },
       };
     }
+    // Project: slide to center
     return {
       x: "0%",
       y: "0%",
       opacity: 1,
-      transition: {
-        x: { duration: Y_DURATION, ease: EASE },
-        opacity: dir < 0 ? { duration: 0.6, ease: EASE } : { duration: 0 },
-      },
+      transition: { x: { duration: PROJECT_DURATION, ease: PROJECT_EASE } },
     };
   },
   exit: ({ axis, dir, kind }) => {
@@ -125,19 +124,13 @@ const pageVariants = {
         transition: { x: { duration: Y_DURATION, ease: EASE } },
       };
     }
-    return dir > 0
-      ? {
-          opacity: 0,
-          transition: { opacity: { duration: 0.6, ease: EASE } },
-        }
-      : {
-          x: "20%",
-          opacity: 0,
-          transition: {
-            x: { duration: Y_DURATION, ease: EASE },
-            opacity: { duration: 0.6, ease: EASE },
-          },
-        };
+    // Project: exit fully off-screen in opposite direction
+    return {
+      x: dir > 0 ? "-100%" : "100%",
+      y: "0%",
+      opacity: 1,
+      transition: { x: { duration: PROJECT_DURATION, ease: PROJECT_EASE } },
+    };
   },
 };
 
@@ -288,15 +281,7 @@ function AppContent() {
           // Vertical transitions stay in "sync" both directions so the two
           // pages move together (one sliding off as the other slides on).
           // Horizontal keeps the existing sync/wait split.
-          mode={
-            direction.axis === "y"
-              ? "sync"
-              : direction.kind === "sibling"
-                ? "sync"
-                : direction.dir > 0
-                  ? "sync"
-                  : "wait"
-          }
+          mode="sync"
           onExitComplete={handleExitComplete}
         >
           <motion.div
@@ -313,14 +298,6 @@ function AppContent() {
               minHeight: "100svh",
               background: "var(--bg-secondary)",
               willChange: direction.axis !== "none" ? "transform" : "auto",
-              // Flash-frame fix: in wait mode (project backward), hide the
-              // entering page until Framer applies the initial variant.
-              // Sibling navigation uses sync mode and a full off-screen
-              // x-translate, so doesn't need this.
-              ...(!isInitialLoad.current &&
-                direction.axis === "x" &&
-                direction.kind === "project" &&
-                direction.dir < 0 && { opacity: 0 }),
             }}
           >
             <ErrorBoundary>
