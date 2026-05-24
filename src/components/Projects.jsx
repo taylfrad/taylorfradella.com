@@ -15,6 +15,11 @@ const FieldFlowVideo = lazy(() => import("@/components/ui/fieldflow-video"));
 // Prefetch ProjectDetail chunk on hover so it's cached before the user clicks.
 const prefetchProjectDetail = () => import("./ProjectDetail");
 
+// SVG fractalNoise used as a repeating CSS background to give project cards a
+// subtle film-grain texture (Design C). Defined once to avoid re-encoding on
+// every render.
+const NOISE_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E")`;
+
 // ─── Scroll-reveal hook — IntersectionObserver, fires once ─────────────────────
 function useReveal(threshold = 0.1) {
   const ref = useRef(null);
@@ -135,12 +140,11 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
     const stops = project.gradientColors || [project.accentColor];
     return [stops[0], stops[1] || stops[0]];
   })();
-  // Two-layer background. The first (top in CSS order = painted on top) is a
-  // universal dark vignette so white text in the content block lands on at
-  // least ~5.5:1 contrast regardless of how light the project's accent is
-  // (coral, bright green, etc. would otherwise be marginal). The second
-  // (underneath) is the project's two-stop color gradient.
-  const cardBackground = `linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.12) 55%, transparent 70%), linear-gradient(to top, ${c1} 30%, ${c2} 100%)`;
+  // Design C — three separate layers stacked via z-index:
+  //   1. Base 135° gradient (on the card div itself)
+  //   2. SVG fractal-noise overlay (mix-blend-mode: overlay) for film-grain
+  //   3. Dark vignette for text contrast
+  const cardBackground = `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
 
   return (
     <div
@@ -178,6 +182,33 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
         background: cardBackground,
       }}
     >
+
+      {/* Design C: film-grain noise overlay */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+          backgroundImage: NOISE_SVG,
+          backgroundRepeat: "repeat",
+          opacity: 0.5,
+          mixBlendMode: "overlay",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Design C: dark vignette — ensures ≥5.5:1 contrast for white text */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.05) 55%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
 
       {/* Project videos — hover on desktop, auto-play on mobile when in view */}
       {project.id === 1 && (
@@ -363,7 +394,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
           left: 0,
           right: 0,
           padding: featured ? "36px 36px" : "24px 24px",
-          zIndex: 2,
+          zIndex: 4,
           // Fade out content when video is playing
           ...(project.id <= 7
             ? {

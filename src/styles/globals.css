@@ -91,6 +91,25 @@
     --card-border: #e8e8ed;
     --nav-bg: rgba(251, 251, 253, 0.8);
     --overlay-bg: rgba(0, 0, 0, 0.5);
+
+    /* ─── Scrollytelling tokens — Light ─────────────────────────────── */
+    --st-bg: var(--bg-secondary);
+    --st-bg-alt: #ededf0;
+    --st-surface: rgba(0, 0, 0, 0.025);
+    --st-surface-2: rgba(0, 0, 0, 0.04);
+    --st-border: rgba(0, 0, 0, 0.07);
+    --st-border-sub: rgba(0, 0, 0, 0.04);
+    --st-dot: rgba(0, 0, 0, 0.07);
+    --st-tag-bg: rgba(0, 0, 0, 0.05);
+    --st-tag-border: rgba(0, 0, 0, 0.08);
+    --st-tag-text: rgba(0, 0, 0, 0.6);
+    --st-rule: rgba(0, 0, 0, 0.06);
+    --st-faint: rgba(0, 0, 0, 0.1);
+    --st-scroll-thumb: rgba(0, 0, 0, 0.15);
+    --st-scroll-ind: rgba(0, 0, 0, 0.22);
+    --st-back-text: rgba(0, 0, 0, 0.35);
+    --st-back-hover: rgba(0, 0, 0, 0.75);
+    --st-glow-mult: 0.3;
   }
 
   .dark {
@@ -140,6 +159,25 @@
     --card-border: #424245;
     --nav-bg: rgba(29, 29, 31, 0.8);
     --overlay-bg: rgba(0, 0, 0, 0.6);
+
+    /* ─── Scrollytelling tokens — Dark ──────────────────────────────── */
+    --st-bg: var(--bg-secondary);
+    --st-bg-alt: #161618;
+    --st-surface: rgba(255, 255, 255, 0.025);
+    --st-surface-2: rgba(255, 255, 255, 0.07);
+    --st-border: rgba(255, 255, 255, 0.07);
+    --st-border-sub: rgba(255, 255, 255, 0.04);
+    --st-dot: rgba(255, 255, 255, 0.08);
+    --st-tag-bg: rgba(255, 255, 255, 0.07);
+    --st-tag-border: rgba(255, 255, 255, 0.09);
+    --st-tag-text: rgba(255, 255, 255, 0.82);
+    --st-rule: rgba(255, 255, 255, 0.06);
+    --st-faint: rgba(255, 255, 255, 0.12);
+    --st-scroll-thumb: rgba(255, 255, 255, 0.1);
+    --st-scroll-ind: rgba(255, 255, 255, 0.25);
+    --st-back-text: rgba(255, 255, 255, 0.4);
+    --st-back-hover: rgba(255, 255, 255, 0.8);
+    --st-glow-mult: 1;
   }
 
   html,
@@ -920,59 +958,6 @@ html.theme-transition div {
   }
 }
 
-/* About edge fades — viewport-fixed strips at the top and bottom of the
-   screen that blur (and tint toward the page background color) whatever
-   scrolls underneath. Subtle — just a hint of feathering, not a curtain.
-   Multi-stop gradients approximate an ease-out curve for a smoother dissolve
-   than a single linear stop. */
-.about-edge-fade {
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: 72px;
-  pointer-events: none;
-  z-index: 30;
-  -webkit-backdrop-filter: blur(1.5px);
-  backdrop-filter: blur(1.5px);
-  animation: about-edge-delay 0s 1.4s both;
-}
-@keyframes about-edge-delay {
-  from { visibility: hidden; }
-  to   { visibility: visible; }
-}
-.about-edge-fade--top {
-  top: 0;
-  height: 120px;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  background: linear-gradient(
-    to bottom,
-    var(--bg-secondary) 0%,
-    var(--bg-secondary) 30%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
-}
-.about-edge-fade--bottom {
-  bottom: 0;
-  background: linear-gradient(
-    to top,
-    var(--bg-secondary) 0%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
-  mask-image: linear-gradient(to top, black 0%, transparent 100%);
-}
-
-/* Respect reduced motion / transparency: skip the blur and dim the
-   gradient slightly so the effect doesn't compete with content. */
-@media (prefers-reduced-transparency: reduce) {
-  .about-edge-fade {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
 
 /* Site-wide footer tint — subtle off-shade from --bg-secondary so the footer
    reads as a distinct surface in both light and dark mode. Consumed by
@@ -1071,4 +1056,15 @@ html:has(.work-page) body { scrollbar-width: none; }
     opacity: var(--work-fade-target, 1);
     transform: none;
   }
+}
+
+/* Scrollytelling — scroll chevron float */
+@keyframes scrolly-chevron-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+.scrolly-chevron { animation: scrolly-chevron-float 1.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scrolly-chevron { animation: none; }
 }
