@@ -26,7 +26,7 @@ function smoothScrollTo(targetTop) {
 export function smoothScrollToTop() {
   const start = window.scrollY;
   if (start === 0) return;
-  const duration = Math.min(3000, 1200 + start * 0.15);
+  const duration = Math.min(5000, 2000 + start * 0.25);
   const startTime = performance.now();
   function step(now) {
     const t = Math.min((now - startTime) / duration, 1);
