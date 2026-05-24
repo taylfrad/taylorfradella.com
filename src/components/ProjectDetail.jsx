@@ -14,15 +14,24 @@ import { GithubIcon } from "@/components/ui/github";
 import { YoutubeIcon } from "@/components/ui/youtube";
 import { ExternalLinkIcon } from "@/components/ui/external-link";
 import { ChevronUpIcon } from "@/components/ui/chevron-up";
-import {
-  elerp,
-  useScrollyInView,
-  useStickyProgress,
-} from "@/hooks/useScrollyProgress";
+import { easeIO, useScrollyInView } from "@/hooks/useScrollyProgress";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const PdfModal = lazy(() => import("@/components/ui/PdfModal"));
 const Footer = lazy(() => import("./Footer"));
+
+// Sticky scroll progress as a MotionValue: 0 when the tall outer container
+// begins pinning its sticky child, 1 when it finishes scrolling past. This is
+// the motion-value equivalent of the old useStickyProgress() — same 0→1 range
+// (-rect.top / (height - vh)), but Framer writes derived transform/opacity
+// straight to the DOM, so scrolling never re-renders the consuming section.
+function useStickyMotion(ref) {
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+  return scrollYProgress;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -237,19 +246,26 @@ function ProgressBarFill({ accent }) {
 function HeroSection({ project, accent }) {
   const containerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const p = useStickyProgress(containerRef);
+  const p = useStickyMotion(containerRef);
 
-  const titleScale = elerp(p, 0.08, 0.42, 1, 0.72);
-  const titleY = elerp(p, 0.08, 0.42, 6, -6);
-  const roleOp = elerp(p, 0.18, 0.38, 0, 1);
-  const roleY = elerp(p, 0.18, 0.38, 14, 0);
-  const lineW = elerp(p, 0.12, 0.38, 0, 100);
-  const descOp = elerp(p, 0.38, 0.56, 0, 1);
-  const descY = elerp(p, 0.38, 0.56, 20, 0);
-  const tagsOp = elerp(p, 0.52, 0.66, 0, 1);
-  const linksOp = elerp(p, 0.62, 0.76, 0, 1);
-  const glowOp = elerp(p, 0, 0.5, 0.1, 0.35);
-  const scrollInd = elerp(p, 0, 0.1, 0.5, 0);
+  // Scroll-driven values as motion values (same breakpoints + easeIO curve as
+  // the old elerp() calls). Framer writes these straight to the DOM, so the
+  // section never re-renders while scrolling.
+  const titleScale = useTransform(p, [0.08, 0.42], [1, 0.72], { ease: easeIO });
+  const titleYn = useTransform(p, [0.08, 0.42], [6, -6], { ease: easeIO });
+  const titleY = useMotionTemplate`${titleYn}vh`;
+  const roleOp = useTransform(p, [0.18, 0.38], [0, 1], { ease: easeIO });
+  const roleY = useTransform(p, [0.18, 0.38], [14, 0], { ease: easeIO });
+  const lineScaleX = useTransform(p, [0.12, 0.38], [0, 1], { ease: easeIO });
+  const descOp = useTransform(p, [0.38, 0.56], [0, 1], { ease: easeIO });
+  const descY = useTransform(p, [0.38, 0.56], [20, 0], { ease: easeIO });
+  const tagsOp = useTransform(p, [0.52, 0.66], [0, 1], { ease: easeIO });
+  const linksOp = useTransform(p, [0.62, 0.76], [0, 1], { ease: easeIO });
+  const glowOpRaw = useTransform(p, [0, 0.5], [0.1, 0.35], { ease: easeIO });
+  const glowOp = useMotionTemplate`calc(${glowOpRaw} * var(--st-glow-mult))`;
+  const scrollInd = useTransform(p, [0, 0.1], [0.5, 0], { ease: easeIO });
+  const wmOp = useTransform(p, [0, 0.4], [0.18, 0.06], { ease: easeIO });
+  const wmScale = useTransform(p, [0, 0.5], [1, 0.9], { ease: easeIO });
 
   const isLive = project.status === "Live";
 
@@ -258,11 +274,11 @@ function HeroSection({ project, accent }) {
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
         {/* Accent glow — hidden on mobile for GPU performance */}
         {!isMobile && (
-          <div aria-hidden className="pointer-events-none absolute left-1/2 top-[12%] h-[55vh] w-[55vw] -translate-x-1/2 rounded-full" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: `calc(${glowOp} * var(--st-glow-mult))`, filter: "blur(80px)" }} />
+          <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-[12%] h-[55vh] w-[55vw] -translate-x-1/2 rounded-full" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: glowOp, filter: "blur(80px)" }} />
         )}
 
         {/* Ghost watermark — large outlined title behind content */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center select-none" style={{ opacity: elerp(p, 0, 0.4, 0.18, 0.06), transform: `scale(${elerp(p, 0, 0.5, 1, 0.9)})` }}>
+        <motion.div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center select-none" style={{ opacity: wmOp, scale: wmScale }}>
           <span className="whitespace-nowrap text-center font-bold uppercase" style={{
             fontSize: "clamp(80px, 18vw, 240px)",
             letterSpacing: "-0.03em",
@@ -270,42 +286,42 @@ function HeroSection({ project, accent }) {
             WebkitTextStroke: `2.5px ${accent}`,
             lineHeight: 0.9,
           }}>{project.title.split(" ")[0]}</span>
-        </div>
+        </motion.div>
 
         {/* Subtle radial gradient behind content */}
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 45%, ${accent}25 0%, transparent 70%)` }} />
 
         {/* Content */}
-        <div className="relative z-[2] mx-auto max-w-[860px] px-7 text-center" style={{ transform: `translateY(${titleY}vh)` }}>
+        <motion.div className="relative z-[2] mx-auto max-w-[860px] px-7 text-center" style={{ y: titleY }}>
           {/* Role overline */}
-          <p className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: roleOp, transform: `translateY(${roleY}px)` }}>
+          <motion.p className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: roleOp, y: roleY }}>
             {project.role}
-          </p>
+          </motion.p>
 
           {/* Title */}
-          <h1 className="font-bold leading-[1.06] tracking-tight text-[var(--text-primary)]" style={{ fontSize: "clamp(34px, 8.5vw, 76px)", transform: `scale(${titleScale})`, transformOrigin: "center center" }}>
+          <motion.h1 className="font-bold leading-[1.06] tracking-tight text-[var(--text-primary)]" style={{ fontSize: "clamp(34px, 8.5vw, 76px)", scale: titleScale, transformOrigin: "center center" }}>
             {project.title}
-          </h1>
+          </motion.h1>
 
-          {/* Accent line */}
-          <div aria-hidden className="mx-auto my-[22px] h-[2px]" style={{ width: `${lineW}%`, background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
+          {/* Accent line — scaleX (compositor-only) instead of animating width */}
+          <motion.div aria-hidden className="mx-auto my-[22px] h-[2px] w-full" style={{ scaleX: lineScaleX, background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
 
           {/* Description */}
-          <p className="mx-auto max-w-[520px] text-[17px] leading-[1.65] text-[var(--text-secondary)]" style={{ opacity: descOp, transform: `translateY(${descY}px)`, textWrap: "pretty" }}>
+          <motion.p className="mx-auto max-w-[520px] text-[17px] leading-[1.65] text-[var(--text-secondary)]" style={{ opacity: descOp, y: descY, textWrap: "pretty" }}>
             {project.description}
-          </p>
+          </motion.p>
 
           {/* Tags */}
-          <div className="mt-5 flex flex-wrap justify-center gap-2" style={{ opacity: tagsOp }}>
+          <motion.div className="mt-5 flex flex-wrap justify-center gap-2" style={{ opacity: tagsOp }}>
             {project.tags.map((t) => (
               <span key={t} className="whitespace-nowrap rounded-[4px] border px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--st-tag-text)", background: "var(--st-tag-bg)", borderColor: "var(--st-tag-border)" }}>
                 {t}
               </span>
             ))}
-          </div>
+          </motion.div>
 
           {/* Status + Links */}
-          <div className="mt-6 flex flex-wrap justify-center gap-2.5" style={{ opacity: linksOp }}>
+          <motion.div className="mt-6 flex flex-wrap justify-center gap-2.5" style={{ opacity: linksOp }}>
             <span className="inline-flex items-center gap-1.5 rounded-[4px] border px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em]" style={{ background: isLive ? "rgba(52,211,153,0.12)" : getAccentRgba(accent, 0.12), color: isLive ? "#34d399" : accent, borderColor: isLive ? "rgba(52,211,153,0.28)" : getAccentRgba(accent, 0.28) }}>
               {isLive && <span className="inline-block h-[5px] w-[5px] rounded-full bg-emerald-400" />}
               {project.status}
@@ -325,14 +341,14 @@ function HeroSection({ project, accent }) {
                 YouTube
               </a>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 flex flex-col items-center gap-2" style={{ opacity: scrollInd }}>
+        <motion.div className="absolute bottom-8 flex flex-col items-center gap-2" style={{ opacity: scrollInd }}>
           <span className="text-[10px] font-medium uppercase tracking-[0.2em]" style={{ color: "var(--st-scroll-ind)" }}>Scroll</span>
           <svg className="scrolly-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--st-scroll-ind)" strokeWidth="1.5"><path d="M3 5L7 9L11 5" /></svg>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -344,6 +360,26 @@ function HeroSection({ project, accent }) {
 // Statement on the left, three spotlight columns on the right (desktop).
 // Stacks vertically on mobile.
 
+// One spotlight column — own component so its scroll-driven transforms are
+// valid hooks (one per item) rather than hooks called inside a .map callback.
+function SpotlightItem({ spotlight, index, progress, accent, isMobile }) {
+  const start = 0.22 + index * 0.12;
+  const op = useTransform(progress, [start, start + 0.1], [0, 1], { ease: easeIO });
+  const y = useTransform(progress, [start, start + 0.1], [24, 0], { ease: easeIO });
+  return (
+    <motion.div style={{ opacity: op, y }}>
+      <h3 className="mb-2 font-bold tracking-tight text-[var(--text-primary)]" style={{
+        fontSize: isMobile ? 20 : 22,
+        lineHeight: 1.2,
+      }}>{spotlight.title}</h3>
+      <div aria-hidden className="mb-3 h-[2px] rounded-full" style={{ width: 36, background: accent, opacity: 0.3 }} />
+      <p className="text-[14px] leading-[1.65] text-[var(--text-secondary)]" style={{ textWrap: "pretty" }}>
+        {spotlight.text}
+      </p>
+    </motion.div>
+  );
+}
+
 function StatementSpotlightsSection({ project, accent }) {
   const fallbackRef = useRef(null);
   const fallbackInView = useScrollyInView(fallbackRef);
@@ -353,11 +389,13 @@ function StatementSpotlightsSection({ project, accent }) {
     target: sectionRef,
     offset: ["start 0.85", "end 0.5"],
   });
-  const [scrollP, setScrollP] = useState(0);
-  useEffect(() => {
-    const unsub = scrollYProgress.on("change", setScrollP);
-    return unsub;
-  }, [scrollYProgress]);
+
+  // Sticky pinned: content builds 0→60%, reading pause 60→100%. Motion values
+  // (driven straight to the DOM) so scrolling doesn't re-render the section.
+  const titleOp = useTransform(scrollYProgress, [0, 0.12], [0, 1], { ease: easeIO });
+  const titleY = useTransform(scrollYProgress, [0, 0.12], [40, 0], { ease: easeIO });
+  const stmtOp = useTransform(scrollYProgress, [0.15, 0.28], [0, 1], { ease: easeIO });
+  const stmtY = useTransform(scrollYProgress, [0.15, 0.28], [28, 0], { ease: easeIO });
 
   const statement = project.statement;
   const spotlights = project.spotlights;
@@ -396,12 +434,6 @@ function StatementSpotlightsSection({ project, accent }) {
     </p>
   ) : null;
 
-  // Sticky pinned: content builds 0→60%, reading pause 60→100%
-  const titleOp = elerp(scrollP, 0, 0.12, 0, 1);
-  const titleY = elerp(scrollP, 0, 0.12, 40, 0);
-  const stmtOp = elerp(scrollP, 0.15, 0.28, 0, 1);
-  const stmtY = elerp(scrollP, 0.15, 0.28, 28, 0);
-
   return (
     <div ref={sectionRef} style={{ height: isMobile ? "200vh" : "220vh", position: "relative" }}>
       <div className="sticky top-0 flex min-h-screen items-center" style={{ background: "var(--st-bg-alt)" }}>
@@ -410,42 +442,34 @@ function StatementSpotlightsSection({ project, accent }) {
 
             {/* Left: Title + statement */}
             <div>
-              <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)` }}>
+              <motion.div style={{ opacity: titleOp, y: titleY }}>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.6 }}>Overview</p>
                 <h2 className="text-[clamp(32px,5vw,48px)] font-bold tracking-tight text-[var(--text-primary)]" style={{ lineHeight: 1.1 }}>
                   At a Glance<span style={{ color: accent }}>.</span>
                 </h2>
                 <div aria-hidden className="mt-3 h-[2px] rounded-full" style={{ width: 40, background: accent, opacity: 0.3 }} />
-              </div>
+              </motion.div>
 
               {statementNode && (
-                <div className="mt-8" style={{ opacity: stmtOp, transform: `translateY(${stmtY}px)` }}>
+                <motion.div className="mt-8" style={{ opacity: stmtOp, y: stmtY }}>
                   {statementNode}
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Right: Spotlights */}
             {spotlights?.length > 0 && (
               <div className="flex flex-col gap-8">
-                {spotlights.map((s, i) => {
-                  const sStart = 0.22 + i * 0.12;
-                  const sEnd = sStart + 0.1;
-                  const sOp = elerp(scrollP, sStart, sEnd, 0, 1);
-                  const sY = elerp(scrollP, sStart, sEnd, 24, 0);
-                  return (
-                    <div key={i} style={{ opacity: sOp, transform: `translateY(${sY}px)` }}>
-                      <h3 className="mb-2 font-bold tracking-tight text-[var(--text-primary)]" style={{
-                        fontSize: isMobile ? 20 : 22,
-                        lineHeight: 1.2,
-                      }}>{s.title}</h3>
-                      <div aria-hidden className="mb-3 h-[2px] rounded-full" style={{ width: 36, background: accent, opacity: 0.3 }} />
-                      <p className="text-[14px] leading-[1.65] text-[var(--text-secondary)]" style={{ textWrap: "pretty" }}>
-                        {s.text}
-                      </p>
-                    </div>
-                  );
-                })}
+                {spotlights.map((s, i) => (
+                  <SpotlightItem
+                    key={i}
+                    spotlight={s}
+                    index={i}
+                    progress={scrollYProgress}
+                    accent={accent}
+                    isMobile={isMobile}
+                  />
+                ))}
               </div>
             )}
           </div>
@@ -510,13 +534,21 @@ function ghostPattern(indices, mod) {
 
 function TechSection({ project, accent }) {
   const outerRef = useRef(null);
-  const stickyP = useStickyProgress(outerRef);
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const stickyP = useStickyMotion(outerRef);
 
   // Horizontal text movement still driven by page-level scroll
   const { scrollYProgress } = useScroll({
     target: outerRef,
     offset: ["start end", "end start"],
   });
+
+  // Sticky pinned: title 0→12%, rows 18→30%, reading pause 55→100%. Motion
+  // values keep the whole row stack (many stroked spans) off the re-render path.
+  const titleOp = useTransform(stickyP, [0, 0.12], [0, 1], { ease: easeIO });
+  const titleY = useTransform(stickyP, [0, 0.12], [40, 0], { ease: easeIO });
+  const rowsOp = useTransform(stickyP, [0.18, 0.3], [0, 1], { ease: easeIO });
+  const rowsY = useTransform(stickyP, [0.18, 0.3], [24, 0], { ease: easeIO });
 
   const primaryName = project.primaryTool?.name || null;
 
@@ -528,41 +560,48 @@ function TechSection({ project, accent }) {
     const tc = t.length;
     const repeat = (arr, times) => { const out = []; for (let i = 0; i < times; i++) out.push(...arr); return out; };
     const shift = (arr, n) => [...arr.slice(n % arr.length), ...arr.slice(0, n % arr.length)];
+    // Each row is a wide, GPU-composited layer of large stroked text. On mobile
+    // we render 4 rows instead of 6 and repeat the tool list 3× instead of 4× —
+    // ~half the painted span count. reps=3 still keeps every row wider than
+    // viewport + max scroll-travel (even for 5-tool lists), so edges never show.
+    const reps = isMobile ? 3 : 4;
+    const configs = [
+      { shift: 0, speed: 220, direction: 1,  opacity: 0.15, ghost: ghostPattern([1, 4, 7, 10], tc) },
+      { shift: 3, speed: 160, direction: -1, opacity: 0.4,  ghost: ghostPattern([0, 3, 8], tc) },
+      { shift: 7, speed: 280, direction: 1,  opacity: 0.6,  ghost: ghostPattern([2, 5, 9], tc) },
+      { shift: 1, speed: 190, direction: -1, opacity: 0.3,  ghost: ghostPattern([1, 6, 10], tc) },
+      { shift: 5, speed: 240, direction: 1,  opacity: 0.2,  ghost: ghostPattern([0, 4, 7], tc) },
+      { shift: 9, speed: 140, direction: -1, opacity: 0.12, ghost: ghostPattern([2, 3, 8, 10], tc) },
+    ];
+    const used = isMobile ? configs.slice(0, 4) : configs;
     return {
       toolNames: t,
-      rows: [
-        { items: repeat(t, 4), speed: 220, direction: 1,  opacity: 0.15, ghost: ghostPattern([1, 4, 7, 10], tc) },
-        { items: repeat(shift(t, 3), 4), speed: 160, direction: -1, opacity: 0.4,  ghost: ghostPattern([0, 3, 8], tc) },
-        { items: repeat(shift(t, 7), 4), speed: 280, direction: 1,  opacity: 0.6,  ghost: ghostPattern([2, 5, 9], tc) },
-        { items: repeat(shift(t, 1), 4), speed: 190, direction: -1, opacity: 0.3,  ghost: ghostPattern([1, 6, 10], tc) },
-        { items: repeat(shift(t, 5), 4), speed: 240, direction: 1,  opacity: 0.2,  ghost: ghostPattern([0, 4, 7], tc) },
-        { items: repeat(shift(t, 9), 4), speed: 140, direction: -1, opacity: 0.12, ghost: ghostPattern([2, 3, 8, 10], tc) },
-      ],
+      rows: used.map((c) => ({
+        items: repeat(shift(t, c.shift), reps),
+        speed: c.speed,
+        direction: c.direction,
+        opacity: c.opacity,
+        ghost: c.ghost,
+      })),
     };
-  }, [project.toolsDetailed, project.tools]);
+  }, [project.toolsDetailed, project.tools, isMobile]);
 
   if (!toolNames.length) return null;
-
-  // Sticky pinned: title 0→12%, rows 18→30%, reading pause 55→100%
-  const titleOp = elerp(stickyP, 0, 0.12, 0, 1);
-  const titleY = elerp(stickyP, 0, 0.12, 40, 0);
-  const rowsOp = elerp(stickyP, 0.18, 0.3, 0, 1);
-  const rowsY = elerp(stickyP, 0.18, 0.3, 24, 0);
 
   return (
     <div ref={outerRef} style={{ height: "200vh", position: "relative" }}>
       <div className="sticky top-0 flex min-h-screen items-center" style={{ background: "var(--st-bg)" }}>
         <section className="relative w-full overflow-hidden py-12">
           {/* Phase 1: Title slides up first */}
-          <div className="mx-auto max-w-[860px] px-7 mb-10" style={{ opacity: titleOp, transform: `translateY(${titleY}px)` }}>
+          <motion.div className="mx-auto max-w-[860px] px-7 mb-10" style={{ opacity: titleOp, y: titleY }}>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.6 }}>Technologies</p>
             <h2 className="text-[clamp(32px,5vw,48px)] font-bold tracking-tight text-[var(--text-primary)]" style={{ lineHeight: 1.1 }}>
               <span className="underline decoration-2 underline-offset-[6px]" style={{ textDecorationColor: accent }}>Built With</span><span style={{ color: accent }}>.</span>
             </h2>
-          </div>
+          </motion.div>
 
           {/* Phase 2: Rows build in after title locks */}
-          <div className="flex flex-col gap-[clamp(6px,1.2vw,14px)]" style={{ opacity: rowsOp, transform: `translateY(${rowsY}px)` }}>
+          <motion.div className="flex flex-col gap-[clamp(6px,1.2vw,14px)]" style={{ opacity: rowsOp, y: rowsY }}>
             {rows.map((row, i) => (
               <div key={i} className="flex overflow-visible">
                 <ScrollTextRow
@@ -577,7 +616,7 @@ function TechSection({ project, accent }) {
                 />
               </div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Top/bottom fade masks */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-20" style={{ background: "linear-gradient(to bottom, var(--st-bg), transparent)" }} />
@@ -590,17 +629,38 @@ function TechSection({ project, accent }) {
 
 // ─── Features Section — Left title, right scroll-reveal breakdown ────────────
 
+// One feature bullet — own component so its scroll transform is a valid
+// top-level hook rather than a hook called inside a .map callback.
+function FeatureBullet({ text, index, total, progress, accent }) {
+  const start = 0.14 + (index / total) * 0.35;
+  const op = useTransform(progress, [start, start + 0.06], [0, 1], { ease: easeIO });
+  const x = useTransform(progress, [start, start + 0.06], [14, 0], { ease: easeIO });
+  return (
+    <motion.div className="flex items-start gap-3 py-2.5" style={{ opacity: op, x }}>
+      <div aria-hidden className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: accent, opacity: 0.45 }} />
+      <p className="text-[14px] leading-[1.6] text-[var(--text-secondary)]">{text}</p>
+    </motion.div>
+  );
+}
+
 function FeaturesSection({ project, accent }) {
   const outerRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const stickyP = useStickyProgress(outerRef);
+  const stickyP = useStickyMotion(outerRef);
+
+  // Sticky pinned: title 0→10%, features 15→50%, links 50→56%, summary fade-in
+  // ~10%, reading pause 55→100%. All motion values → no per-frame re-render.
+  const titleOp = useTransform(stickyP, [0, 0.1], [0, 1], { ease: easeIO });
+  const titleY = useTransform(stickyP, [0, 0.1], [40, 0], { ease: easeIO });
+  const linksOp = useTransform(stickyP, [0.5, 0.56], [0, 1], { ease: easeIO });
+  const linksY = useTransform(stickyP, [0.5, 0.56], [12, 0], { ease: easeIO });
+  // Right column fade-in (replaces the old boolean opacity + CSS transition).
+  const summaryOp = useTransform(stickyP, [0.08, 0.18], [0, 1], { ease: easeIO });
 
   if (!project.keyFeatures || project.keyFeatures.length === 0) return null;
 
   const hasDescription = !!project.extendedDescription;
-  // Sticky pinned: title 0→10%, features 15→50%, description 15→45%, pause 55→100%
-  const titleOp = elerp(stickyP, 0, 0.1, 0, 1);
-  const titleY = elerp(stickyP, 0, 0.1, 40, 0);
+  const total = project.keyFeatures.length;
 
   return (
     <div ref={outerRef} style={{ height: isMobile ? "220vh" : "260vh", position: "relative" }}>
@@ -610,71 +670,51 @@ function FeaturesSection({ project, accent }) {
 
             {/* Left: Title + feature bullets */}
             <div>
-              <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)` }}>
+              <motion.div style={{ opacity: titleOp, y: titleY }}>
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.6 }}>Highlights</p>
                 <h2 className="text-[clamp(32px,5vw,48px)] font-bold tracking-tight text-[var(--text-primary)]" style={{ lineHeight: 1.1 }}>
                   Key Features<span style={{ color: accent }}>.</span>
                 </h2>
                 <div aria-hidden className="mt-3 mb-8 h-[2px] rounded-full" style={{ width: 40, background: accent, opacity: 0.3 }} />
-              </div>
+              </motion.div>
 
               {/* Feature bullets — stagger in after title */}
               <div>
-                {project.keyFeatures.map((f, i) => {
-                  const total = project.keyFeatures.length;
-                  const featureStart = 0.14 + (i / total) * 0.35;
-                  const featureEnd = featureStart + 0.06;
-                  const fOp = elerp(stickyP, featureStart, featureEnd, 0, 1);
-                  const fX = elerp(stickyP, featureStart, featureEnd, 14, 0);
-                  return (
-                    <div key={i} className="flex items-start gap-3 py-2.5" style={{
-                      opacity: fOp,
-                      transform: `translateX(${fX}px)`,
-                    }}>
-                      <div aria-hidden className="mt-[8px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: accent, opacity: 0.45 }} />
-                      <p className="text-[14px] leading-[1.6] text-[var(--text-secondary)]">{f}</p>
-                    </div>
-                  );
-                })}
+                {project.keyFeatures.map((f, i) => (
+                  <FeatureBullet key={i} text={f} index={i} total={total} progress={stickyP} accent={accent} />
+                ))}
               </div>
 
               {/* Action links — appear after features */}
-              {(project.github || project.liveUrl || project.youtube) && (() => {
-                const linksOp = elerp(stickyP, 0.5, 0.56, 0, 1);
-                const linksY = elerp(stickyP, 0.5, 0.56, 12, 0);
-                return (
-                  <div className="mt-6 flex flex-wrap gap-3" style={{ opacity: linksOp, transform: `translateY(${linksY}px)` }}>
-                    {project.github && (
-                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
-                        <GithubIcon size={14} />
-                        View on GitHub
-                      </a>
-                    )}
-                    {project.liveUrl && (
-                      <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
-                        <ExternalLinkIcon size={14} />
-                        View Live Site
-                      </a>
-                    )}
-                    {project.youtube && (
-                      <a href={project.youtube} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
-                        <YoutubeIcon size={14} />
-                        Watch on YouTube
-                      </a>
-                    )}
-                  </div>
-                );
-              })()}
+              {(project.github || project.liveUrl || project.youtube) && (
+                <motion.div className="mt-6 flex flex-wrap gap-3" style={{ opacity: linksOp, y: linksY }}>
+                  {project.github && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
+                      <GithubIcon size={14} />
+                      View on GitHub
+                    </a>
+                  )}
+                  {project.liveUrl && (
+                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
+                      <ExternalLinkIcon size={14} />
+                      View Live Site
+                    </a>
+                  )}
+                  {project.youtube && (
+                    <a href={project.youtube} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-[6px] border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] no-underline transition-all duration-200 hover:-translate-y-0.5" style={{ color: accent, borderColor: `${accent}44`, background: `${accent}0a` }}>
+                      <YoutubeIcon size={14} />
+                      Watch on YouTube
+                    </a>
+                  )}
+                </motion.div>
+              )}
             </div>
 
             {/* Right: Summary with sentence-by-sentence reveal */}
             {hasDescription && (
-              <div className={isMobile ? "" : "pt-2"} style={{
-                opacity: stickyP > 0.1 ? 1 : 0,
-                transition: "opacity 0.6s cubic-bezier(0.25,0.1,0.25,1)",
-              }}>
+              <motion.div className={isMobile ? "" : "pt-2"} style={{ opacity: summaryOp }}>
                 <DescriptionReveal text={project.extendedDescription} progress={stickyP} accent={accent} />
-              </div>
+              </motion.div>
             )}
           </div>
         </section>
@@ -683,38 +723,39 @@ function FeaturesSection({ project, accent }) {
   );
 }
 
+// One summary sentence — own component so its scroll transform is a valid
+// top-level hook rather than a hook called inside a .map callback.
+function RevealSentence({ sentence, index, count, progress }) {
+  const start = 0.18 + (index / count) * 0.32;
+  const op = useTransform(progress, [start, start + 0.08], [0, 1], { ease: easeIO });
+  const y = useTransform(progress, [start, start + 0.08], [12, 0], { ease: easeIO });
+  return (
+    <motion.p className="text-[15px] leading-[1.75] text-[var(--text-secondary)]" style={{ opacity: op, y, textWrap: "pretty" }}>
+      {sentence.trim()}
+    </motion.p>
+  );
+}
+
 const DescriptionReveal = memo(function DescriptionReveal({ text, progress, accent }) {
   const sentences = useMemo(() => text.match(/[^.!?]+[.!?]+/g) || [text], [text]);
 
   // Title reveals first
-  const titleOp = elerp(progress, 0.1, 0.18, 0, 1);
-  const titleY = elerp(progress, 0.1, 0.18, 16, 0);
+  const titleOp = useTransform(progress, [0.1, 0.18], [0, 1], { ease: easeIO });
+  const titleY = useTransform(progress, [0.1, 0.18], [16, 0], { ease: easeIO });
 
   return (
     <div>
       {/* Summary heading */}
-      <div style={{ opacity: titleOp, transform: `translateY(${titleY}px)` }}>
+      <motion.div style={{ opacity: titleOp, y: titleY }}>
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.6 }}>Summary</p>
         <div aria-hidden className="mb-6 h-[2px] rounded-full" style={{ width: 32, background: accent, opacity: 0.3 }} />
-      </div>
+      </motion.div>
 
       {/* Sentences reveal one by one */}
       <div className="flex flex-col gap-4">
-        {sentences.map((sentence, i) => {
-          const sStart = 0.18 + (i / sentences.length) * 0.32;
-          const sEnd = sStart + 0.08;
-          const sOp = elerp(progress, sStart, sEnd, 0, 1);
-          const sY = elerp(progress, sStart, sEnd, 12, 0);
-          return (
-            <p key={i} className="text-[15px] leading-[1.75] text-[var(--text-secondary)]" style={{
-              opacity: sOp,
-              transform: `translateY(${sY}px)`,
-              textWrap: "pretty",
-            }}>
-              {sentence.trim()}
-            </p>
-          );
-        })}
+        {sentences.map((sentence, i) => (
+          <RevealSentence key={i} sentence={sentence} index={i} count={sentences.length} progress={progress} />
+        ))}
       </div>
     </div>
   );
