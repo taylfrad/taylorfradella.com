@@ -285,6 +285,12 @@ export default function Lanyard({
   const containerRef = useRef(null);
   const isVisibleRef = useRef(true);
   const invalidateRef = useRef(null);
+  // MOBILE-SWARM: webgl track on-screen state from the IO independently so the
+  // visibilitychange listener only resumes when the canvas is also in view.
+  const ioVisibleRef = useRef(true);
+  // MOBILE-SWARM: webgl hold the webglcontextlost/restored listeners so we can
+  // detach them on unmount (set in onCreated).
+  const contextHandlersRef = useRef(null);
 
   // matchMedia fires only on breakpoint cross (not every resize pixel),
   // avoiding layout thrash from reading window.innerWidth on each event.
@@ -295,17 +301,68 @@ export default function Lanyard({
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
+  // MOBILE-SWARM: webgl combine the IO on-screen state with tab visibility.
+  // isVisibleRef (read by the frame loop) is true only when the canvas is both
+  // in view AND the tab is foregrounded; resuming requests one frame so the
+  // demand loop wakes cleanly. Purely additive over the existing IO + invalidate.
   useEffect(() => {
+    const isTabVisible = () =>
+      typeof document === "undefined" || !document.hidden;
+
+    const syncVisibility = () => {
+      const next = ioVisibleRef.current && isTabVisible();
+      const wasVisible = isVisibleRef.current;
+      isVisibleRef.current = next;
+      // Only re-invalidate on a hidden→visible transition so we don't fight the
+      // idle-frame halting logic while already on-screen.
+      if (next && !wasVisible) invalidateRef.current?.();
+    };
+
     const node = containerRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
-      },
-      { rootMargin: "200px 0px" },
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
+    let obs = null;
+    if (node && typeof IntersectionObserver !== "undefined") {
+      obs = new IntersectionObserver(
+        ([entry]) => {
+          ioVisibleRef.current = entry.isIntersecting;
+          syncVisibility();
+        },
+        { rootMargin: "200px 0px" },
+      );
+      obs.observe(node);
+    }
+
+    const onVisibilityChange = () => syncVisibility();
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibilityChange);
+    }
+    // Establish the correct initial combined state.
+    syncVisibility();
+
+    return () => {
+      if (obs) obs.disconnect();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+      }
+    };
+  }, []);
+
+  // MOBILE-SWARM: webgl detach the context-loss listeners (registered in
+  // onCreated) when the component unmounts.
+  useEffect(() => {
+    return () => {
+      const handlers = contextHandlersRef.current;
+      if (handlers) {
+        handlers.canvasEl.removeEventListener(
+          "webglcontextlost",
+          handlers.handleContextLost,
+        );
+        handlers.canvasEl.removeEventListener(
+          "webglcontextrestored",
+          handlers.handleContextRestored,
+        );
+        contextHandlersRef.current = null;
+      }
+    };
   }, []);
 
   return (
@@ -320,7 +377,8 @@ export default function Lanyard({
         camera={{ position, fov }}
         frameloop="demand"
         dpr={[1, Math.min(window.devicePixelRatio, 2)]}
-        gl={{ alpha: transparent }}
+        // MOBILE-SWARM: webgl request the discrete/high-perf GPU on mobile; additive hint only, no DPR/visual change
+        gl={{ alpha: transparent, powerPreference: "high-performance" }}
         onCreated={({ gl, invalidate }) => {
           gl.setClearColor(new Color(0x000000), transparent ? 0 : 1);
           // Claim touch events on the canvas so card dragging works on mobile.
@@ -328,6 +386,22 @@ export default function Lanyard({
           // and the header (z-30) which sit above the canvas (z-10).
           gl.domElement.style.touchAction = "none";
           invalidateRef.current = invalidate;
+          // MOBILE-SWARM: webgl recover from GPU context loss (common on mobile under
+          // memory pressure) so the canvas repaints instead of staying blank. Additive.
+          const canvasEl = gl.domElement;
+          const handleContextLost = (event) => {
+            event.preventDefault();
+          };
+          const handleContextRestored = () => {
+            invalidateRef.current?.();
+          };
+          canvasEl.addEventListener("webglcontextlost", handleContextLost, false);
+          canvasEl.addEventListener("webglcontextrestored", handleContextRestored, false);
+          contextHandlersRef.current = {
+            canvasEl,
+            handleContextLost,
+            handleContextRestored,
+          };
           invalidate();
         }}
       >

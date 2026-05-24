@@ -60,14 +60,26 @@ export function CardStage({ duration = 10, playing = false, loop = true, childre
   const [time, setTime] = useState(0);
   const rafRef = useRef(null);
   const lastTsRef = useRef(null);
+  // MOBILE-SWARM: webgl single ref accumulator is the source of truth for the
+  // playhead. The rAF loop advances it and pushes a concrete value to setTime,
+  // replacing the per-frame functional-updater closure (which re-read prev
+  // state inside the setter every frame). Visible per-frame animation is
+  // unchanged — these scenes read `time` from context synchronously and
+  // interpolate sub-second, so a render per frame is still required; this only
+  // trims the reconciliation/closure overhead, it does not change pixels.
+  const timeRef = useRef(0);
 
-  const setTimeCb = useCallback((t) => setTime(t), []);
+  const setTimeCb = useCallback((t) => {
+    timeRef.current = t;
+    setTime(t);
+  }, []);
   const setPlayingCb = useCallback(() => {}, []);
 
   // Reset time when starting playback
   const prevPlaying = useRef(false);
   useEffect(() => {
     if (playing && !prevPlaying.current) {
+      timeRef.current = 0;
       setTime(0);
     }
     prevPlaying.current = playing;
@@ -84,13 +96,12 @@ export function CardStage({ duration = 10, playing = false, loop = true, childre
       if (lastTsRef.current == null) lastTsRef.current = ts;
       const dt = (ts - lastTsRef.current) / 1000;
       lastTsRef.current = ts;
-      setTime((t) => {
-        let next = t + dt;
-        if (next >= duration) {
-          next = loop ? next % duration : duration;
-        }
-        return next;
-      });
+      let next = timeRef.current + dt;
+      if (next >= duration) {
+        next = loop ? next % duration : duration;
+      }
+      timeRef.current = next;
+      setTime(next);
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
