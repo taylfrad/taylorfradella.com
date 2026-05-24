@@ -21,7 +21,12 @@ export default defineConfig({
     sourcemap: false,
     minify: "esbuild",
     cssMinify: true,
-    target: "esnext",
+    // Down-level modern JS so older mobile Safari can parse every chunk.
+    // "esnext" shipped ES2022 syntax (e.g. class static blocks + logical-
+    // assignment in the lazy react-pdf chunk) raw, which threw a SyntaxError on
+    // iOS Safari < 16.4 — crashing the route into the ErrorBoundary. es2020
+    // (~Safari 13.1+) covers all currently-active iPhones.
+    target: "es2020",
     reportCompressedSize: true,
     chunkSizeWarningLimit: 3200,
     rollupOptions: {
