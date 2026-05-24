@@ -334,8 +334,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
     target: localRef,
     offset: ["start end", "end start"],
   });
-  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-4vh", "4vh"]);
-  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-2vh", "2vh"]);
+  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-10vh", "10vh"]);
+  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-5vh", "5vh"]);
 
   // Trigger build-out when a non-first entry becomes visible
   useEffect(() => {

@@ -109,7 +109,7 @@
     --st-scroll-ind: rgba(0, 0, 0, 0.22);
     --st-back-text: rgba(0, 0, 0, 0.35);
     --st-back-hover: rgba(0, 0, 0, 0.75);
-    --st-glow-mult: 0.3;
+    --st-glow-mult: 1;
   }
 
   .dark {

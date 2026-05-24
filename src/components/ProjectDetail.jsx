@@ -248,7 +248,7 @@ function HeroSection({ project, accent }) {
   const descY = elerp(p, 0.38, 0.56, 20, 0);
   const tagsOp = elerp(p, 0.52, 0.66, 0, 1);
   const linksOp = elerp(p, 0.62, 0.76, 0, 1);
-  const glowOp = elerp(p, 0, 0.5, 0.03, 0.18);
+  const glowOp = elerp(p, 0, 0.5, 0.1, 0.35);
   const scrollInd = elerp(p, 0, 0.1, 0.5, 0);
 
   const isLive = project.status === "Live";
@@ -262,18 +262,18 @@ function HeroSection({ project, accent }) {
         )}
 
         {/* Ghost watermark — large outlined title behind content */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center select-none" style={{ opacity: elerp(p, 0, 0.4, 0.06, 0.02), transform: `scale(${elerp(p, 0, 0.5, 1, 0.9)})` }}>
+        <div aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center select-none" style={{ opacity: elerp(p, 0, 0.4, 0.18, 0.06), transform: `scale(${elerp(p, 0, 0.5, 1, 0.9)})` }}>
           <span className="whitespace-nowrap text-center font-bold uppercase" style={{
             fontSize: "clamp(80px, 18vw, 240px)",
             letterSpacing: "-0.03em",
             color: "transparent",
-            WebkitTextStroke: `1.5px ${accent}`,
+            WebkitTextStroke: `2.5px ${accent}`,
             lineHeight: 0.9,
           }}>{project.title.split(" ")[0]}</span>
         </div>
 
         {/* Subtle radial gradient behind content */}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 45%, ${accent}08 0%, transparent 70%)` }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 45%, ${accent}25 0%, transparent 70%)` }} />
 
         {/* Content */}
         <div className="relative z-[2] mx-auto max-w-[860px] px-7 text-center" style={{ transform: `translateY(${titleY}vh)` }}>
@@ -741,7 +741,7 @@ function NextProjectSection({ nextProject, onNavigate }) {
       aria-label={`View next project: ${nextProject.title}`}
     >
       {/* Accent glow */}
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[22%] h-[50vh] w-[50vw] -translate-x-1/2 rounded-full transition-opacity duration-500" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: `calc(${hovered ? 0.18 : 0.04} * var(--st-glow-mult))`, filter: "blur(80px)" }} />
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[22%] h-[50vh] w-[50vw] -translate-x-1/2 rounded-full transition-opacity duration-500" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: `calc(${hovered ? 0.35 : 0.12} * var(--st-glow-mult))`, filter: "blur(80px)" }} />
 
       <div className="relative z-[2] text-center" style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: "all 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)" }}>
         <span className="mb-5 block text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.5 }}>Next Project</span>
