@@ -1035,6 +1035,9 @@ html:has(.work-page) body { scrollbar-width: none; }
 /* On mobile, the background logo becomes a subtle blurred watermark instead
    of being hidden. Repositioned center-right and enlarged to fill the
    viewport as atmospheric texture, not competing with foreground content. */
+.work-bg-logo {
+  will-change: transform;
+}
 @media (max-width: 767px) {
   .work-bg-logo {
     right: auto !important;
@@ -1043,7 +1046,13 @@ html:has(.work-page) body { scrollbar-width: none; }
     width: 80vw !important;
     max-width: none !important;
     opacity: 0.15;
-    filter: blur(6px);
+    filter: blur(4px);
+    will-change: transform, opacity;
+  }
+  .work-entry__content {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center;
   }
 }
 

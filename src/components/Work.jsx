@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import PageHeader from "./PageHeader";
 import useReducedMotion from "@/hooks/useReducedMotion";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   AnimatedLogoFull,
   AnimatedLogoMark,
@@ -193,7 +194,7 @@ export default function Work() {
       if (animatingRef.current) return;
       const deltaY = touchStartY - e.changedTouches[0].clientY;
       // ~40px swipe threshold — small but intentional.
-      if (Math.abs(deltaY) < 40) return;
+      if (Math.abs(deltaY) < 55) return;
       advance(deltaY > 0 ? 1 : -1);
     };
 
@@ -311,6 +312,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
   // Only the first entry runs its fade-up animations on mount. Later entries
   const isFirst = index === 0;
   const reducedMotion = useReducedMotion();
+  const isMobile = useMediaQuery("(max-width: 767px)");
   // Non-first entries use IntersectionObserver to trigger their build-out
   // animation when they scroll into view, so they feel fresh on arrival.
   const [hasEntered, setHasEntered] = useState(isFirst);
@@ -334,8 +336,16 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
     target: localRef,
     offset: ["start end", "end start"],
   });
-  const logoParallaxY = useTransform(scrollYProgress, [0, 1], ["-10vh", "10vh"]);
-  const ambientParallaxY = useTransform(scrollYProgress, [0, 1], ["-5vh", "5vh"]);
+  const logoParallaxY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    isMobile ? ["0vh", "0vh"] : ["-10vh", "10vh"],
+  );
+  const ambientParallaxY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    isMobile ? ["0vh", "0vh"] : ["-5vh", "5vh"],
+  );
 
   // Trigger build-out when a non-first entry becomes visible
   useEffect(() => {
@@ -408,8 +418,8 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
                 width: "100%",
               }}
             >
-              <AnimatedLogoMark size={500} animate={!reducedMotion} />
-              <AnimatedLogoWordmark fontSize={64} />
+              <AnimatedLogoMark size={isMobile ? 280 : 500} animate={!reducedMotion && !isMobile} />
+              <AnimatedLogoWordmark fontSize={isMobile ? 36 : 64} />
             </div>
           ) : (
             <img
@@ -444,7 +454,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
           // list below stays at the same Y position.
           <div
             className={shouldAnimate ? "work-fade-up work-fade-up--mini" : ""}
-            style={{ marginBottom: "clamp(28px, 4vh, 44px)", opacity: 0.95 }}
+            style={{ marginBottom: "clamp(28px, 4vh, 44px)", opacity: 0.95, display: "flex", justifyContent: isMobile ? "center" : "flex-start" }}
           >
             <AnimatedLogoFull height={44} animate={!reducedMotion} />
           </div>
@@ -459,6 +469,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
               filter: entry.logoMiniFilter,
               opacity: 0.9,
               marginBottom: "clamp(28px, 4vh, 44px)",
+              ...(isMobile ? { display: "block", marginLeft: "auto", marginRight: "auto" } : {}),
             }}
           />
         )}
