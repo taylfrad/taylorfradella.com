@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { projectsData } from "../data/projectsData";
 import useReducedMotion from "@/hooks/useReducedMotion";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const TaylCraftVideo = lazy(() => import("@/components/ui/taylcraft-video"));
 const WorklyVideo = lazy(() => import("@/components/ui/workly-video"));
@@ -119,6 +120,12 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
   const [mobilePlaying, setMobilePlaying] = useState(false);
   const [revealRef, visible] = useReveal(0.08);
   const reducedMotion = useReducedMotion();
+  // MOBILE-SWARM: touch — only arm pointer-hover state on hover-capable devices.
+  // A tap fires synthetic mouseenter; without this the card's lift/glow/arrow
+  // nudge would stick after the route changes / on back-nav. Keyboard focus
+  // (onFocus/onBlur) still drives `hovered` so desktop focus styling is intact.
+  // Touch feedback comes from the CSS :active rule on .bento-card (globals.css).
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
   const navigate = useNavigate();
 
   const videoPlaying = isMobile ? mobilePlaying : hovered;
@@ -149,6 +156,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
   return (
     <div
       ref={revealRef}
+      className="bento-card"
       role="link"
       tabIndex={0}
       aria-label={`View ${project.title} project details`}
@@ -159,11 +167,11 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
           onCardClick();
         }
       }}
-      onMouseEnter={() => {
+      onMouseEnter={canHover ? () => {
         setHovered(true);
         prefetchProjectDetail();
-      }}
-      onMouseLeave={() => setHovered(false)}
+      } : undefined}
+      onMouseLeave={canHover ? () => setHovered(false) : undefined}
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
       style={{
@@ -365,8 +373,9 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
             top: 12,
             right: 12,
             zIndex: 5,
-            width: 40,
-            height: 40,
+            // MOBILE-SWARM: touch — 40→44px to meet the 44×44 min touch target.
+            width: 44,
+            height: 44,
             borderRadius: "50%",
             background: "rgba(0,0,0,0.45)",
             border: "1px solid rgba(255,255,255,0.2)",
@@ -376,6 +385,7 @@ const BentoCard = memo(function BentoCard({ project, featured, tall, delay, isMo
             justifyContent: "center",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
+            touchAction: "manipulation",
           }}
         >
           {mobilePlaying ? (

@@ -148,7 +148,11 @@ function Lightbox({ screenshots, projectTitle, open, onClose, initialIndex = 0 }
       }}
     >
       <Box sx={{ position: "relative", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", p: { xs: 1.5, sm: 2.5, md: 4 } }}>
-        <IconButton onClick={onClose} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", top: { xs: 14, sm: 20, md: 24 }, right: { xs: 14, sm: 20, md: 24 }, zIndex: 10 }}>
+        {/* MOBILE-SWARM: touch — lucide default icon is 24px and .glass-btn adds no
+            padding, leaving these lightbox controls ~26px (< 44 min touch target).
+            Absolutely positioned, so a 44×44 min size only grows the hit area —
+            no layout shift, desktop visuals unchanged. */}
+        <IconButton onClick={onClose} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", top: { xs: 14, sm: 20, md: 24 }, right: { xs: 14, sm: 20, md: 24 }, zIndex: 10, minWidth: 44, minHeight: 44, p: 1 }}>
           <X />
         </IconButton>
 
@@ -162,10 +166,11 @@ function Lightbox({ screenshots, projectTitle, open, onClose, initialIndex = 0 }
 
         {total > 1 && (
           <>
-            <IconButton onClick={prev} component={motion.button} layout={false} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", left: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}>
+            {/* MOBILE-SWARM: touch — 44×44 min hit area (see close-button note above). */}
+            <IconButton onClick={prev} component={motion.button} layout={false} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", left: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10, minWidth: 44, minHeight: 44, p: 1 }}>
               <ChevronLeft />
             </IconButton>
-            <IconButton onClick={next} component={motion.button} layout={false} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", right: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}>
+            <IconButton onClick={next} component={motion.button} layout={false} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="glass-btn glass-btn--secondary text-white" sx={{ position: "absolute", right: { xs: 8, sm: 18, md: 24 }, top: "50%", transform: "translateY(-50%)", zIndex: 10, minWidth: 44, minHeight: 44, p: 1 }}>
               <ChevronRight />
             </IconButton>
             <GlassSurface as={Box} variant="clear" className="rounded-[20px] px-2 py-1 text-white" sx={{ position: "absolute", bottom: { xs: 14, sm: 20, md: 24 }, left: "50%", transform: "translateX(-50%)", zIndex: 10 }}>
@@ -807,15 +812,21 @@ function NextProjectSection({ nextProject, onNavigate }) {
   const ref = useRef(null);
   const inView = useScrollyInView(ref);
   const [hovered, setHovered] = useState(false);
+  // MOBILE-SWARM: touch — gate the hover STATE behind a hover-capable pointer.
+  // Synthetic mouseenter fires on a tap, so on touch this glow + title-scale
+  // would engage and stay STUCK after navigating back. Only arm the handlers
+  // on hover+fine-pointer devices; touch gets the always-visible CTA + a CSS
+  // :active press (see .next-project-cta in globals.css). Desktop unchanged.
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
   const accent = nextProject.accentColor;
 
   return (
     <section
       ref={ref}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={canHover ? () => setHovered(true) : undefined}
+      onMouseLeave={canHover ? () => setHovered(false) : undefined}
       onClick={() => onNavigate(nextProject.id)}
-      className="relative flex min-h-[60vh] cursor-pointer flex-col items-center justify-center overflow-hidden px-7 py-20"
+      className="next-project-cta relative flex min-h-[60vh] cursor-pointer flex-col items-center justify-center overflow-hidden px-7 py-20"
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onNavigate(nextProject.id); }}

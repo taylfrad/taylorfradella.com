@@ -1207,3 +1207,76 @@ html:has(.work-page) body { scrollbar-width: none; }
     padding-bottom: 0.25rem;
   }
 }
+
+/* MOBILE-SWARM: touch — site-wide tap responsiveness + hover→touch fallbacks.
+   ───────────────────────────────────────────────────────────────────────────
+   Appended AFTER the scrollytelling (.h-screen-svh) and layout blocks; modifies
+   none of their rules. Desktop hover behavior is a protected baseline — every
+   :active/feedback rule that could alter desktop is gated behind
+   `(hover: none)` / `(pointer: coarse)` so hover-capable devices are untouched.
+
+   Three concerns:
+   1. Kill the legacy 300ms tap delay (touch-action: manipulation) on all
+      interactive elements.
+   2. Replace the default grey tap-flash with a deliberate transparent highlight
+      site-wide, PAIRED with real :active feedback so taps never feel dead.
+   3. Give the hover-gated controls (Projects bento cards, ProjectDetail
+      Next-Project CTA) a tactile press state on touch, since their JS hover
+      lift/glow is now disarmed on touch pointers (see those components). */
+
+/* 1 + 2. Interactive elements: no 300ms delay, deliberate tap highlight.
+   `touch-action: manipulation` only disables double-tap-zoom / delay — it does
+   NOT affect desktop pointing or page scrolling, so it is safe everywhere.
+   The transparent tap highlight matches the existing `.floating-nav-btn` rule
+   (globals.css:438) and is now applied consistently. */
+button,
+a,
+[role="button"],
+[role="link"],
+summary,
+label[for],
+input[type="button"],
+input[type="submit"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 3. Touch-only press feedback. Gated to non-hover / coarse pointers so the
+   desktop hover paths (JS `hovered` state on these components) are byte-for-byte
+   unchanged. These give a calm, tactile settle on tap — never a stuck state,
+   because :active only holds while the finger is down. */
+@media (hover: none), (pointer: coarse) {
+  /* Generic safety net: any control that lost its hover affordance on touch
+     still confirms the tap with a subtle opacity dip. Excludes the bento card
+     (it has its own transform press below) and the bento card's decorative
+     aria-hidden <a> wrapper (so the whole card doesn't flash-dim on tap). */
+  button:active,
+  a:not([aria-hidden="true"]):active,
+  [role="button"]:not(.bento-card):active,
+  [role="link"]:not(.bento-card):active {
+    opacity: 0.78;
+  }
+
+  /* Projects bento card — tactile press (mirrors the desktop -4px hover lift as
+     a brief compression). The card navigates on tap, so this is the press cue. */
+  .bento-card:active {
+    transform: scale(0.985);
+    transition: transform 0.12s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* ProjectDetail "Next Project" CTA — settle the title on press in place of the
+     hover scale, since the JS hover glow/scale is disarmed on touch. */
+  .next-project-cta:active h2 {
+    transform: scale(0.99);
+    transition: transform 0.12s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* mode-toggle tooltip is hover-only (`group-hover:opacity-100`) and the button
+     already exposes an aria-label + sr-only text. On touch a tap can leave the
+     group in a stuck :hover, so suppress the tooltip entirely on touch — zero
+     information loss. Desktop (hover-capable) keeps the tooltip via the
+     untouched Tailwind group-hover utility. */
+  .glass-tooltip {
+    display: none;
+  }
+}
