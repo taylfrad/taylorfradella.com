@@ -27,8 +27,17 @@ export default function SkillsPage() {
           exactly when the footer's bottom edge meets viewport bottom — there
           is no "dead scroll" past the parked footer. During the last sliver
           of scroll, the footer rises into view from below while the sticky-
-          pinned slide 4 stays static above it (the parallax effect). */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+          pinned slide 4 stays static above it (the parallax effect).
+
+          MOBILE-SWARM: layout — on short viewports (portrait phones and ALL
+          landscape phones) the absolute-parked footer overlapped the last
+          pinned slide: the single-column slide content is taller than the
+          region the 32vh footer-overlap easing clears, so the tools/pills row
+          rendered UNDER the opaque footer. The `.skills-footer` class (see
+          globals.css) drops the footer back into normal document flow at those
+          breakpoints, so it scrolls in cleanly below the pinned section with
+          no overlap and no dead scroll. Desktop keeps the absolute parallax. */}
+      <div className="skills-footer absolute bottom-0 left-0 right-0 z-10">
         <Footer />
       </div>
 

@@ -27,6 +27,14 @@ export default function BackToTop({ threshold = 300, size = 36 }) {
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"
       }`}
+      // MOBILE-SWARM: layout — keep the fixed back-to-top chevron clear of the
+      // home indicator / curved corner on notched phones. Insets resolve to 0
+      // on desktop and until the touch lane adds viewport-fit=cover, so this is
+      // a no-op everywhere it shouldn't apply. (QA: re-check on a notched profile.)
+      style={{
+        marginBottom: "env(safe-area-inset-bottom, 0px)",
+        marginRight: "env(safe-area-inset-right, 0px)",
+      }}
       aria-label="Back to top"
       title="Back to top"
     >

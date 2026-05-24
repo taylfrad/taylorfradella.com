@@ -1095,3 +1095,115 @@ html:has(.work-page) body { scrollbar-width: none; }
   min-height: 100vh;
   min-height: 100svh;
 }
+
+/* MOBILE-SWARM: layout — SkillsPage footer + pinned-slide fit on short viewports.
+   ───────────────────────────────────────────────────────────────────────────
+   DESKTOP IS UNTOUCHED. All rules below are gated to phone-class viewports:
+     • portrait phones:  (max-width: 767px)
+     • landscape phones: (orientation: landscape) and (max-height: 430px)
+       — landscape phones are ~667–932px WIDE, so they do NOT match max-width:767px;
+         the orientation+height gate is what catches them.
+
+   PROBLEM (verified at 320×568 portrait + 667/812×375 landscape):
+   The footer is `absolute bottom-0` on SkillsPage and the last Skills slide is
+   pinned (sticky) with its centering box lifted by `bottom: 0→32vh` during the
+   final 10% of scroll, so the footer can "rise" into the cleared band. But the
+   single-column slide content (~540–570px) is taller than that cleared band on
+   short screens, so its tools/pills row rendered UNDER the opaque footer
+   (320px portrait: 217px overlap; 812×375 landscape: 148px overlap). Landscape
+   was doubly broken: single-column content also overflowed the short pinned
+   frame and clipped the headline + tools regardless of the footer.
+
+   FIX (additive, mobile-gated):
+   1. Footer returns to normal document flow (`position: static`) so it scrolls
+      in cleanly below the pinned section — eliminating the overlap entirely and
+      preserving "no dead scroll" (footer still lands exactly at viewport bottom;
+      verified docScrollHeight === 800vh-container + footer height).
+   2. The pinned slide's inline `bottom: …vh` footer-overlap easing is frozen to
+      0 (the slide simply fills its pinned frame) since there is no longer an
+      overlapping footer to clear. `!important` is required to beat the inline
+      style Skills.jsx writes each frame. This is presentational only — it does
+      NOT touch the scroll-progress math (Skills.jsx owns that). The left-rail
+      dots are `hidden md:flex` (desktop-only) so their easing never renders on
+      portrait phones and is hidden in landscape below.
+   3. Landscape only: the slide switches to a compact 2-column layout so the
+      content fits the short frame (≤375px tall) instead of overflowing it.
+
+   NOTE for QA / scrollytelling lane: item 2 overrides an inline style produced
+   by Skills.jsx's render (the `bottom` lerp). It is intentionally CSS-only so
+   Skills.jsx's rAF/progress logic is left exactly as the scrollytelling lane
+   wrote it. If that easing is ever reworked in JS, revisit this override. */
+@media (max-width: 767px), (orientation: landscape) and (max-height: 430px) {
+  /* 1. Footer flows below the pinned Skills section instead of overlapping it. */
+  .skills-footer {
+    position: static;
+  }
+
+  /* 2. Freeze the per-slide footer-overlap lift; let each slide fill its frame. */
+  #skills .sticky > .absolute.inset-x-0 {
+    bottom: 0 !important;
+  }
+}
+
+/* 3. Landscape phones: short height makes single-column slide content overflow
+      the pinned frame (clipping the headline + tools). Switch to a compact
+      2-column layout — landscape phones have ample WIDTH — so all four slides
+      fit within the frame (verified max content ≈236–272px in a 375px frame). */
+@media (orientation: landscape) and (max-height: 430px) {
+  /* Wide landscape phones (≥768px) would otherwise render the desktop left-rail
+     dots (they are `hidden md:flex`). Their 50vh→40vh footer-overlap easing is
+     meaningless once the footer flows, and at scroll-end it nudges them partly
+     off-screen. Hide them in short landscape to match the dot-free portrait
+     phone experience. */
+  #skills .sticky > .absolute.left-6 {
+    display: none;
+  }
+
+  #skills .sticky > .absolute.inset-x-0 {
+    align-items: center;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2.5rem;
+    row-gap: 0.6rem;
+    max-width: 820px;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+    align-items: center;
+  }
+  /* Left column (overline / headline / accent line / description) — compact. */
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:first-child > div:first-child {
+    margin-bottom: 0.45rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:first-child > h3 {
+    font-size: 26px;
+    line-height: 1.05;
+    margin-bottom: 0.4rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:first-child > div[aria-hidden] {
+    margin-bottom: 0.5rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:first-child > p {
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  /* Right column (core skills + tool pills) — compact. */
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:last-child {
+    gap: 0.7rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:last-child > div > p:first-child {
+    margin-bottom: 0.35rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:last-child > div:first-child > div > div {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:last-child > div:first-child span {
+    font-size: 14px;
+  }
+  #skills .sticky > .absolute.inset-x-0 > .relative > div:last-child > div:last-child span {
+    font-size: 12px;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+}
