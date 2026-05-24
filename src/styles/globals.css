@@ -1280,3 +1280,26 @@ input[type="submit"] {
     display: none;
   }
 }
+
+/* Hero landscape fit — follow-up to the mobile swarm (hero landscape padding).
+   The hero stacks the lanyard (z-10, top) above the headline/CTA (z-20), which
+   is pushed down 50svh to clear it. That stack can't fit a short landscape
+   phone, so the headline/CTA ran off the bottom into the scroll chevron. In
+   short landscape only, drop the push-down and vertically center the content
+   column so it stays fully visible (text is z-20 over the z-10 lanyard, so
+   legibility is preserved even where they overlap). Portrait is byte-identical
+   — this rule only fires in landscape ≤430px tall. */
+@media (orientation: landscape) and (max-height: 430px) and (max-width: 767px) {
+  /* Scoped to the compact hero (<768px) — that's the only breakpoint with the
+     `pt-[54svh]`/`sm:pt-[50svh]` push-down (md:pt-0 removes it ≥768, where the
+     2-col centered layout already fits). `.hero-content` ancestor raises
+     specificity above Tailwind's `sm:pt-[50svh]` utility (a plain
+     `.hero-landscape-fit` ties on specificity and loses on source order).
+     Centering the column in the space above the scroll chevron (reserved via
+     padding-bottom) keeps the headline + CTA fully on-screen. */
+  .hero-content .hero-landscape-fit {
+    padding-top: 0;
+    padding-bottom: 3.5rem;
+    align-content: center;
+  }
+}

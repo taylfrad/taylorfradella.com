@@ -383,7 +383,9 @@ export default function Hero({
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 content-start items-start px-4 pt-[54svh] sm:px-8 sm:pt-[50svh] md:grid-cols-2 md:content-center md:items-center md:gap-8 md:pt-0">
+        {/* hero-landscape-fit: in short landscape the 50svh push-down shoves the
+            headline/CTA off the bottom (see globals.css). Portrait unaffected. */}
+        <div className="hero-landscape-fit mx-auto grid h-full w-full max-w-7xl grid-cols-1 content-start items-start px-4 pt-[54svh] sm:px-8 sm:pt-[50svh] md:grid-cols-2 md:content-center md:items-center md:gap-8 md:pt-0">
           <HeroHeadline
             isCompactHero={isCompactHero}
             onNavClick={handleNavClick}
