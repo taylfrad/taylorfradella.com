@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import PageHeader from "./PageHeader";
 import useReducedMotion from "@/hooks/useReducedMotion";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import ScrollCue from "@/components/ui/ScrollCue";
 import { easeInOutCubic } from "@/lib/easing";
 import {
   AnimatedLogoFull,
@@ -325,6 +326,11 @@ function ProgressDots({ entries, activeIndex, onSelect }) {
 function WorkEntry({ entry, index, sectionRef, containerRef }) {
   // Only the first entry runs its fade-up animations on mount. Later entries
   const isFirst = index === 0;
+  // The last entry rests at the parallax's top extreme (Framer useScroll caps
+  // progress at max-scroll), which leaves its big logo translated ~10vh too
+  // high — exposing the dark gradient below it. Pin the last entry's logo +
+  // ambient to center (no parallax offset) so the scene fills the viewport.
+  const isLast = index === ENTRIES.length - 1;
   const reducedMotion = useReducedMotion();
   const isMobile = useMediaQuery("(max-width: 767px)");
   // Non-first entries use IntersectionObserver to trigger their build-out
@@ -397,7 +403,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ background: entry.ambient, y: ambientParallaxY }}
+        style={{ background: entry.ambient, y: isLast ? 0 : ambientParallaxY }}
       />
 
       {/* Large background logo:
@@ -423,7 +429,7 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         {/* Desktop: no top offset — the outer flex centers the logo vertically
             so it lines up with the centered left-hand text column. Mobile keeps
             the lower watermark placement. */}
-        <motion.div style={{ y: logoParallaxY, marginTop: isMobile ? "22vh" : 0 }}>
+        <motion.div style={{ y: isLast ? 0 : logoParallaxY, marginTop: isMobile ? "22vh" : 0 }}>
           {entry.useAnimatedLogo ? (
             // FieldFlow: animated polygon mark + gradient wordmark. Stacked
             // vertically inside the parallax wrapper so they read as one unit
@@ -500,6 +506,14 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         <MetaGroup label="Duration" value={entry.duration} delay={0.45} animate={shouldAnimate} />
         <MetaGroup label="Tools" value={entry.tools} delay={0.55} animate={shouldAnimate} />
         <MetaGroup label="Team" value={entry.team} delay={0.65} animate={shouldAnimate} />
+      </div>
+
+      {/* Scroll cue — same prompt used on the hero, skills, and project pages. */}
+      <div
+        className="pointer-events-none absolute bottom-4 left-1/2 z-[3] -translate-x-1/2"
+        style={{ color: "rgba(255,255,255,0.42)" }}
+      >
+        <ScrollCue />
       </div>
 
       {/* Location badge */}
