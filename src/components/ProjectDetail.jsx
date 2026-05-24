@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { projectsData } from "../data/projectsData";
 import { ACCENT_DEFAULT, SCROLL_TO_PROJECTS_FLAG } from "@/constants";
+import { smoothScrollToTop } from "@/lib/navigation";
 import GlassSurface from "@/components/surfaces/GlassSurface";
 import OptimizedImage from "./OptimizedImage";
 import { useTheme } from "@/components/theme-provider";
@@ -914,7 +915,9 @@ export default function ProjectDetail() {
   }, []);
 
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Distance-adaptive cinematic scroll — matches the shared BackToTop used
+    // across the rest of the site, instead of the browser's fast native smooth.
+    smoothScrollToTop();
   }, []);
 
   const accentColor = project?.accentColor || ACCENT_DEFAULT;
