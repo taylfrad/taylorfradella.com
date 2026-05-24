@@ -506,6 +506,33 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         <MetaGroup label="Duration" value={entry.duration} delay={0.45} animate={shouldAnimate} />
         <MetaGroup label="Tools" value={entry.tools} delay={0.55} animate={shouldAnimate} />
         <MetaGroup label="Team" value={entry.team} delay={0.65} animate={shouldAnimate} />
+
+        {/* CTA — sits directly under the metadata in the content column. */}
+        {entry.ctaUrl && entry.ctaLabel && (
+          <a
+            href={entry.ctaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`work-cta ${shouldAnimate ? "work-fade-up work-fade-up--cta" : ""}`}
+            style={{
+              display: "inline-block",
+              marginTop: "clamp(8px, 1.5vh, 16px)",
+              padding: "16px 40px",
+              fontSize: "clamp(11px, 1.2vw, 13px)",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.2em",
+              color: "rgba(255,255,255,0.78)",
+              border: "1.5px solid rgba(255,255,255,0.25)",
+              borderRadius: 4,
+              textDecoration: "none",
+              background: "transparent",
+              transition: "color 0.3s, border-color 0.3s, background 0.3s",
+            }}
+          >
+            {entry.ctaLabel}
+          </a>
+        )}
       </div>
 
       {/* Scroll cue — same prompt used on the hero, skills, and project pages. */}
@@ -544,40 +571,6 @@ function WorkEntry({ entry, index, sectionRef, containerRef }) {
         </span>
       )}
 
-      {/* Bottom CTA — skipped when an entry has no ctaLabel/ctaUrl (e.g. the
-          FieldFlow entry, where the mark + wordmark carry the identity on
-          their own). */}
-      {entry.ctaUrl && entry.ctaLabel && (
-        <div
-          className={`${
-            shouldAnimate ? "work-fade-up work-fade-up--cta" : ""
-          } absolute flex w-full justify-center px-6`}
-          style={{ bottom: "clamp(32px, 8vh, 64px)", zIndex: 2 }}
-        >
-          <a
-            href={entry.ctaUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="work-cta"
-            style={{
-              display: "inline-block",
-              padding: "16px 40px",
-              fontSize: "clamp(11px, 1.2vw, 13px)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.2em",
-              color: "rgba(255,255,255,0.78)",
-              border: "1.5px solid rgba(255,255,255,0.25)",
-              borderRadius: 4,
-              textDecoration: "none",
-              background: "transparent",
-              transition: "color 0.3s, border-color 0.3s, background 0.3s",
-            }}
-          >
-            {entry.ctaLabel}
-          </a>
-        </div>
-      )}
     </section>
   );
 }
