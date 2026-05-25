@@ -517,9 +517,11 @@ function SkillsScrollytelling() {
           );
         })}
 
-        {/* Bottom scroll hint — fades out as user begins scrolling */}
+        {/* Bottom scroll hint — fades out as user begins scrolling.
+            Sits lower on mobile (just above the safe-area inset) so it clears
+            the tools tags; restored to bottom-8 from the sm breakpoint up. */}
         <div
-          className="absolute bottom-8 left-1/2 z-[5] -translate-x-1/2 text-[var(--text-3)]"
+          className="absolute bottom-[calc(env(safe-area-inset-bottom)_+_0.75rem)] left-1/2 z-[5] -translate-x-1/2 text-[var(--text-3)] sm:bottom-8"
           style={{ opacity: clamp(1 - scrollProgress * 5) * 0.4 }}
         >
           <ScrollCue />

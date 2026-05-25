@@ -169,7 +169,7 @@ export default function PageHeader({ active, theme = "dark" }) {
                     onClick={(e) => handleClick(e, route)}
                     className={`floating-nav-btn inline-flex items-center justify-center px-1 py-1 transition-colors duration-200 ease-out motion-reduce:transition-none ${
                       isActive
-                        ? `${isDark ? "text-white" : "text-[var(--text-primary)]"} underline underline-offset-4 [text-decoration-thickness:1.5px]`
+                        ? `${isDark ? "text-white hover:text-white" : "text-[var(--text-primary)] hover:text-[var(--text-primary)]"} underline underline-offset-4 [text-decoration-thickness:1.5px]`
                         : `${isDark ? "text-white/60 hover:text-white" : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"} hover:underline hover:underline-offset-4 [text-decoration-thickness:1.5px]`
                     }`}
                   >

@@ -304,10 +304,10 @@ function HeroSection({ project, accent }) {
       {/* MOBILE-SWARM: scrollytelling — pinned scene uses svh (smallest viewport)
           so it never clips when the mobile address bar is visible; outer scrub
           container stays in vh so useStickyMotion progress 0→1 is unchanged. */}
-      <div className="sticky top-0 flex h-screen-svh flex-col items-center justify-center overflow-hidden">
+      <div className="sticky top-0 isolate flex h-screen-svh flex-col items-center justify-center overflow-hidden">
         {/* Accent glow — hidden on mobile for GPU performance */}
         {!isMobile && (
-          <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-[12%] h-[55vh] w-[55vw] -translate-x-1/2 rounded-full" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: glowOp, filter: "blur(80px)" }} />
+          <motion.div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[30vh] w-[46vw] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: accent, opacity: glowOp, filter: "blur(90px)" }} />
         )}
 
         {/* Ghost watermark — large outlined title behind content */}
@@ -321,8 +321,12 @@ function HeroSection({ project, accent }) {
           }}>{project.title.split(" ")[0]}</span>
         </motion.div>
 
-        {/* Subtle radial gradient behind content */}
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 45%, ${accent}25 0%, transparent 70%)` }} />
+        {/* Soft accent glow behind content — a blurred SOLID (not a gradient) so
+            the blur produces a clean Gaussian falloff. */}
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[26vh] w-[40vw] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: accent, opacity: 0.14, filter: "blur(90px)" }} />
+
+        {/* Dither overlay — removes 8-bit banding rings from the glows above */}
+        <div aria-hidden className="glow-dither pointer-events-none absolute inset-0" />
 
         {/* Content */}
         <motion.div className="relative z-[2] mx-auto max-w-[860px] px-7 text-center" style={{ y: titleY }}>
@@ -827,14 +831,17 @@ function NextProjectSection({ nextProject, onNavigate }) {
       onMouseEnter={canHover ? () => setHovered(true) : undefined}
       onMouseLeave={canHover ? () => setHovered(false) : undefined}
       onClick={() => onNavigate(nextProject.id)}
-      className="next-project-cta relative flex min-h-[60vh] cursor-pointer flex-col items-center justify-center overflow-hidden px-7 py-20"
+      className="next-project-cta relative isolate flex min-h-[60vh] cursor-pointer flex-col items-center justify-center overflow-hidden px-7 py-20"
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onNavigate(nextProject.id); }}
       aria-label={`View next project: ${nextProject.title}`}
     >
-      {/* Accent glow */}
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[22%] h-[50vh] w-[50vw] -translate-x-1/2 rounded-full transition-opacity duration-500" style={{ background: `radial-gradient(ellipse, ${accent} 0%, transparent 70%)`, opacity: `calc(${hovered ? 0.35 : 0.12} * var(--st-glow-mult))`, filter: "blur(80px)" }} />
+      {/* Accent glow — blurred solid, softened to blend out */}
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[30vh] w-[44vw] -translate-x-1/2 -translate-y-1/2 rounded-full transition-opacity duration-500" style={{ background: accent, opacity: `calc(${hovered ? 0.26 : 0.13} * var(--st-glow-mult))`, filter: "blur(90px)" }} />
+
+      {/* Dither overlay — removes 8-bit banding rings from the glow above */}
+      <div aria-hidden className="glow-dither pointer-events-none absolute inset-0" />
 
       <div className="relative z-[2] text-center" style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: "all 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)" }}>
         <span className="mb-5 block text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: accent, opacity: 0.5 }}>Next Project</span>

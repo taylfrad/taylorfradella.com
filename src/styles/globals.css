@@ -637,13 +637,17 @@ html[data-theme-wave="active"]::view-transition-new(root) {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* PageHeader mobile dropdown — dark variant (Work page) */
+/* PageHeader mobile dropdown — dark variant.
+   Matches the neutral dark app background (--bg-secondary) instead of a blue
+   tint; blur + border keep it reading as a floating control surface. */
 .page-mobile-dropdown--dark {
-  background-color: rgba(20, 30, 50, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.22),
-    0 1px 3px rgba(0, 0, 0, 0.08);
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: saturate(1.1) blur(20px);
+  backdrop-filter: saturate(1.1) blur(20px);
 }
 .page-mobile-dropdown__item--dark {
   color: rgba(248, 250, 252, 0.98);
@@ -679,6 +683,16 @@ html[data-theme-wave="active"]::view-transition-new(root) {
 .page-mobile-dropdown__item--light.page-mobile-dropdown__item--active {
   color: #1d1d1f;
   font-weight: 600;
+}
+
+/* Dither overlay — breaks up 8-bit color banding ("rings") in the low-contrast
+   accent glows on project pages. Subtle zero-mean grain via SVG fractal noise;
+   `overlay` blend keeps it from lifting the blacks. Place above the glows and
+   below content, inside an isolated stacking context. */
+.glow-dither {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='gd'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3C/filter%3E%3Crect%20width='160'%20height='160'%20filter='url(%23gd)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.09;
 }
 
 
