@@ -183,13 +183,27 @@ const ProjectFallback = memo(function ProjectFallback() {
   );
 });
 
-// Prefetch hero chunks as soon as app mounts (home route) for faster hero load
+// Prefetch hero chunks as soon as app mounts (home route) for faster hero load.
+// The hero video prefetch lives here (not in index.html) so it only fires on the
+// home route — index.html is shared by every page, so a static prefetch wasted
+// a multi-MB download on subpages that never show the hero.
 function useHeroPrefetch() {
   const location = useLocation();
   useEffect(() => {
     if (location.pathname === "/" || location.pathname === "") {
       import("./components/backgrounds/HeroBackground");
       import("./components/Lanyard");
+
+      // Give the hero video a head start before <video> mounts. Guard against
+      // duplicates so repeat visits to home don't stack <link> nodes.
+      if (!document.querySelector('link[data-hero-video-prefetch]')) {
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.as = "fetch";
+        link.href = "/videos/hero.webm";
+        link.setAttribute("data-hero-video-prefetch", "");
+        document.head.appendChild(link);
+      }
     }
   }, [location.pathname]);
 }
