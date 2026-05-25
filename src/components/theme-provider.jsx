@@ -1,10 +1,23 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { canUseThemeWave, runThemeWave } from "@/lib/themeTransition";
 
 const ThemeProviderContext = createContext(null);
 
 function getSystemTheme() {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+}
+
+// Single source of truth for flipping the theme on <html>. Used by both the
+// declarative effect and the imperative swap inside the wave transition.
+function applyThemeClass(root, theme) {
+  if (theme === "dark") {
+    root.classList.add("dark");
+    root.style.colorScheme = "dark";
+  } else {
+    root.classList.remove("dark");
+    root.style.colorScheme = "light";
+  }
 }
 
 export function ThemeProvider({ children }) {
@@ -49,15 +62,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
-
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.style.colorScheme = "dark";
-    } else {
-      root.classList.remove("dark");
-      root.style.colorScheme = "light";
-    }
-
+    applyThemeClass(root, theme);
     root.classList.toggle("reduce-effects", shouldReduceEffects);
   }, [theme, shouldReduceEffects]);
 
@@ -70,8 +75,24 @@ export function ThemeProvider({ children }) {
     // Persist so the index.html first-paint script can read it
     try { sessionStorage.setItem("theme", nextTheme); } catch { /* ignore */ }
 
-    if (typeof document !== "undefined") {
-      const root = document.documentElement;
+    const root = typeof document !== "undefined" ? document.documentElement : null;
+
+    // Flip <html> synchronously (so the View Transition's "new" snapshot is
+    // correctly themed) and update React state for the toggle icon/aria.
+    const apply = () => {
+      if (root) applyThemeClass(root, nextTheme);
+      setThemeState(nextTheme);
+    };
+
+    // Preferred path: reveal the new theme behind a sine-wave wipe.
+    if (root && canUseThemeWave(shouldReduceEffects)) {
+      runThemeWave(root, apply);
+      return;
+    }
+
+    // Fallback: temporary crossfade class (also yields an instant swap under
+    // prefers-reduced-motion, where the global media query zeroes transitions).
+    if (root) {
       root.classList.add("theme-transition");
 
       // Clear any pending timer from a rapid previous toggle
@@ -82,8 +103,8 @@ export function ThemeProvider({ children }) {
       }, 250);
     }
 
-    setThemeState(nextTheme);
-  }, []);
+    apply();
+  }, [shouldReduceEffects]);
 
   // Cleanup timer on unmount
   useEffect(() => {
